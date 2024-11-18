@@ -1,0 +1,17 @@
+MetaFileClass {
+ Name "{6B59CE9ABF067E0A}Prefabs/WEGenerators/Markers/PG_MarkerGenerator_AOLimit_OPFOR.et"
+ Configurations {
+  EntityTemplateResourceClass PC {
+  }
+  EntityTemplateResourceClass XBOX_ONE : PC {
+  }
+  EntityTemplateResourceClass XBOX_SERIES : PC {
+  }
+  EntityTemplateResourceClass PS4 : PC {
+  }
+  EntityTemplateResourceClass PS5 : PC {
+  }
+  EntityTemplateResourceClass HEADLESS : PC {
+  }
+ }
+}

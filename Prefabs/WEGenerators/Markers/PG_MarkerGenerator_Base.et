@@ -1,0 +1,8 @@
+PrefabGeneratorEntity {
+ ID "61F6E08B5EB7674C"
+ coords 1248.795 39 2758.238
+ Flags 1048579
+ m_PrefabNames {
+ }
+ m_fDistance 50
+}

@@ -1,0 +1,6 @@
+PS_ManualMarker : "{93C2F8BDFF146CB8}PrefabsEditable/Markers/Marker_AOLimit_Base.et" {
+ ID "5EDF4803173675DF"
+ coords 1150.173 38 2778.905
+ m_MarkerColor 0.502 0 0 1
+ m_sDescription "AO Limit (OPFOR)"
+}

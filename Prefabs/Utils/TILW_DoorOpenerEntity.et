@@ -1,0 +1,9 @@
+GenericEntity {
+ ID "6286D85817314E5E"
+ components {
+  TILW_DoorOpenerComponent "{6286C518C60FB163}" {
+   m_doorControl 1
+  }
+ }
+ coords 4767.93 187.439 6988.851
+}

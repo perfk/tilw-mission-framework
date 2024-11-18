@@ -1,0 +1,771 @@
+BehaviorTree "{B12936F510077FED}AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.bt" {
+ Name "AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.bt"
+ Nodes {
+  RootNode Root {
+   Name "Root"
+   EditorPos -4.524 -219.94
+   Nodes {
+    Parallel Parallel {
+     Name "Parallel"
+     EditorPos -3.81 -98.512
+     Nodes {
+      Sequence Sequence {
+       Name "Seq: Try Select Target"
+       EditorPos -885.321 194.964
+       Nodes {
+        Sequence Sequence {
+         Name "Seq: Find Target"
+         EditorPos -2051.988 498.893
+         Nodes {
+          Sequence Sequence {
+           Name "Seq: Loop Start"
+           EditorPos -4303.472 606.722
+           Nodes {
+            DecoTestVariable "Test Variable" {
+             Name "Test Variable"
+             EditorPos -4319.777 841.721
+             Nodes {
+              Sequence Sequence {
+               Name "Seq: Global Init"
+               EditorPos -4305.742 1031.435
+               Nodes {
+                AITaskSetVariable "Set Variable" {
+                 Name "Set Variable"
+                 EditorPos -4443.73 1176.642
+                 Group "{6162F20EFDB58F89}"
+                 SetValue "false"
+                 OutVariable 9
+                }
+                SCR_AIGetPosForward "SCR_AI Get Pos Forward" {
+                 Name "SCR_AI Get Pos Forward"
+                 EditorPos -4223.472 1173.611
+                 InPorts {
+                  SingleInputPortContainer SingleInputPortContainer {
+                   Port -1
+                   PortName "TargetIn"
+                  }
+                  SingleInputPortContainer SingleInputPortContainer {
+                   Port -1
+                   PortName "DistanceIn"
+                  }
+                 }
+                 OutPorts {
+                  SingleOutputPortContainer SingleOutputPortContainer {
+                   Port 7
+                   PortName "VectorOut"
+                  }
+                 }
+                 Group "{6162F20EFDB58F89}"
+                 m_Distance 50
+                }
+               }
+               Group "{6162F20EFDB58F89}"
+              }
+             }
+             Group "{6162F20EFDB58F89}"
+             NegativeCondition 1
+             ForceNodeResult Success
+             InVariable 7
+            }
+            Selector Selector {
+             Name "Sel: Check LOD"
+             EditorPos -3420.667 841.472
+             Nodes {
+              DecoCheckLOD CheckLOD {
+               Name "CheckLOD"
+               EditorPos -3835.389 977.305
+               Nodes {
+                AITaskSetVariable "Set Variable" {
+                 Name "Set Variable"
+                 EditorPos -3862.38 1111.639
+                 Group "{6162C1FDE12F5C24}"
+                 SetValue "0"
+                 OutVariable 11
+                }
+               }
+               Group "{6162C1FDE12F5C24}"
+              }
+              DecoCheckLOD CheckLOD {
+               Name "CheckLOD"
+               EditorPos -3621.333 976.916
+               Nodes {
+                AITaskSetVariable "Set Variable" {
+                 Name "Set Variable"
+                 EditorPos -3647.436 1111.25
+                 Group "{6162C1FDE12F5C24}"
+                 SetValue "1"
+                 OutVariable 11
+                }
+               }
+               Group "{6162C1FDE12F5C24}"
+               CheckLOD 1
+              }
+              DecoCheckLOD CheckLOD {
+               Name "CheckLOD"
+               EditorPos -3405.388 976.305
+               Nodes {
+                AITaskSetVariable "Set Variable" {
+                 Name "Set Variable"
+                 EditorPos -3431.094 1109.314
+                 Group "{6162C1FDE12F5C24}"
+                 SetValue "2"
+                 OutVariable 11
+                }
+               }
+               Group "{6162C1FDE12F5C24}"
+               CheckLOD 2
+              }
+              DecoCheckLOD CheckLOD {
+               Name "CheckLOD"
+               EditorPos -3189.651 976.527
+               Nodes {
+                AITaskSetVariable "Set Variable" {
+                 Name "Set Variable"
+                 EditorPos -3215.151 1109.75
+                 Group "{6162C1FDE12F5C24}"
+                 SetValue "3"
+                 OutVariable 11
+                }
+               }
+               Group "{6162C1FDE12F5C24}"
+               CheckLOD 3
+              }
+              AITaskSetVariable "Set Variable" {
+               Name "Set Variable"
+               EditorPos -3001.889 976.027
+               Group "{6162C1FDE12F5C24}"
+               SetValue "4"
+               OutVariable 11
+              }
+             }
+             Group "{6162C1FDE12F5C24}"
+            }
+           }
+          }
+          AITaskIdle Idle {
+           Name "Idle: Check interval"
+           EditorPos -2455.809 654.667
+           Group "{61616865AF2E2701}"
+           Period 2
+           PeriodRandom 0
+          }
+          Selector Selector {
+           Name "Sel: Check for target"
+           EditorPos -2073.789 618.75
+           Nodes {
+            Sequence Sequence {
+             Name "Seq: Target"
+             EditorPos -2275 784.25
+             Nodes {
+              SCR_AIFindTagetToLookAt "SCR_AI Find Taget To Look At" {
+               Name "SCR_AI Find Taget To Look At"
+               EditorPos -2607.616 928.179
+               OutPorts {
+                SingleOutputPortContainer SingleOutputPortContainer {
+                 Port 4
+                 PortName "BaseTarget"
+                }
+               }
+               Group "{61616865AF2E2701}"
+              }
+              DecoTestVariable "Test Variable" {
+               Name "Test Variable"
+               EditorPos -2346 933.889
+               Nodes {
+                Sequence Sequence {
+                 Name "Seq: Raise"
+                 EditorPos -2307.778 1114.444
+                 Nodes {
+                  AITaskCharacterRaiseWeapon "Character Raise Weapon" {
+                   Name "Character Raise Weapon"
+                   EditorPos -2376 1218
+                   Group "{61616865AF2E2701}"
+                  }
+                 }
+                 Group "{61616865AF2E2701}"
+                }
+               }
+               Group "{61616865AF2E2701}"
+               ForceNodeResult Success
+               AbortType AbortChildrenBranch
+               InVariable 2
+               TestType EqualsValue
+               TestValue "false"
+              }
+              AITaskSetVariable "Set Variable" {
+               Name "Set Variable"
+               EditorPos -2115.428 923.214
+               Group "{61616865AF2E2701}"
+               SetValue "true"
+               OutVariable 2
+              }
+             }
+             Group "{61616865AF2E2701}"
+            }
+            Sequence Sequence {
+             Name "Seq: No target"
+             EditorPos -1754.75 780.694
+             Nodes {
+              DecoTestVariable "Test Variable" {
+               Name "Test Variable"
+               EditorPos -1868.778 932.444
+               Nodes {
+                Sequence Sequence {
+                 Name "Seq: Lower"
+                 EditorPos -1832.222 1110.556
+                 Nodes {
+                  AITaskCharacterRaiseWeapon "Character Raise Weapon" {
+                   Name "Character Lower Weapon"
+                   EditorPos -1896.333 1213.333
+                   Group "{61616865AF2E2701}"
+                   Raise 0
+                  }
+                 }
+                 Group "{61616865AF2E2701}"
+                }
+               }
+               Group "{61616865AF2E2701}"
+               ForceNodeResult Success
+               AbortType AbortChildrenBranch
+               InVariable 2
+               TestType EqualsValue
+               TestValue "true"
+              }
+              AITaskSetVariable "Set Variable" {
+               Name "Set Variable"
+               EditorPos -1643.095 936.605
+               Group "{61616865AF2E2701}"
+               SetValue "false"
+               OutVariable 2
+              }
+              AITaskReturnState "Return State" {
+               Name "Return State"
+               EditorPos -1442.28 935.192
+               Group "{61616865AF2E2701}"
+               Result FAIL
+              }
+             }
+             Group "{61616865AF2E2701}"
+            }
+           }
+           Group "{61616865AF2E2701}"
+          }
+          SCR_AIGetBaseTargetProperties "SCR_AI Get Base Target Properties" {
+           Name "SCR_AI Get Base Target Properties"
+           EditorPos -1238.357 927.33
+           InPorts {
+            SingleInputPortContainer SingleInputPortContainer {
+             Port 1
+             PortName "BaseTarget"
+            }
+           }
+           OutPorts {
+            SingleOutputPortContainer SingleOutputPortContainer {
+             Port 0
+             PortName "Entity"
+            }
+            SingleOutputPortContainer SingleOutputPortContainer {
+             Port -1
+             PortName "LastSeenPosition"
+            }
+            SingleOutputPortContainer SingleOutputPortContainer {
+             Port -1
+             PortName "TimeSinceSeen"
+            }
+            SingleOutputPortContainer SingleOutputPortContainer {
+             Port -1
+             PortName "IsEndangering"
+            }
+           }
+           Group "{6160F5E886AD083F}"
+          }
+         }
+         Group "{61616865AF2E2701}"
+        }
+        SCR_AISetAIState "SCR_AI SetAI State" {
+         Name "SCR_AI SetAI State"
+         EditorPos -1168.171 444.876
+         InPorts {
+          SingleInputPortContainer SingleInputPortContainer {
+           Port -1
+           PortName "AIState"
+          }
+         }
+        }
+        AITaskCharacterRaiseWeapon "Character Raise Weapon" {
+         Name "Character Raise Weapon"
+         EditorPos -1011.821 444.619
+        }
+        SCR_AITalk "SCR_AI Talk" {
+         Name "SCR_AI Talk"
+         EditorPos -738.21 446.147
+         InPorts {
+          SingleInputPortContainer SingleInputPortContainer {
+           Port -1
+           PortName "SpeakerIn"
+          }
+          SingleInputPortContainer SingleInputPortContainer {
+           Port -1
+           PortName "TargetIn"
+          }
+          SingleInputPortContainer SingleInputPortContainer {
+           Port -1
+           PortName "LocationIn"
+          }
+          SingleInputPortContainer SingleInputPortContainer {
+           Port -1
+           PortName "EnumIn"
+          }
+         }
+         m_messageType REPORT_ENGAGING
+         m_bTransmitIfPassenger 0
+        }
+        SCR_AIDecideBehavior "SCR_AI Decide Behavior" {
+         Name "SCR_AI Decide Behavior"
+         EditorPos -610.468 444.373
+         InPorts {
+          SingleInputPortContainer SingleInputPortContainer {
+           Port 1
+           PortName "UnknownTarget"
+          }
+         }
+         OutPorts {
+          SingleOutputPortContainer SingleOutputPortContainer {
+           Port -1
+           PortName "BehaviorTree"
+          }
+          SingleOutputPortContainer SingleOutputPortContainer {
+           Port -1
+           PortName "UpdateBehavior"
+          }
+          SingleOutputPortContainer SingleOutputPortContainer {
+           Port -1
+           PortName "UseCombatMove"
+          }
+          SingleOutputPortContainer SingleOutputPortContainer {
+           Port -1
+           PortName "UpdateInterval"
+          }
+         }
+        }
+       }
+      }
+      Selector Selector {
+       Name "Selector"
+       EditorPos 428.333 17.084
+       Nodes {
+        DecoTestVariable "Test Variable" {
+         Name "Test Variable"
+         EditorPos 384 144
+         Nodes {
+          RunBT RunBT {
+           Name "RunBT"
+           EditorPos 208 336
+           InPorts {
+            SingleInputPortContainer SingleInputPortContainer {
+             Port 0
+             PortName "targetEntity"
+            }
+            SingleInputPortContainer SingleInputPortContainer {
+             Port 1
+             PortName "baseTarget"
+            }
+           }
+           OutPorts {
+            SingleOutputPortContainer SingleOutputPortContainer {
+             Port 13
+             PortName "lookPosition"
+            }
+           }
+           BehaviorTree "{CD721A24B48B7A04}AI/BehaviorTrees/Chimera/Soldier/TILW_ProcessAttack.bt"
+          }
+         }
+         AbortType AbortChildrenBranch
+         InVariable 3
+         TestType EqualsValue
+         TestValue "true"
+        }
+        Selector Selector {
+         Name "Sel: Other"
+         EditorPos 1344 144
+         Nodes {
+          DecoratorEntity Entity {
+           Name "Deco: Is Wounded"
+           EditorPos 598.595 776.81
+           Nodes {
+            Sequence Sequence {
+             Name "Seq: Heal"
+             EditorPos 671.194 951.333
+             Nodes {
+              AITaskIdle Idle {
+               Name "Idle"
+               EditorPos 359.806 1099.805
+               Group "{61616841095E675C}"
+               Period 0.5
+               PeriodRandom 0
+              }
+              SCR_AITakeGadgetInLeftHand "SCR_AI Take Gadget In Left Hand" {
+               Name "SCR_AI Take Gadget In Left Hand"
+               EditorPos 481.611 1095.778
+               OutPorts {
+                SingleOutputPortContainer SingleOutputPortContainer {
+                 Port 6
+                 PortName "ItemOut"
+                }
+               }
+               Group "{61616841095E675C}"
+               m_eItemType BANDAGE
+               m_eGadgetType CONSUMABLE
+              }
+              SCR_AIPerformSmartHealing "SCR_AI Perform Smart Healing" {
+               Name "SCR_AI Perform Smart Healing"
+               EditorPos 768 1104
+               InPorts {
+                SingleInputPortContainer SingleInputPortContainer {
+                 Port -1
+                 PortName "UserAction"
+                }
+                SingleInputPortContainer SingleInputPortContainer {
+                 Port -1
+                 PortName "TargetEntity"
+                }
+                SingleInputPortContainer SingleInputPortContainer {
+                 Port 6
+                 PortName "ItemToUse"
+                }
+               }
+               Group "{61616841095E675C}"
+              }
+              AITaskIdle Idle {
+               Name "Idle"
+               EditorPos 1024 1104
+               Group "{61616841095E675C}"
+               PeriodRandom 0
+              }
+             }
+             Group "{61616841095E675C}"
+            }
+           }
+           Group "{61616841095E675C}"
+           AbortType AbortChildrenBranch
+           TEST {
+            SCR_AIDecoTestCharacterWounded "{61616873721B2269}" {
+            }
+           }
+          }
+          DecoTestVariable "Test Variable" {
+           Name "Test Variable"
+           EditorPos 1729.5 479.25
+           Nodes {
+            Parallel Parallel {
+             Name "Parallel"
+             EditorPos 2048 656
+             Nodes {
+              Sequence Sequence {
+               Name "Sequence"
+               EditorPos 1888 720
+               Nodes {
+                Selector Selector {
+                 Name "Sel: Look Type"
+                 EditorPos 1712 784
+                 Nodes {
+                  DecoDangerEvent "Danger Event" {
+                   Name "Danger Event"
+                   EditorPos 1520 880
+                   Nodes {
+                    Sequence Sequence {
+                     Name "Seq: Danger"
+                     EditorPos 1536 1008
+                     Nodes {
+                      SCR_AIGetMoveFromDangerBehaviorParameters "SCR_AI Get Move From Danger Behavior Parameters" {
+                       Name "SCR_AI Get Move From Danger Behavior Parameters"
+                       EditorPos 1216 1120
+                       OutPorts {
+                        SingleOutputPortContainer SingleOutputPortContainer {
+                         Port -1
+                         PortName "DangerEntity"
+                        }
+                        SingleOutputPortContainer SingleOutputPortContainer {
+                         Port 5
+                         PortName "DangerPosition"
+                        }
+                        SingleOutputPortContainer SingleOutputPortContainer {
+                         Port -1
+                         PortName "CharacterStance"
+                        }
+                        SingleOutputPortContainer SingleOutputPortContainer {
+                         Port -1
+                         PortName "MovementType"
+                        }
+                       }
+                      }
+                     }
+                    }
+                   }
+                   HasAny 1
+                  }
+                  DecoTestVariable "Test Variable" {
+                   Name "Test Variable"
+                   EditorPos 1712 896
+                   Nodes {
+                    Sequence Sequence {
+                     Name "Seq: Random"
+                     EditorPos 1712 1040
+                     Nodes {
+                      AITaskSetVariable "Set Variable" {
+                       Name "Set Variable"
+                       EditorPos 1712 1248
+                       Group "{6162C1F23215E87C}"
+                       SetValue "true"
+                       OutVariable 8
+                       InVariable -1
+                      }
+                      SCR_AIGetRandomPointWithExclude "SCR_AI Get Random Point With Exclude" {
+                       Name "SCR_AI Get Random Point With Exclude"
+                       EditorPos 1920 1216
+                       InPorts {
+                        SingleInputPortContainer SingleInputPortContainer {
+                         Port -1
+                         PortName "Entity"
+                        }
+                        SingleInputPortContainer SingleInputPortContainer {
+                         Port -1
+                         PortName "SearchCenter"
+                        }
+                        SingleInputPortContainer SingleInputPortContainer {
+                         Port -1
+                         PortName "SearchRadius"
+                        }
+                        SingleInputPortContainer SingleInputPortContainer {
+                         Port -1
+                         PortName "ExclusionCenter"
+                        }
+                        SingleInputPortContainer SingleInputPortContainer {
+                         Port -1
+                         PortName "ExclusionRadius"
+                        }
+                       }
+                       OutPorts {
+                        SingleOutputPortContainer SingleOutputPortContainer {
+                         Port 5
+                         PortName "Position"
+                        }
+                       }
+                       Group "{6162C1F23215E87C}"
+                       m_fSearchRadius 100
+                       m_fExcludeRadius 10
+                      }
+                     }
+                     Group "{6162C1F23215E87C}"
+                    }
+                   }
+                   Group "{6162C1F23215E87C}"
+                   InVariable 8
+                   TestType EqualsValue
+                   TestValue "false"
+                  }
+                  Sequence Sequence {
+                   Name "Seq: Initial"
+                   EditorPos 1872 896
+                   Nodes {
+                    AITaskSetVariable "Set Variable" {
+                     Name "Set Variable"
+                     EditorPos 1904 1104
+                     Group "{6162C1F23215E87C}"
+                     SetValue "false"
+                     OutVariable 8
+                     InVariable -1
+                    }
+                    AITaskSetVariable "Set Variable" {
+                     Name "Set Variable"
+                     EditorPos 1920 992
+                     Group "{6162C1F23215E87C}"
+                     OutVariable 5
+                     InVariable 10
+                    }
+                   }
+                   Group "{6162C1F23215E87C}"
+                  }
+                 }
+                 Group "{6162C1F23215E87C}"
+                }
+                AITaskIdle Idle {
+                 Name "Idle: Observe"
+                 EditorPos 2192 960
+                 Group "{6162C1F23215E87C}"
+                 Period 10
+                 PeriodRandom 5
+                }
+               }
+               Group "{6162C1F23215E87C}"
+              }
+              AITaskCharacterAim "Character Aim" {
+               Name "Character Aim"
+               EditorPos 2192 768
+               Group "{6162C1F23215E87C}"
+               InAimAtPosition 5
+               UseADS 0
+              }
+             }
+            }
+           }
+           Group "{6162C1F23215E87C}"
+           AbortType AbortChildrenBranchAndParentFurtherChildren
+           InVariable 12
+           TestType EqualsValue
+           TestValue "false"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+  AITaskChangeStance "Change Stance" {
+   Name "Change Stance"
+   EditorPos 1344 864
+  }
+ }
+ Variables {
+  Variable baseTarget {
+   VariableName "baseTarget"
+   VariableTypeName "BaseTarget"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+  Variable targetEntity {
+   VariableName "targetEntity"
+   VariableTypeName "IEntity"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+  Variable currentLOD {
+   VariableName "currentLOD"
+   VariableTypeName "int"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+  Variable foundEnemy {
+   VariableName "foundEnemy"
+   VariableTypeName "bool"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+  Variable bandageItem {
+   VariableName "bandageItem"
+   VariableTypeName "IEntity"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+  Variable initLookPosition {
+   VariableName "initLookPosition"
+   VariableTypeName "vector"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+  Variable lookPosition {
+   VariableName "lookPosition"
+   VariableTypeName "vector"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+  Variable lookingAway {
+   VariableName "lookingAway"
+   VariableTypeName "bool"
+   VariableExposedInput 0
+   VariableExposedOutput 0
+  }
+ }
+ VariablesRefs {
+  VariableReference targetEntity {
+   VariableType 1
+   EditorPos -1153.332 827.008
+  }
+  VariableReference baseTarget {
+   VariableType 0
+   EditorPos -1182.202 745.944
+  }
+  VariableReference foundEnemy {
+   VariableType 3
+   EditorPos -2084.813 1125.309
+   Group "{61616865AF2E2701}"
+  }
+  VariableReference foundEnemy {
+   VariableType 3
+   EditorPos 208 224
+  }
+  VariableReference baseTarget {
+   VariableType 0
+   EditorPos -2592.5 1035.083
+   Group "{61616865AF2E2701}"
+  }
+  VariableReference lookPosition {
+   VariableType 6
+   EditorPos 2176 1056
+   Group "{6162C1F23215E87C}"
+  }
+  VariableReference bandageItem {
+   VariableType 4
+   EditorPos 561.333 1212.861
+   Group "{61616841095E675C}"
+  }
+  VariableReference initLookPosition {
+   VariableType 5
+   EditorPos -4230.612 1321.412
+   Group "{6162F20EFDB58F89}"
+  }
+  VariableReference lookingAway {
+   VariableType 7
+   EditorPos 1728 1168
+   Group "{6162C1F23215E87C}"
+  }
+  VariableReference lookingAway {
+   VariableType 7
+   EditorPos -4436.341 1320.058
+   Group "{6162F20EFDB58F89}"
+  }
+  VariableReference initLookPosition {
+   VariableType 5
+   EditorPos 2160 1136
+   Group "{6162C1F23215E87C}"
+  }
+  VariableReference currentLOD {
+   VariableType 2
+   EditorPos -2970.233 1165.972
+   Group "{6162C1FDE12F5C24}"
+  }
+  VariableReference foundEnemy {
+   VariableType 3
+   EditorPos 1728 656
+   Group "{6162C1F23215E87C}"
+  }
+  VariableReference lookPosition {
+   VariableType 6
+   EditorPos 608 400
+  }
+ }
+ Groups {
+  BTGroup "{61616865AF2E2701}" {
+   Name "Try Select Target"
+   Color 0.6 0.6 0.6 0.251
+  }
+  BTGroup "{6162C1FDE12F5C24}" {
+   Name "Refresh LOD variable"
+   Color 0.6 0.6 0.6 0.251
+  }
+  BTGroup "{6162F20EFDB58F89}" {
+   Name "Init Look variables"
+   Color 0.6 0.6 0.6 0.251
+  }
+  BTGroup "{61616841095E675C}" {
+   Name "Try Heal self"
+   Color 0.6 0.6 0.6 0.251
+  }
+  BTGroup "{6162C1F23215E87C}" {
+   Name "Observe"
+   Color 0.6 0.6 0.6 0.251
+  }
+ }
+}

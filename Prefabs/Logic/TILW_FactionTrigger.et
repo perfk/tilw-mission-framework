@@ -1,0 +1,11 @@
+TILW_FactionTriggerEntity {
+ ID "61F339AC7B7B5324"
+ components {
+  RplComponent "{61F339AC6681CBF1}" {
+   Streamable Disabled
+  }
+ }
+ m_statusMessages {
+  "The %1 has taken control of %2." "The %1 is taking control of %2." "The %1 is no longer taking control of %2." "The %1 has lost control of %2." "The %1 is losing control of %2." "The %1 is no longer losing control of %2."
+ }
+}

@@ -1,0 +1,8 @@
+PrefabGeneratorEntity : "{0555ABAB329C6DFB}Prefabs/WEGenerators/Markers/PG_MarkerGenerator_Base.et" {
+ ID "61F6E08B5EB7674C"
+ coords 0 0 0
+ Flags 1048579
+ m_PrefabNames {
+  "{93C2F8BDFF146CB8}PrefabsEditable/Markers/AOLimit/Marker_AOLimit_Base.et"
+ }
+}

@@ -1,0 +1,69 @@
+Vehicle uh : "{70BAEEFC2D3FEE64}Prefabs/Vehicles/Helicopters/UH1H/UH1H.et" {
+ coords 90.342 1 116.614
+}
+SCR_AIWaypoint : "{750A8D1695BD6998}Prefabs/AI/Waypoints/AIWaypoint_Move.et" {
+ coords 61.409 1 138.27
+}
+TILW_FactionTriggerEntity sdas : "{8C576D46F6579229}Prefabs/Logic/TILW_FactionTrigger.et" {
+ coords 9.784 1 244.278
+ OnResultChanged ""\
+ "		/* code here */"\
+ "		Print(\"ORC \" + result);"\
+ "	"
+ m_queryRadius 10
+ m_comparisonMode EQUAL_OR_LESS
+ m_captureIterations 2
+ m_sendStatusMessages 1
+ m_flagName "OBJ_B"
+ m_ownerFactionKey "US"
+ m_ratioThreshold 0
+}
+TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrameworkEntity.et" {
+ coords 69.217 1 186.542
+ m_missionEvents {
+  TILW_MissionEvent "{61F534F42172FE83}" {
+   m_instructions {
+    TILW_SendMessageInstruction "{61F534F43779191F}" {
+     m_messageTitle "end"
+     m_messageBody "end"
+    }
+   }
+   m_condition TILW_ConjunctionTerm "{61F534F9D95A3AFB}" {
+    m_operands {
+     TILW_LiteralTerm "{61F534F9DF44F618}" {
+      m_flagName "OBJ_A"
+     }
+     TILW_LiteralTerm "{61F534F9DC51C5EA}" {
+      m_flagName "OBJ_B"
+     }
+    }
+   }
+  }
+  TILW_MissionEvent "{61F534F4D9123C7E}" {
+   m_instructions {
+    TILW_SendMessageInstruction "{61F534F523DE91F4}" {
+     m_messageTitle "us dead"
+     m_messageBody "adasd"
+    }
+   }
+   m_condition TILW_LiteralTerm "{61F534F4DFF404DD}" {
+    m_flagName "US_DEAD"
+   }
+  }
+ }
+ m_factionPlayersKilledFlags {
+  TILW_FactionPlayersKilledFlag "{61F534F4D292E11D}" {
+   m_flagName "US_DEAD"
+   m_factionKey "US"
+  }
+ }
+}
+Vehicle BTR1 : "{C012BB3488BEA0C2}Prefabs/Vehicles/Wheeled/BTR70/BTR70.et" {
+ components {
+  TILW_VehicleCrewComponent "{6219245F562BFFAF}" {
+   m_spawnPilot 1
+   m_spawnTurret 1
+  }
+ }
+ coords 51.367 1 88.271
+}

@@ -1,0 +1,8 @@
+TILW_MissionFrameworkEntity {
+ ID "61F2015A86D6DBFB"
+ components {
+  RplComponent "{61F2015AB911969A}" {
+   Streamable Disabled
+  }
+ }
+}

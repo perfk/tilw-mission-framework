@@ -1,0 +1,12 @@
+PolylineShapeEntity {
+ ID "621761787151A879"
+ components {
+  TILW_AOLimitComponent "{6217617AC21DEB7B}" {
+  }
+  RplComponent "{62176179E7F3AC4C}" {
+   Streamable Disabled
+  }
+ }
+ IsClosed 1
+ LineColor 0 0 0 1
+}

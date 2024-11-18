@@ -1,0 +1,28 @@
+GenericEntity {
+ ID "61F4C18F06EBB15F"
+ components {
+  ActionsManagerComponent "{61F4C18E835074FF}" {
+   ActionContexts {
+    UserActionContext "{61F4C18ECB0A8B85}" {
+     ContextName "Interact_A"
+     Position PointInfo "{61F4C18F31FA02AA}" {
+     }
+     Radius 2
+    }
+   }
+   additionalActions {
+    TILW_BaseInteraction "{61F4C18E863E752C}" {
+     ParentContextList {
+      "Interact_A"
+     }
+     ActionTitle "Interact_A"
+     Duration 1
+    }
+   }
+  }
+  RplComponent "{61F4C18EBF064AFE}" {
+  }
+  Hierarchy "{6242E7BB27068E93}" {
+  }
+ }
+}

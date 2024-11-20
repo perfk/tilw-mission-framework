@@ -303,3 +303,17 @@ class TILW_ReactivateEventsInstruction : TILW_BaseInstruction
 		GetGame().GetCallqueue().Call(fw.RecheckConditions);
 	}
 }
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Deactivate Events")]
+class TILW_DeactivateEventsInstruction : TILW_BaseInstruction
+{
+	[Attribute("", UIWidgets.Auto, desc: "Names of the mission events to be deactivated - after execution, these events will not be able to run anymore.")]
+	protected ref array<string> m_eventNames;
+	
+	override void Execute()
+	{
+		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
+		if (!fw || !m_eventNames) return;
+		foreach (TILW_MissionEvent me : fw.m_missionEvents) if (!me.m_alreadyOccurred && m_eventNames.Contains(me.m_name)) me.m_alreadyOccurred = true;
+	}
+}

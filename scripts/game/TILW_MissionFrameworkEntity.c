@@ -74,15 +74,12 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		else ClearMissionFlag(name, recheck);
 	}
 	
-	protected void RecheckConditions()
+	void RecheckConditions()
 	{
 		SCR_BaseGameMode gameMode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
 		if (gameMode.GetState() != SCR_EGameModeState.GAME) return;
 		
-		foreach (TILW_MissionEvent mEvent : m_missionEvents)
-		{
-			mEvent.EvalExpression();
-		}
+		foreach (TILW_MissionEvent mEvent : m_missionEvents) mEvent.EvalExpression();
 	}
 	
 	

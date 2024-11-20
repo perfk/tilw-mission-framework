@@ -4,7 +4,7 @@ class TILW_MissionEvent
 {
 	bool m_alreadyOccurred = false;
 	
-	[Attribute("Mission Event", UIWidgets.Auto, desc: "Just for readability and print debugging, this does not affect the mission")];
+	[Attribute("Mission Event", UIWidgets.Auto, desc: "For readability and print debugging, this does not usually affect the mission.\nIt can also be used to reference events in reactivation instructions.")];
 	string m_name;
 	
 	[Attribute("", UIWidgets.Object, desc: "Mission instructions that are executed when the event occurs")]
@@ -285,5 +285,21 @@ class TILW_DeleteOpenSlotsInstruction : TILW_BaseInstruction
 			
 			SCR_EntityHelper.DeleteEntityAndChildren(e);
 		}
+	}
+
+}
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Reactivate Events")]
+class TILW_ReactivateEventsInstruction : TILW_BaseInstruction
+{
+	[Attribute("", UIWidgets.Auto, desc: "Names of the mission events to be reactivated - after execution, these events will be allowed to run another time.")]
+	protected ref array<string> m_eventNames;
+	
+	override void Execute()
+	{
+		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
+		if (!fw || !m_eventNames) return;
+		foreach (TILW_MissionEvent me : fw.m_missionEvents) if (me.m_alreadyOccurred && m_eventNames.Contains(me.m_name)) me.m_alreadyOccurred = false;
+		GetGame().GetCallqueue().Call(fw.RecheckConditions);
 	}
 }

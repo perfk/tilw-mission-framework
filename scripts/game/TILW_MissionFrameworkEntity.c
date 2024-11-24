@@ -195,13 +195,14 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		}
 	}
 	
-	ref map<string, int> m_aliveFactionPlayers = new map<string, int>();
+	ref map<string, int> m_curAliveFactionPlayers = new map<string, int>();
+	ref map<string, int> m_maxAliveFactionPlayers = new map<string, int>();
 	
 	protected void RecountPlayers()
 	{
 		m_recountScheduled = false;
 		
-		m_aliveFactionPlayers.Clear();
+		m_curAliveFactionPlayers.Clear();
 		array<int> playerIds = {};
 		GetGame().GetPlayerManager().GetPlayers(playerIds);
 		
@@ -217,7 +218,11 @@ class TILW_MissionFrameworkEntity: GenericEntity
 			Faction f = factionManager.GetPlayerFaction(playerId);
 			if (!f) continue;
 			string fkey = f.GetFactionKey();
-			m_aliveFactionPlayers.Set(fkey, m_aliveFactionPlayers.Get(fkey) + 1);
+			m_curAliveFactionPlayers.Set(fkey, m_curAliveFactionPlayers.Get(fkey) + 1);
+		}
+		
+		foreach (string f, int n : m_curAliveFactionPlayers) {
+			if (n > m_maxAliveFactionPlayers.Get(f)) m_maxAliveFactionPlayers.Set(f, n);
 		}
 		
 		foreach (TILW_FactionPlayersKilledFlag fpkf : m_factionPlayersKilledFlags) fpkf.Evaluate();
@@ -260,11 +265,14 @@ class TILW_MissionFrameworkEntity: GenericEntity
 [BaseContainerProps(), BaseContainerCustomStringTitleField("FactionPlayersKilled Flag")]
 class TILW_FactionPlayersKilledFlag
 {
-	[Attribute("", UIWidgets.Auto, desc: "Flag to be set when there are no alive faction players, or cleared when there are")]
+	[Attribute("", UIWidgets.Auto, desc: "Flag to be set when the faction reaches the given casualty ratio, or to be cleared when it's below. Only players are taken into account.")]
 	protected string m_flagName;
 	
 	[Attribute("", UIWidgets.Auto, desc: "Key of examined faction")]
 	protected string m_factionKey;
+	
+	[Attribute("1", UIWidgets.Auto, desc: "When the faction reaches/exceeds this casualty rate, the flag is set. \nTo be precise, when the current number of alive players divided by the historic maximum of concurrently alive players reaches this threshold. \nFor example, if the ratio is 0.9, the flag is set after 90% have been killed.", params: "0 1 0.01")]
+	protected float m_casualtyRatio;
 	
 	void Evaluate()
 	{
@@ -274,8 +282,8 @@ class TILW_FactionPlayersKilledFlag
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
 		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey)) return;
 		
-		if (mfe.m_aliveFactionPlayers.Get(m_factionKey) > 0) mfe.ClearMissionFlag(m_flagName);
-		else mfe.SetMissionFlag(m_flagName);
+		if (mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_maxAliveFactionPlayers.Get(m_factionKey) * (1 - m_casualtyRatio)) mfe.SetMissionFlag(m_flagName);
+		else mfe.ClearMissionFlag(m_flagName);
 	}
 }
 
@@ -293,7 +301,7 @@ class TILW_RandomFlag
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
 		float f = Math.RandomFloat01();
 		if (mfe && m_chance >= f) mfe.SetMissionFlag(m_flagName);
-		// Fun fact: A chance of 0 can technically still set the flag, because RandomFloat01 is inclusive. I don't know a good way to fix this.
+		// Fun fact: A chance of 0 can technically still set the flag, because RandomFloat01 is inclusive. I don't know an elegant way to fix this.
 		// Anyway, this will never happen! Okay, maybe once in about 4 billion times...
 		// I'm gonna print a cool message just in case!
 		if (f == 0 && m_chance == 0) Print("You should have played lotto instead of Arma. Too bad!");

@@ -1,3 +1,29 @@
+GenericEntity asdasdadsads {
+ coords 215.589 1 209.251
+}
+GenericEntity : "{45F7BDF237E75478}Prefabs/Props/Civilian/Birdhouse_01/Birdhouse_01_pole.et" {
+ coords 133.218 1 129.444
+ {
+  GenericEntity : "{5B462DF843A26368}Prefabs/Utils/Interactions/TILW_TeleportInteraction.et" {
+   components {
+    ActionsManagerComponent "{62EF76E0D47ED96A}" {
+     additionalActions {
+      TILW_TeleportInteraction "{62EF76E608B6CB36}" {
+       m_locationName "asdasdadsads"
+       m_factionKeys {
+        "US"
+       }
+      }
+     }
+    }
+   }
+   coords 0 1.137 0
+  }
+ }
+}
+GenericEntity : "{584EB34600E9698D}Prefabs/Utils/Interactions/TILW_BaseInteraction.et" {
+ coords 133.516 2.925 129.311
+}
 Vehicle uh : "{70BAEEFC2D3FEE64}Prefabs/Vehicles/Helicopters/UH1H/UH1H.et" {
  coords 90.342 1 116.614
 }
@@ -18,7 +44,7 @@ TILW_FactionTriggerEntity sdas : "{8C576D46F6579229}Prefabs/Logic/TILW_FactionTr
  m_ownerFactionKey "US"
  m_ratioThreshold 0
 }
-TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrameworkEntity.et" {
+TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramework.et" {
  coords 69.217 1 186.542
  m_missionEvents {
   TILW_MissionEvent "{61F534F42172FE83}" {

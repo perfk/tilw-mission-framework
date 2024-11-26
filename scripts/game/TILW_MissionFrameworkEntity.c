@@ -235,7 +235,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	void ShowGlobalHint(string hl, string msg, int dur, array<string> fkeys)
 	{
 		Rpc(RpcDo_ShowHint, hl, msg, dur, fkeys); // broadcast to clients
-		// RpcDo_ShowHint(hl, msg, dur, fkeys); // try to show on authority
+		RpcDo_ShowHint(hl, msg, dur, fkeys); // try to show on authority
 	}
 	
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]

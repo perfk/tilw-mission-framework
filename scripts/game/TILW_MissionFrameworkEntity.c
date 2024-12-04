@@ -120,11 +120,11 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	[Attribute("", UIWidgets.Object, desc: "Used to set a flag when all players of a faction were killed", category: "Flags")]
 	ref array<ref TILW_FactionPlayersKilledFlag> m_factionPlayersKilledFlags;
 	
-	[Attribute("", UIWidgets.Auto, desc: "This array sets given flags on initialization. \nThis is not required for regular framework usage.", category: "Flags")]
-	ref array<string> m_defaultFlags;
+	// [Attribute("", UIWidgets.Auto, desc: "This array sets given flags on initialization. \nThis is not required for regular framework usage.", category: "Flags")]
+	// ref array<string> m_defaultFlags;
 	
 	[Attribute("", UIWidgets.Object, desc: "Just like default flags, except that each one has a certain chance to be set on initialization.\nCan be used as a random factor, e. g. for switching between two QRF events with different locations, based on if a random flag was set or not.", category: "Flags")]
-	ref array<ref TILW_RandomFlag> m_randomFlags;
+	ref array<ref TILW_BaseRandomFlag> m_randomFlags;
 	
 	
 	// debug
@@ -140,7 +140,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		Print("TILWMF | Framework EOnActivate()");
 		if (!Replication.IsServer()) return; // MFE only runs on server
 		GetGame().GetCallqueue().Call(InsertListeners); // Insert listeners for player updates and game start
-		InitDefaultFlags();
+		GetGame().GetCallqueue().Call(InitDefaultFlags); // Call, just to randomize time a little
 	}
 	
 	override void EOnDeactivate(IEntity owner)
@@ -173,8 +173,8 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	protected void InitDefaultFlags()
 	{
-		foreach (string flag : m_defaultFlags) SetMissionFlag(flag, false);
-		foreach (TILW_RandomFlag rf : m_randomFlags) rf.Evaluate();
+		// foreach (string flag : m_defaultFlags) SetMissionFlag(flag, false);
+		foreach (TILW_BaseRandomFlag rf : m_randomFlags) rf.Evaluate();
 	}
 	
 	// Gamemode Start
@@ -287,8 +287,16 @@ class TILW_FactionPlayersKilledFlag
 	}
 }
 
+//! TILW_BaseRandomFlag is the base class for various probability experiments that can set mission flags
+[BaseContainerProps(), BaseContainerCustomStringTitleField("NOT USEFUL")]
+class TILW_BaseRandomFlag
+{
+	void Evaluate();
+}
+
+//! TILW_RandomFlag is a simple Bernoulli trial, where a given mission flag has a given chance to be set
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Random Flag")]
-class TILW_RandomFlag
+class TILW_RandomFlag: TILW_BaseRandomFlag
 {
 	[Attribute("", UIWidgets.Auto, desc: "Mission Flag which might be set.")]
 	protected string m_flagName;
@@ -296,7 +304,7 @@ class TILW_RandomFlag
 	[Attribute("0.5", UIWidgets.Auto, desc: "Chance that the flag gets set on framework initialization", params: "0 1 0.05")]
 	protected float m_chance;
 	
-	void Evaluate()
+	override void Evaluate()
 	{
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
 		float f = Math.RandomFloat01();
@@ -306,6 +314,33 @@ class TILW_RandomFlag
 		// I'm gonna print a cool message just in case!
 		if (f == 0 && m_chance == 0) Print("You should have played lotto instead of Arma. Too bad!");
 		// ...But why would you even add a flag with a chance of 0?
+	}
+}
+
+//! TILW_RandomFlag is a simple Bernoulli trial, where a given mission flag has a given chance to be set
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Flag Sampling")]
+class TILW_FlagSampling: TILW_BaseRandomFlag
+{
+	[Attribute("", UIWidgets.Auto, desc: "Pool to draw k random mission flags from, and set them.")]
+	protected ref array<string> m_flagNames;
+	
+	[Attribute("1", UIWidgets.Auto, desc: "Number of flags to draw.", params: "1 inf")]
+	protected int m_k;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Can a single entry be selected multiple times? \nThis means that the number of set flags can also be less than k, since a single one may be drawn multiple times.")]
+	protected bool m_withReplacement;
+	
+	override void Evaluate()
+	{
+		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
+		
+		for (int k = m_k; k > 0; k--)
+		{
+			if (m_flagNames.IsEmpty()) break;
+			string flag = m_flagNames.GetRandomElement();
+			if (!m_withReplacement) m_flagNames.RemoveItem(flag);
+			mfe.SetMissionFlag(flag);
+		}
 	}
 }
 

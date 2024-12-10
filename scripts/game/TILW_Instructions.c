@@ -317,3 +317,33 @@ class TILW_DeactivateEventsInstruction : TILW_BaseInstruction
 		foreach (TILW_MissionEvent me : fw.m_missionEvents) if (!me.m_alreadyOccurred && m_eventNames.Contains(me.m_name)) me.m_alreadyOccurred = true;
 	}
 }
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Edit Respawn Tickets")]
+class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
+{
+	[Attribute("", UIWidgets.Auto, desc: "Key of the affected faction.")]
+	protected string m_factionKey;
+	
+	[Attribute("0", UIWidgets.ComboBox, "How to affect the factions ticket count.", enums: ParamEnumArray.FromEnum(TILW_EVariableOperation))]
+	protected TILW_EVariableOperation m_operation;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "By what amount to affect the factions ticket count.", params: "0 inf")]
+	protected int m_amount;
+	
+	override void Execute()
+	{
+		BaseGameMode bgm = GetGame().GetGameMode();
+		if (!bgm) return;
+		PS_GameModeCoop gm = PS_GameModeCoop.Cast(bgm);
+		int num = gm.TILW_GetFactionTicketCount(m_factionKey);
+		switch (m_operation) {
+			case TILW_EVariableOperation.SET:	num = m_amount; break;
+			case TILW_EVariableOperation.ADD:	num += m_amount; break;
+			case TILW_EVariableOperation.SUB: num -= m_amount; break;
+			case TILW_EVariableOperation.MUL:	num *= m_amount; break;
+			case TILW_EVariableOperation.DIV: num /= m_amount; break;
+			default: return;
+		}
+		gm.TILW_SetFactionTicketCount(m_factionKey, num);
+	}
+}

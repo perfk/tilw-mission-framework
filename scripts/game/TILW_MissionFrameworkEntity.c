@@ -367,6 +367,15 @@ class TILW_FactionRatioFlag
 	}
 }
 
+enum TILW_EVariableOperation
+{
+	SET,
+	ADD,
+	SUB,
+	MUL,
+	DIV
+}
+
 // String-Bool Script Invoker for mission flag changes
 void TILW_ScriptInvokerStringBoolMethod(string s, bool b);
 typedef func TILW_ScriptInvokerStringBoolMethod;

@@ -7,25 +7,22 @@ modded class PS_GameModeCoop : SCR_BaseGameMode
 		if (mfe) mfe.PlayerUpdate(0, null);
 	}
 	
-	override void OnGameStart()
+	void TILW_SetFactionTicketCount(string fkey, int num)
 	{
-		super.OnGameStart();
-		GetOnPlayerConnected().Insert(TILW_OnPlayerConnected);
+		if (m_mFactionRespawnCount.Contains(fkey)) {
+			m_mFactionRespawnCount.Get(fkey).m_iCount = num; // check if this works
+		} else {
+			PS_FactionRespawnCount frc = new PS_FactionRespawnCount();
+			frc.m_sFactionKey = fkey;
+			frc.m_iCount = num;
+			m_mFactionRespawnCount.Insert(fkey, frc);
+		}
 	}
 	
-	protected void TILW_OnPlayerConnected(int playerId)
+	int TILW_GetFactionTicketCount(string fkey)
 	{
-		GetGame().GetCallqueue().CallLater(ShowJIPInfo, 15 * 1000, false, playerId);
-	}
-	
-	protected void ShowJIPInfo(int playerId)
-	{
-		if (GetState() != SCR_EGameModeState.GAME || PS_PlayableManager.GetInstance().GetPlayableByPlayer(playerId) != RplId.Invalid()) return;
-		
-		SCR_PlayerController pc = SCR_PlayerController.TILW_GetPCFromPID(playerId);
-		if (!pc) return;
-		
-		if (m_bTeamSwitch && !m_bRemoveRedundantUnits) pc.TILW_ShowJIPInfo();
-		else pc.TILW_SendHintToPlayer("JIP Not Available", "This mission does not support join-in-progress, please wait until the next mission starts.", 10);
+		PS_FactionRespawnCount frc = m_mFactionRespawnCount.Get(fkey);
+		if (!frc) return 0;
+		return frc.m_iCount;
 	}
 }

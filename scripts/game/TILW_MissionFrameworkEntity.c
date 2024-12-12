@@ -14,7 +14,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		if (!s_Instance && create) {
 			Print("TILWMF | No MFE instance present, creating new one...");
 			BaseWorld world = GetGame().GetWorld();
-			if (world) s_Instance = TILW_MissionFrameworkEntity.Cast(GetGame().SpawnEntityPrefab("{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrameworkEntity.et", false, world));
+			if (world) s_Instance = TILW_MissionFrameworkEntity.Cast(GetGame().SpawnEntityPrefab(Resource.Load("{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrameworkEntity.et"), world));
 		}
 		return s_Instance;
 	}

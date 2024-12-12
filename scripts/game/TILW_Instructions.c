@@ -102,7 +102,7 @@ class TILW_SpawnPrefabInstruction : TILW_BaseInstruction
 		vector mat[4];
 		e.GetWorldTransform(mat);
 		spawnParams.Transform = mat;
-		m_spawnedEntity = GetGame().SpawnEntityPrefab(m_prefab, true, GetGame().GetWorld(), spawnParams);
+		m_spawnedEntity = GetGame().SpawnEntityPrefab(Resource.Load(m_prefab), GetGame().GetWorld(), spawnParams);
 		if (m_spawnedEntity && m_setEntityName != "") m_spawnedEntity.SetName(m_setEntityName);
 	}
 	

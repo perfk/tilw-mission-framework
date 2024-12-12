@@ -39,7 +39,7 @@ class TILW_AreaSpawningComponent : ScriptComponent
 		{
 			SCR_Math2D.GetRandomPointInPolygon(m_points2D, x, y);
 			params.Transform[3] = Vector(x, SCR_TerrainHelper.GetTerrainY(Vector(x, 0, y), null, true), y);
-			IEntity e = GetGame().SpawnEntityPrefab(r, true, GetGame().GetWorld(), params);
+			IEntity e = GetGame().SpawnEntityPrefab(Resource.Load(r), GetGame().GetWorld(), params);
 		}
 	}
 	

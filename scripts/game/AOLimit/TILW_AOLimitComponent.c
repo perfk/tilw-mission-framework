@@ -54,10 +54,12 @@ class TILW_AOLimitComponent : ScriptComponent
 
 		pse.GetPointsPositions(points3D);
 		for (int i = 0; i < points3D.Count(); i++) points3D[i] = pse.CoordToParent(points3D[i]);
-		SCR_Math2D.Get2DPolygon(points3D, points2D);
+		if(points2D.Count() == 0)
+			SCR_Math2D.Get2DPolygon(points3D, points2D);
 		
 		if(RplSession.Mode() == RplMode.Dedicated)
 			return;
+
 		SetEventMask(owner, EntityEvent.FIXEDFRAME);
 	}
 	
@@ -92,7 +94,6 @@ class TILW_AOLimitComponent : ScriptComponent
 		IEntity vehicle = CompartmentAccessComponent.GetVehicleIn(player);
 		if (vehicle)
 		{
-			Print("ignoreVehicleType = " + ignoreVehicleType);
 			VehicleHelicopterSimulation isAirVehicle;
 			if(ignoreVehicleType == TILW_EIgnoreVehicles.Air)
 				isAirVehicle = VehicleHelicopterSimulation.Cast(vehicle.FindComponent(VehicleHelicopterSimulation));

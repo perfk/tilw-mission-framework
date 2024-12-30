@@ -5,7 +5,6 @@ class TILW_AOLimitComponentClass : ScriptComponentClass
 
 enum TILW_EIgnoreVehicles
 {
-	
 	All = 1,
 	Air
 }
@@ -29,7 +28,6 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 	protected ref array<vector> points3D = new array<vector>();
 	protected ref array<float> points2D = new array<float>();
-	protected ref array<MapItem> markers = new array<MapItem>();
 	protected float timer = 0;
 	protected float nextUntil = 0;
 	protected bool isOutsideAO = false;

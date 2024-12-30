@@ -1,12 +1,5 @@
 class TILW_AOLimit : SCR_InfoDisplay
 {
-	protected override event void OnStartDraw(IEntity owner)
-	{
-		super.OnStartDraw(owner);
-		
-		Print("TILW_AOLimitMenu.OnMenuOpsden"); 
-	}
-	
 	void SetTime(float time)
 	{
 		TextWidget timer = TextWidget.Cast(m_wRoot.FindAnyWidget("Timer"));

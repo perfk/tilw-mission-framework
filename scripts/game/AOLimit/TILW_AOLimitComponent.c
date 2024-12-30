@@ -18,7 +18,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)")]
 	protected ref array<string> m_factionKeys;
 	
-	[Attribute("", UIWidgets.Auto, desc: "These vehicles are NOT affected by the AO limit")]
+	[Attribute("", UIWidgets.Auto, desc: "These vehicle prefabs are NOT affected by the AO limit")]
 	protected ref array<ResourceName> ignoreVehicles;
 	
 	[Attribute("", UIWidgets.ComboBox, desc: "Type of vehicle NOT affected by the AO limit", enums: ParamEnumArray.FromEnum(TILW_EIgnoreVehicles))]

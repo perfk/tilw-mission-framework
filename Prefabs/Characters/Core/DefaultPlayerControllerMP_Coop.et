@@ -3,7 +3,7 @@ SCR_PlayerController : "{225E51284CC95CFA}Prefabs/Characters/Core/DefaultPlayerC
  components {
   SCR_HUDManagerComponent "{2FDC275D9EBCDB8B}" {
    InfoDisplays {
-    TILW_AOLimit "{633C23AD9607EBBD}" {
+    TILW_AOLimitDisplay "{633C23AD9607EBBD}" {
      m_LayoutPath "{FE519D23DC3CF06C}UI/layouts/TILW_AOLimitLayout.layout"
      m_eLayer HIGH
      m_bShowWhenCreated 0

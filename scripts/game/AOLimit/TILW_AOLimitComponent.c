@@ -3,35 +3,30 @@ class TILW_AOLimitComponentClass : ScriptComponentClass
 {
 }
 
-enum TILW_EIgnoreVehicles
-{
-	All = 1,
-	Air
-}
-
 class TILW_AOLimitComponent : ScriptComponent
 {
-	[Attribute("30", UIWidgets.Auto, "How many seconds until the player is killed", params: "0 inf 0")]
-	protected float maxTimeOutsideAO;
+	[Attribute("20", UIWidgets.Auto, "After how many seconds outside of AO players are killed", params: "0 inf 0")]
+	protected float m_killTimer;
 	
 	[Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)")]
 	protected ref array<string> m_factionKeys;
 	
-	[Attribute("", UIWidgets.Auto, desc: "These vehicle prefabs are NOT affected by the AO limit")]
-	protected ref array<ResourceName> ignoreVehicles;
-	
-	[Attribute("", UIWidgets.ComboBox, desc: "Type of vehicle NOT affected by the AO limit", enums: ParamEnumArray.FromEnum(TILW_EIgnoreVehicles))]
-	protected TILW_EIgnoreVehicles ignoreVehicleType;
+	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NEVER affected by the AO limit")]
+	protected ref array<ResourceName> m_ignoredVehicles;
 	
 	[Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25")]
-	protected int checkFrequency;
+	protected float m_checkFrequency;
 	
-	protected ref array<vector> points3D = new array<vector>();
-	protected ref array<float> points2D = new array<float>();
-	protected float timer = 0;
-	protected float nextUntil = 0;
-	protected bool isOutsideAO = false;
-	protected TILW_AOLimit aoLimitHud;
+	protected ref array<vector> m_points3D = new array<vector>();
+	protected ref array<float> m_points2D = new array<float>();
+	
+	protected float m_timeLeft = 0;
+	protected float m_checkDelta = 0;
+	
+	
+	protected bool m_wasOutsideAO = false;
+	
+	protected TILW_AOLimitDisplay m_aoLimitDisplay;
 	
 	void TILW_AOLimitComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
@@ -50,112 +45,121 @@ class TILW_AOLimitComponent : ScriptComponent
 			return;
 		}
 
-		pse.GetPointsPositions(points3D);
-		for (int i = 0; i < points3D.Count(); i++) points3D[i] = pse.CoordToParent(points3D[i]);
-		if(points2D.Count() == 0)
-			SCR_Math2D.Get2DPolygon(points3D, points2D);
+		pse.GetPointsPositions(m_points3D);
+		for (int i = 0; i < m_points3D.Count(); i++) m_points3D[i] = pse.CoordToParent(m_points3D[i]);
 		
-		if(RplSession.Mode() == RplMode.Dedicated)
-			return;
+		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
+		
+		if (RplSession.Mode() == RplMode.Dedicated) return;
 
 		SetEventMask(owner, EntityEvent.FIXEDFRAME);
 	}
 	
 	protected override void EOnFixedFrame(IEntity owner, float timeSlice)
 	{
-		nextUntil -= timeSlice;
-		if(nextUntil > 0 && !isOutsideAO)
+		if (m_wasOutsideAO)
+			UpdateTimer(timeSlice);
+		
+		m_checkDelta -= timeSlice;
+		if (m_checkDelta > 0)
 			return;
-		nextUntil = checkFrequency;
-
+		m_checkDelta = m_checkFrequency;
+		
+		bool outsideAO = IsOutsideAO();
+		
+		if (m_wasOutsideAO && !outsideAO) // re-enters ao
+			PlayerEntersAO();
+		
+		else if (!m_wasOutsideAO && outsideAO) // leaves ao
+			PlayerLeavesAO();
+		
+		m_wasOutsideAO = outsideAO;
+	
+	}
+	
+	protected bool IsOutsideAO()
+	{
 		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
 		if (gamemode.GetState() != SCR_EGameModeState.GAME)
-			return;
+			return false;
 
 		SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(GetGame().GetPlayerController().GetControlledEntity());
-		if(!player)
-			return;
+		if (!player)
+			return false;
 
-		if(!SCR_AIDamageHandling.IsAlive(player))
-			return;
+		if (!SCR_AIDamageHandling.IsAlive(player))
+			return false;
 		
-		if(!player.m_pFactionComponent)
-			return;
+		if (!player.m_pFactionComponent)
+			return false;
 		
 		Faction faction = player.m_pFactionComponent.GetAffiliatedFaction();
-		if(!faction)
-			return;
+		if (!faction)
+			return false;
 		
-		if(!m_factionKeys && !m_factionKeys.Contains(faction.GetFactionKey()))
-			return;
+		if (!m_factionKeys.IsEmpty() && !m_factionKeys.Contains(faction.GetFactionKey()))
+			return false;
+		
+		vector playerPos = player.GetOrigin();
+		bool inPolygon = Math2D.IsPointInPolygon(m_points2D, playerPos[0], playerPos[2]);
+		if (inPolygon)
+			return false;
+		
+		IEntity ve = CompartmentAccessComponent.GetVehicleIn(player);
+		if (ve && IsVehicleIgnored(ve))
+			return false;
+		
+		return true;
+	}
 
-		IEntity vehicle = CompartmentAccessComponent.GetVehicleIn(player);
-		if (vehicle)
-		{
-			VehicleHelicopterSimulation isAirVehicle;
-			if(ignoreVehicleType == TILW_EIgnoreVehicles.Air)
-				isAirVehicle = VehicleHelicopterSimulation.Cast(vehicle.FindComponent(VehicleHelicopterSimulation));
-
-			if(ignoreVehicleType == TILW_EIgnoreVehicles.All || isAirVehicle || ignoreVehicles.Contains(vehicle.GetPrefabData().GetPrefabName()))
-			{
-				if(isOutsideAO)
-					PlayerInsideAO();
-				return;
-			}
-		}
+	protected bool IsVehicleIgnored(IEntity e)
+	{
+		// Possible optimization: Save result for this vehicle
 		
-		vector position = player.GetOrigin();
-		bool inPolygon = Math2D.IsPointInPolygon(points2D, position[0], position[2]);
+		if (m_ignoredVehicles.IsEmpty()) return false;
 		
-		if(inPolygon && isOutsideAO)
-		{
-			PlayerInsideAO();
-			return;
-		}
-		
-		if(!inPolygon && !isOutsideAO)
-		{
-			PlayerOutsideAO();
-		}
-		
-		if(isOutsideAO)
-			UpdateTimer(timeSlice);
+		EntityPrefabData epd = e.GetPrefabData();
+		if (!epd) return false;
+		BaseContainer bc = epd.GetPrefab();
+		if (!bc) return false;
+		foreach (ResourceName rn : m_ignoredVehicles) if (SCR_BaseContainerTools.IsKindOf(bc, rn)) return true;
+			
+		return false;
 	}
 	
 	protected void UpdateTimer(float timeSlice)
 	{
-		timer -= timeSlice;
+		m_timeLeft -= timeSlice;
+		m_aoLimitDisplay.SetTime(m_timeLeft);
 	
-		if(timer < 0)
+		if (m_timeLeft < 0)
 		{
 			IEntity player = GetGame().GetPlayerController().GetControlledEntity();
 			CharacterControllerComponent characterController = CharacterControllerComponent.Cast(player.FindComponent(CharacterControllerComponent));
 			if (characterController)
 				characterController.ForceDeath();
 			
-			PlayerInsideAO();
+			PlayerEntersAO();
 		}
-		aoLimitHud.SetTime(timer);
 	}
 	
-	protected void PlayerOutsideAO()
+	protected void PlayerLeavesAO()
 	{
-		isOutsideAO = true;
-		timer = maxTimeOutsideAO;
+		m_timeLeft = m_killTimer;
 		
 		SCR_UISoundEntity.SoundEvent(SCR_SoundEvent.HINT);
 		
 		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
 		SCR_HUDManagerComponent hud = SCR_HUDManagerComponent.Cast(playerController.GetHUDManagerComponent());
-		aoLimitHud = TILW_AOLimit.Cast(hud.FindInfoDisplay(TILW_AOLimit));
-		aoLimitHud.SetTime(timer);
-		aoLimitHud.Show(true,UIConstants.FADE_RATE_FAST);
+		m_aoLimitDisplay = TILW_AOLimitDisplay.Cast(hud.FindInfoDisplay(TILW_AOLimitDisplay));
+		m_aoLimitDisplay.SetTime(m_timeLeft);
+		m_aoLimitDisplay.Show(true, UIConstants.FADE_RATE_FAST);
 	}
 	
-	protected void PlayerInsideAO()
+	protected void PlayerEntersAO()
 	{
-		isOutsideAO = false;
-		aoLimitHud.Show(false,UIConstants.FADE_RATE_INSTANT);
+		m_timeLeft = m_killTimer;
+		m_aoLimitDisplay.Show(false, UIConstants.FADE_RATE_INSTANT);
 	}
 	
 	void SetFactions(array<string> factions)
@@ -183,7 +187,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
 	protected void RpcDo_SetPoints(array<vector> points)
 	{
-		SCR_Math2D.Get2DPolygon(points3D, points2D);
+		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
 		
 		if(RplSession.Mode() == RplMode.Dedicated)
 			return;
@@ -200,7 +204,7 @@ class TILW_AOLimitComponent : ScriptComponent
 		MapItem lastItem;
 		MapItem firstItem;
 		
-		foreach(vector point : points3D)
+		foreach(vector point : m_points3D)
 		{
 			MapItem item =  mapEntity.CreateCustomMapItem();
 			item.SetBaseType(EMapDescriptorType.MDT_ICON);

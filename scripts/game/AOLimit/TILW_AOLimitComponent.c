@@ -1,148 +1,233 @@
 [ComponentEditorProps(category: "GameScripted/", description: "AO Limit component")]
-class TILW_AOLimitComponentClass: ScriptComponentClass
+class TILW_AOLimitComponentClass : ScriptComponentClass
 {
 }
 
+enum TILW_EIgnoreVehicles
+{
+	All,
+	Air
+}
 
 class TILW_AOLimitComponent : ScriptComponent
 {
-	
-	[Attribute("5", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25")]
-	protected float m_checkFrequency;
+	[Attribute("30", UIWidgets.Auto, "How many seconds until the player is killed", params: "0 inf 0")]
+	protected float maxTimeOutsideAO;
 	
 	[Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)")]
-	protected ref array<string> m_factionKeys;
+	protected ref array<string> factionKeys;
 	
-	//[Attribute("0", UIWidgets.Auto, desc: "If greater than 0, the AO limit instead becomes a setup zone, which  expires after the given amount of seconds.")]
-	//protected int m_setupTimer;
+	[Attribute("", UIWidgets.Auto, desc: "These vehicles are NOT affected by the AO limit")]
+	protected ref array<ResourceName> ignoreVehicles;
 	
-	protected ref array<float> m_points2D = new array<float>();
-	protected ref array<vector> m_points3D = new array<vector>();
+	[Attribute("", UIWidgets.ComboBox, desc: "Type of vehicle NOT affected by the AO limit", enums: ParamEnumArray.FromEnum(TILW_EIgnoreVehicles))]
+	protected TILW_EIgnoreVehicles ignoreVehicleType;
 	
-	override void OnPostInit(IEntity owner)
+	[Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25")]
+	protected int checkFrequency;
+	
+	protected ref array<vector> points3D = new array<vector>();
+	protected ref array<float> points2D = new array<float>();
+	protected ref array<MapItem> markers = new array<MapItem>();
+	protected float timer = 0;
+	protected float nextUntil = 0;
+	protected bool isOutsideAO = false;
+	protected TILW_AOLimit aoLimitHud;
+	
+	void TILW_AOLimitComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
-		if (Replication.IsServer()) GetGame().GetCallqueue().Call(InitLoop, owner);
-		
+		SetEventMask(ent, EntityEvent.INIT);
 	}
 	
-	// QUERY
-	
-	protected void InitLoop(IEntity owner)
+	protected override void EOnInit(IEntity owner)
 	{
+		if(RplSession.Mode() == RplMode.Dedicated)
+			return;
+
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(owner);
 		if (!pse) {
-			Print("TILW_AOLimitComponent | Owner entity (" + owner + ") is not a polyline!", LogLevel.ERROR);
+			Print("TILW_AOLimitComponent | Owner entity (" + owner + ") is not a polyline!", LogLevel.WARNING);
 			return;
 		}
 		if (pse.GetPointCount() < 3) {
-			Print("TILW_AOLimitComponent | Owner entity (" + owner + ") does not have enough points!", LogLevel.ERROR);
+			Print("TILW_AOLimitComponent | Owner entity (" + owner + ") does not have enough points!", LogLevel.WARNING);
 			return;
 		}
-		pse.GetPointsPositions(m_points3D);
-		for (int i = 0; i < m_points3D.Count(); i++) m_points3D[i] = pse.CoordToParent(m_points3D[i]);
-		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
+
+		pse.GetPointsPositions(points3D);
+		for (int i = 0; i < points3D.Count(); i++) points3D[i] = pse.CoordToParent(points3D[i]);
+		SCR_Math2D.Get2DPolygon(points3D, points2D);
 		
-		QueryLoop();
+		SetEventMask(owner, EntityEvent.FIXEDFRAME);
 	}
 	
-	protected void QueryLoop()
+	protected override void EOnFixedFrame(IEntity owner, float timeSlice)
 	{
-		RunQuery();
-		GetGame().GetCallqueue().CallLater(QueryLoop, m_checkFrequency * 1000, false);
-	}
-	
-	protected void RunQuery()
-	{
-		SCR_BaseGameMode gm = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (gm.GetState() != SCR_EGameModeState.GAME) return;
+		nextUntil -= timeSlice;
+		if(nextUntil > 0 && !isOutsideAO)
+			return;
+		nextUntil = checkFrequency;
+
+		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
+		if (gamemode.GetState() != SCR_EGameModeState.GAME)
+			return;
+
+		SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(GetGame().GetPlayerController().GetControlledEntity());
+		if(!player)
+			return;
+
+		if(!SCR_AIDamageHandling.IsAlive(player))
+			return;
 		
-		array<int> players = new array<int>();
-		GetGame().GetPlayerManager().GetPlayers(players);
-		foreach (int playerId : players)
+		if(!player.m_pFactionComponent)
+			return;
+		
+		Faction faction = player.m_pFactionComponent.GetAffiliatedFaction();
+		if(!faction)
+			return;
+		
+		if(!factionKeys && !factionKeys.Contains(faction.GetFactionKey()))
+			return;
+
+		IEntity vehicle = CompartmentAccessComponent.GetVehicleIn(player);
+		if (vehicle)
 		{
-			IEntity pce = GetGame().GetPlayerManager().GetPlayerControlledEntity(playerId);
-			if (!pce) continue;
-			if (!SCR_AIDamageHandling.IsAlive(pce)) continue;
-			SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(pce);
-			if (!cc) continue; // not going to work since RL has an "initial entity"
-			if (!cc.m_pFactionComponent) continue;
-			if (!m_factionKeys.IsEmpty()) {
-				Faction f = cc.m_pFactionComponent.GetAffiliatedFaction();
-				if (!f) continue;
-				if (!m_factionKeys.Contains(f.GetFactionKey())) continue;
+			VehicleHelicopterSimulation isAirVehicle;
+			if(ignoreVehicleType == TILW_EIgnoreVehicles.Air)
+				isAirVehicle = VehicleHelicopterSimulation.Cast(vehicle.FindComponent(VehicleHelicopterSimulation));
+
+			if(ignoreVehicleType == TILW_EIgnoreVehicles.All || isAirVehicle || ignoreVehicles.Contains(vehicle.GetPrefabData().GetPrefabName()))
+			{
+				if(isOutsideAO)
+					PlayerInsideAO();
+				return;
 			}
-			bool inPolygon = Math2D.IsPointInPolygon(m_points2D, pce.GetOrigin()[0], pce.GetOrigin()[2]);
-			if (!inPolygon) PlayerOutsidePolygon(playerId);
 		}
+		
+		vector position = player.GetOrigin();
+		bool inPolygon = Math2D.IsPointInPolygon(points2D, position[0], position[2]);
+		
+		if(inPolygon && isOutsideAO)
+		{
+			PlayerInsideAO();
+			return;
+		}
+		
+		if(!inPolygon && !isOutsideAO)
+		{
+			PlayerOutsideAO();
+		}
+		
+		if(isOutsideAO)
+			UpdateTimer(timeSlice);
 	}
 	
-	protected void PlayerOutsidePolygon(int playerId)
+	protected void UpdateTimer(float timeSlice)
 	{
-		SCR_PlayerController pc = SCR_PlayerController.TILW_GetPCFromPID(playerId);
-		if (!pc) return;
-		pc.TILW_SendHintToPlayer("AO Limit reached", "You have passed your AO limit, please return.", 5);
+		timer -= timeSlice;
+	
+		if(timer < 0)
+		{
+			SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(GetGame().GetPlayerController().GetControlledEntity());
+			if (!player)
+				return;
+			
+			Instigator insitgator = Instigator.CreateInstigator(player);
+
+			SCR_DamageManagerComponent damageManager = player.GetDamageManager();
+			damageManager.Kill(insitgator);
+			
+			PlayerInsideAO();
+		}
+		aoLimitHud.SetTime(timer);
 	}
 	
+	protected void PlayerOutsideAO()
+	{
+		isOutsideAO = true;
+		timer = maxTimeOutsideAO;
+		
+		SCR_UISoundEntity.SoundEvent(SCR_SoundEvent.HINT);
+		
+		SCR_PlayerController playerController = SCR_PlayerController.Cast(GetGame().GetPlayerController());
+		SCR_HUDManagerComponent hud = SCR_HUDManagerComponent.Cast(playerController.GetHUDManagerComponent());
+		aoLimitHud = TILW_AOLimit.Cast(hud.FindInfoDisplay(TILW_AOLimit));
+		aoLimitHud.SetTime(timer);
+		aoLimitHud.Show(true,UIConstants.FADE_RATE_FAST);
+	}
+	
+	protected void PlayerInsideAO()
+	{
+		isOutsideAO = false;
+		aoLimitHud.Show(false,UIConstants.FADE_RATE_INSTANT);
+	}
+	
+	void SetFactions(array<string> factions)
+	{
+		Rpc(RpcDo_SetFactions, factions);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	void RpcDo_SetFactions(array<string> factions)
+	{
+		factionKeys = factions;
+	}
+	
+	void SetPoints(array<vector> points)
+	{
+		if (points.Count() < 3) {
+			Print("TILW_AOLimitComponent | not enough points!", LogLevel.ERROR);
+			return;
+		}
+		Rpc(RpcDo_SetPoints, points);
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	void RpcDo_SetPoints(array<vector> points)
+	{
+		SCR_Math2D.Get2DPolygon(points3D, points2D);
+		
+		EntityEvent mask = GetEventMask();
+		if(mask != EntityEvent.FIXEDFRAME)
+			SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);
+	}
 	
 	/*
-	
-	// DRAWING
-	
-	[Attribute("1", UIWidgets.Auto, "Draw AO limit on map")]
-	protected bool m_drawLimit;
-	
-	[Attribute("1", UIWidgets.Auto, "Draw AO limit for everyone, instead of just for the affected factions")]
-	protected bool m_showToEveryone;
-	
-	// color
-	
-	protected CanvasWidget m_wCanvasWidget;
-	protected ref array<ref CanvasWidgetCommand> m_aCanvasCommands;
-	
-	protected void InitDrawing()
+	void DrawAO()
 	{
-		// make sure it's not on dedicated server
 		SCR_MapEntity mapEntity = SCR_MapEntity.GetMapInstance();
-		if (!mapEntity) return;
-		mapEntity.GetOnMapOpen().Insert(CreateWidget);
-		mapEntity.GetOnMapClose().Insert(DeleteWidget);
-	}
-	
-	protected void CreateWidget(MapConfiguration config)
-	{
-		SetEventMask(GetOwner(), EntityEvent.POSTFRAME);
-	}
-	protected void DeleteWidget(MapConfiguration config)
-	{
-		ClearEventMask(GetOwner(), EntityEvent.POSTFRAME);
-	}
-	
-	protected CanvasWidgetCommand CreateLineDrawCommand()
-	{
-		LineDrawCommand ldc = new LineDrawCommand();
-		return ldc;
-	}
-	
-	protected void DrawVertices()
-	{
-		m_aCanvasCommands = {};
+		MapItem lastItem;
+		MapItem firstItem;
 		
-		m_aCanvasCommands.Insert(CreateLineDrawCommand());
-		
-		m_wCanvasWidget.SetDrawCommands(m_aCanvasCommands);
-	}
-	
-	protected bool IsVisible()
-	{
-		if (!m_drawLimit) return false;
-		if (!m_showToEveryone) {
-			Faction f = SCR_PlayerController.GetLocalControlledEntityFaction();
-			if (!f) return false;
-			if (!m_factionKeys.Contains(f.GetFactionKey())) return false;
+		foreach(vector point : points3D)
+		{
+			MapItem item =  mapEntity.CreateCustomMapItem();
+			item.SetBaseType(EMapDescriptorType.MDT_ICON);
+			item.SetImageDef("editor-camera");
+			item.SetPos(point[0],point[2]);
+			item.SetVisible(true);
+			markers.Insert(item);
+
+			MapDescriptorProps props = item.GetProps();
+			
+			if(lastItem)
+			{
+				MapLink link = item.LinkTo(lastItem);
+				MapLinkProps linkProps = link.GetMapLinkProps();
+				linkProps.SetLineColor(AOColor);
+				linkProps.SetLineWidth(AOLineWidth);
+			}
+			
+			if(!firstItem)
+				firstItem = item;
+			lastItem = item;
 		}
-		return true;
+		
+		MapLink link = lastItem.LinkTo(firstItem);
+		MapLinkProps linkProps = link.GetMapLinkProps();
+		
+		linkProps.SetLineColor(AOColor);
+		linkProps.SetLineWidth(AOLineWidth);
 	}
-	
-	**/
-	
+	*/
 }

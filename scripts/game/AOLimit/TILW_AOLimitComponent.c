@@ -5,7 +5,8 @@ class TILW_AOLimitComponentClass : ScriptComponentClass
 
 enum TILW_EIgnoreVehicles
 {
-	All,
+	
+	All = 1,
 	Air
 }
 
@@ -15,7 +16,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	protected float maxTimeOutsideAO;
 	
 	[Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)")]
-	protected ref array<string> factionKeys;
+	protected ref array<string> m_factionKeys;
 	
 	[Attribute("", UIWidgets.Auto, desc: "These vehicles are NOT affected by the AO limit")]
 	protected ref array<ResourceName> ignoreVehicles;
@@ -86,12 +87,13 @@ class TILW_AOLimitComponent : ScriptComponent
 		if(!faction)
 			return;
 		
-		if(!factionKeys && !factionKeys.Contains(faction.GetFactionKey()))
+		if(!m_factionKeys && !m_factionKeys.Contains(faction.GetFactionKey()))
 			return;
 
 		IEntity vehicle = CompartmentAccessComponent.GetVehicleIn(player);
 		if (vehicle)
 		{
+			Print("ignoreVehicleType = " + ignoreVehicleType);
 			VehicleHelicopterSimulation isAirVehicle;
 			if(ignoreVehicleType == TILW_EIgnoreVehicles.Air)
 				isAirVehicle = VehicleHelicopterSimulation.Cast(vehicle.FindComponent(VehicleHelicopterSimulation));
@@ -128,14 +130,10 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 		if(timer < 0)
 		{
-			SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(GetGame().GetPlayerController().GetControlledEntity());
-			if (!player)
-				return;
-			
-			Instigator insitgator = Instigator.CreateInstigator(player);
-
-			SCR_DamageManagerComponent damageManager = player.GetDamageManager();
-			damageManager.Kill(insitgator);
+			IEntity player = GetGame().GetPlayerController().GetControlledEntity();
+			CharacterControllerComponent characterController = CharacterControllerComponent.Cast(player.FindComponent(CharacterControllerComponent));
+			if (characterController)
+				characterController.ForceDeath();
 			
 			PlayerInsideAO();
 		}
@@ -170,7 +168,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
 	void RpcDo_SetFactions(array<string> factions)
 	{
-		factionKeys = factions;
+		m_factionKeys = factions;
 	}
 	
 	void SetPoints(array<vector> points)

@@ -42,9 +42,6 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 	protected override void EOnInit(IEntity owner)
 	{
-		if(RplSession.Mode() == RplMode.Dedicated)
-			return;
-
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(owner);
 		if (!pse) {
 			Print("TILW_AOLimitComponent | Owner entity (" + owner + ") is not a polyline!", LogLevel.WARNING);
@@ -59,6 +56,8 @@ class TILW_AOLimitComponent : ScriptComponent
 		for (int i = 0; i < points3D.Count(); i++) points3D[i] = pse.CoordToParent(points3D[i]);
 		SCR_Math2D.Get2DPolygon(points3D, points2D);
 		
+		if(RplSession.Mode() == RplMode.Dedicated)
+			return;
 		SetEventMask(owner, EntityEvent.FIXEDFRAME);
 	}
 	
@@ -162,6 +161,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 	void SetFactions(array<string> factions)
 	{
+		RpcDo_SetFactions(factions);
 		Rpc(RpcDo_SetFactions, factions);
 	}
 	
@@ -177,6 +177,7 @@ class TILW_AOLimitComponent : ScriptComponent
 			Print("TILW_AOLimitComponent | not enough points!", LogLevel.ERROR);
 			return;
 		}
+		RpcDo_SetPoints(points);
 		Rpc(RpcDo_SetPoints, points);
 	}
 	
@@ -185,6 +186,9 @@ class TILW_AOLimitComponent : ScriptComponent
 	{
 		SCR_Math2D.Get2DPolygon(points3D, points2D);
 		
+		if(RplSession.Mode() == RplMode.Dedicated)
+			return;
+
 		EntityEvent mask = GetEventMask();
 		if(mask != EntityEvent.FIXEDFRAME)
 			SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);

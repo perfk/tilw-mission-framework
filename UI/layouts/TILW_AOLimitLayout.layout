@@ -1,0 +1,99 @@
+FrameWidgetClass {
+ Name "rootFrame"
+ {
+  FrameWidgetClass "{63390C0C1FF81460}" {
+   Name "Frame0"
+   Slot FrameWidgetSlot "{63390C0C1FF8145C}" {
+    Anchor 0.5 0 0.5 0
+    PositionX 0
+    OffsetLeft 0
+    PositionY 200
+    OffsetTop 200
+    SizeX 100
+    OffsetRight -100
+    SizeY 30
+    OffsetBottom -230
+    Alignment 0.5 0.5
+    SizeToContent 1
+   }
+   {
+    ImageWidgetClass "{633923963629991E}" {
+     Name "Background"
+     Slot FrameWidgetSlot "{5EC651633FD7EA82}" {
+      PositionX 0
+      OffsetLeft 0
+      PositionY 0
+      OffsetTop 0
+      SizeX 160
+      OffsetRight -160
+      SizeY 66
+      OffsetBottom -66
+     }
+     Color 0.007 0.012 0.014 0.588
+     "Shadow Offset" 0.5 0.5
+    }
+    HorizontalLayoutWidgetClass "{63390C0EC87C1C4E}" {
+     Name "HorizontalLayout"
+     Slot FrameWidgetSlot "{63390C0EC87C1C38}" {
+      Anchor 0.5 0 0.5 0
+      OffsetLeft 0
+      PositionY 17.9
+      OffsetTop 17.9
+      SizeX 100
+      OffsetRight -100
+      SizeY 30
+      OffsetBottom -47.9
+      Alignment 0.5 0
+      SizeToContent 1
+     }
+     {
+      ImageWidgetClass "{63390C0E992863A4}" {
+       Name "Image"
+       Slot LayoutSlot "{63390C018114A61B}" {
+        HorizontalAlign 3
+        VerticalAlign 1
+        Padding 0 0 -18 0
+        SizeMode Fill
+        FillWeight 1
+       }
+       Texture "{46B08E1E4A34F452}UI/Textures/Nametags/NameTagsSource/death.edds"
+       Size 64 64
+      }
+      TextWidgetClass "{63390C0D95A8DFE5}" {
+       Name "Text"
+       Slot LayoutSlot "{63390C018114A5D6}" {
+        HorizontalAlign 3
+        VerticalAlign 1
+        Padding 0 0 24 0
+       }
+       Text "Return to AO"
+       "Font Size" 18
+       "Min Font Size" 18
+       FontProperties FontProperties "{63390C0F3BEA32B4}" {
+       }
+      }
+     }
+    }
+    TextWidgetClass "{63390C0D2F71617D}" {
+     Name "Timer"
+     Slot FrameWidgetSlot "{63390C0D2F716154}" {
+      Anchor 0.5 0 0.5 0
+      PositionX 0
+      OffsetLeft 0
+      PositionY 0
+      OffsetTop 0
+      SizeX 32.145
+      OffsetRight -32.145
+      SizeY -4.897
+      OffsetBottom 4.897
+      Alignment 0.5 0
+      SizeToContent 1
+     }
+     Text "00:000"
+     "Font Size" 36
+     "Min Font Size" 36
+    }
+   }
+  }
+ }
+}

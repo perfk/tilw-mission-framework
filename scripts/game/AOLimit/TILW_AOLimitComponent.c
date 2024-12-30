@@ -166,7 +166,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	}
 	
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
-	void RpcDo_SetFactions(array<string> factions)
+	protected void RpcDo_SetFactions(array<string> factions)
 	{
 		m_factionKeys = factions;
 	}
@@ -181,7 +181,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	}
 	
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
-	void RpcDo_SetPoints(array<vector> points)
+	protected void RpcDo_SetPoints(array<vector> points)
 	{
 		SCR_Math2D.Get2DPolygon(points3D, points2D);
 		

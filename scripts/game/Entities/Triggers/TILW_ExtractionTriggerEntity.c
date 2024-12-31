@@ -1,9 +1,9 @@
-[EntityEditorProps(category: "GameScripted/Triggers", description: "The TILW_ExfilTriggerEntity is a custom trigger designed to be used with the TILW_MissionFrameworkEntity. \nIt compares the number of local faction players to the number of global alive faction players.")]
-class TILW_ExfilTriggerEntityClass: TILW_BaseTriggerEntityClass
+[EntityEditorProps(category: "GameScripted/Triggers", description: "The ExtractionTriggerEntity is a custom trigger designed to be used with the TILW_MissionFrameworkEntity. \nIt compares the number of local faction players to the number of global alive faction players.")]
+class TILW_ExtractionTriggerEntityClass: TILW_BaseTriggerEntityClass
 {
 }
 
-class TILW_ExfilTriggerEntity : TILW_BaseTriggerEntity
+class TILW_ExtractionTriggerEntity : TILW_BaseTriggerEntity
 {
 	
 	// FILTER SETTINGS

@@ -1,5 +1,5 @@
 MetaFileClass {
- Name "{192ABD6B9232E064}Prefabs/Logic/TILW_ExfilTrigger.et"
+ Name "{192ABD6B9232E064}Prefabs/Logic/TILW_ExtractionTrigger.et"
  Configurations {
   EntityTemplateResourceClass PC {
   }

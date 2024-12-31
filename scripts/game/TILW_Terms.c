@@ -17,9 +17,9 @@ class TILW_BaseTerm
 	}
 }
 
-//! TILW_OperatorTerm adds an operand array to TILW_BaseTerm. Do not use this directly.
+//! TILW_OperationTerm adds an operand array to TILW_BaseTerm. Do not use this directly.
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Base Operation (NOT USEFUL)")]
-class TILW_OperatorTerm : TILW_BaseTerm
+class TILW_OperationTerm : TILW_BaseTerm
 {
 	[Attribute("", UIWidgets.Object, desc: "Operands used for the operation - either literals or sub-operations.")]
 	ref array<ref TILW_BaseTerm> m_operands;
@@ -28,7 +28,7 @@ class TILW_OperatorTerm : TILW_BaseTerm
 
 //! TILW_ConjunctionTerm returns true if all operands are true
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Conjunction (And/All)")]
-class TILW_ConjunctionTerm : TILW_OperatorTerm
+class TILW_ConjunctionTerm : TILW_OperationTerm
 {
 	override bool Calc()
 	{
@@ -42,7 +42,7 @@ class TILW_ConjunctionTerm : TILW_OperatorTerm
 
 //! TILW_DisjunctionTerm returns true if any operands (at least one) are true
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Disjunction (Or/Any)")]
-class TILW_DisjunctionTerm : TILW_OperatorTerm
+class TILW_DisjunctionTerm : TILW_OperationTerm
 {
 	override bool Calc()
 	{
@@ -56,7 +56,7 @@ class TILW_DisjunctionTerm : TILW_OperatorTerm
 
 //! TILW_MinjunctionTerm returns true if at least m_minTrue operands are true
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Minjunction (At least k)")]
-class TILW_MinjunctionTerm : TILW_OperatorTerm
+class TILW_MinjunctionTerm : TILW_OperationTerm
 {
 	[Attribute("1", UIWidgets.Auto, desc: "Minimum number of operands that must be true", params: "0 inf 1")]
 	protected int m_minTrue;
@@ -75,7 +75,7 @@ class TILW_MinjunctionTerm : TILW_OperatorTerm
 
 //! TILW_MaxjunctionTerm returns true if no more than m_maxTrue operands are true
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Maxjunction (At most k)")]
-class TILW_MaxjunctionTerm : TILW_OperatorTerm
+class TILW_MaxjunctionTerm : TILW_OperationTerm
 {
 	[Attribute("1", UIWidgets.Auto, desc: "Maximum number of operands that may be true", params: "0 inf 1")]
 	protected int m_maxTrue;
@@ -94,7 +94,7 @@ class TILW_MaxjunctionTerm : TILW_OperatorTerm
 
 //! TILW_MatchjunctionTerm returns true if exactly m_matchTrue operands are true
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Matchjunction (Exactly k)")]
-class TILW_MatchjunctionTerm : TILW_OperatorTerm
+class TILW_MatchjunctionTerm : TILW_OperationTerm
 {
 	[Attribute("1", UIWidgets.Auto, desc: "Exact number of operands that have to be true", params: "0 inf 1")]
 	protected int m_matchTrue;

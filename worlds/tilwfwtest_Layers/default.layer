@@ -6,6 +6,11 @@ $grp GenericEntity {
   coords 116.546 1 139.412
  }
 }
+TILW_ExfilTriggerEntity : "{192ABD6B9232E064}Prefabs/Logic/TILW_ExfilTrigger.et" {
+ coords 71.672 1 103.105
+ m_flagName "exf"
+ m_factionKey "US"
+}
 Vehicle uh : "{70BAEEFC2D3FEE64}Prefabs/Vehicles/Helicopters/UH1H/UH1H.et" {
  coords 90.342 1 116.614
 }

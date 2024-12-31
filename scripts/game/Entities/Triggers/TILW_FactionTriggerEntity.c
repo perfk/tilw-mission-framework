@@ -19,7 +19,7 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 	
 	// CONDITION SETTINGS
 	
-	[Attribute("", UIWidgets.Auto, "Key of the owner faction", category: "Trigger Condition")]
+	[Attribute("", UIWidgets.Auto, "Which faction can capture this trigger?", category: "Trigger Condition")]
 	protected string m_ownerFactionKey;
 	
 	[Attribute("1", UIWidgets.Auto, "How high/low the factions character share has to be", category: "Trigger Condition", params: "0 1 0.01")]

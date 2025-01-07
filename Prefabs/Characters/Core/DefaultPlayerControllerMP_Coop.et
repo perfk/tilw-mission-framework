@@ -5,7 +5,7 @@ SCR_PlayerController : "{225E51284CC95CFA}Prefabs/Characters/Core/DefaultPlayerC
    InfoDisplays {
     TILW_AOLimitDisplay "{633C23AD9607EBBD}" {
      m_LayoutPath "{FE519D23DC3CF06C}UI/layouts/TILW_AOLimitLayout.layout"
-     m_eLayer HIGH
+     m_eLayer ALWAYS_TOP
      m_bShowWhenCreated 0
     }
    }

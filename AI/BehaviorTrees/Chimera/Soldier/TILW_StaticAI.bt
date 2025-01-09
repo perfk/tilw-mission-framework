@@ -1,4 +1,4 @@
-BehaviorTree "{B12936F510077FED}AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.bt" {
+BehaviorTree "{1E81FF0F3EC49323}AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.bt" {
  Name "AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.bt"
  Nodes {
   RootNode Root {
@@ -377,7 +377,7 @@ BehaviorTree "{B12936F510077FED}AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.b
              PortName "lookPosition"
             }
            }
-           BehaviorTree "{CD721A24B48B7A04}AI/BehaviorTrees/Chimera/Soldier/TILW_ProcessAttack.bt"
+           BehaviorTree "{C7587E59FDD98F9F}AI/BehaviorTrees/Chimera/Soldier/TILW_ProcessAttack.bt"
           }
          }
          AbortType AbortChildrenBranch
@@ -455,15 +455,15 @@ BehaviorTree "{B12936F510077FED}AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.b
           }
           DecoTestVariable "Test Variable" {
            Name "Test Variable"
-           EditorPos 1729.5 479.25
+           EditorPos 1728 416
            Nodes {
             Parallel Parallel {
              Name "Parallel"
-             EditorPos 2048 656
+             EditorPos 2048 592
              Nodes {
               Sequence Sequence {
                Name "Sequence"
-               EditorPos 1888 720
+               EditorPos 1888 688
                Nodes {
                 Selector Selector {
                  Name "Sel: Look Type"
@@ -738,7 +738,7 @@ BehaviorTree "{B12936F510077FED}AI/BehaviorTrees/Chimera/Soldier/TILW_StaticAI.b
   }
   VariableReference foundEnemy {
    VariableType 3
-   EditorPos 1728 656
+   EditorPos 1728 608
    Group "{6162C1F23215E87C}"
   }
   VariableReference lookPosition {

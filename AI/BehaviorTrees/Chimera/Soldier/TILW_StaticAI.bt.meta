@@ -1,5 +1,5 @@
 MetaFileClass {
- Name "{B12936F510077FED}AI/BehaviorTrees/Chimera/Soldier/TILW_Attack_Default.bt"
+ Name "{1E81FF0F3EC49323}AI/BehaviorTrees/TILW_StaticAI.bt"
  Configurations {
   BehaviorTreeResourceClass PC {
   }

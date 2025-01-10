@@ -50,7 +50,7 @@ class TILW_BaseTriggerEntity : GenericEntity
 	[Attribute("", UIWidgets.Auto, "Set a flag when the condition becomes true (clear it when false)", category: "Trigger Effect")]
 	protected string m_flagName;
 	
-	[Attribute("0", UIWidgets.Auto, "Only invoke script events if the gamemode state is GAME (flags are still set, but not checked either way until game start).", category: "Trigger Effect")]
+	[Attribute("1", UIWidgets.Auto, "Only invoke SCRIPT events if the gamemode state is GAME (flags are still set, but not checked either way until game start - so mission events are not affected either way).", category: "Trigger Effect")]
 	protected bool m_eventsOnlyDuringGame;
 	
 	[Attribute("0", UIWidgets.Auto, "After the effect is first triggered, prevent the trigger from doing any further queries. \nThis also prevents the flag from potentially being cleared again.", category: "Trigger Effect")]

@@ -75,10 +75,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	}
 	
 	void RecheckConditions()
-	{
-		SCR_BaseGameMode gameMode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (gameMode.GetState() != SCR_EGameModeState.GAME) return;
-		
+	{	
 		foreach (TILW_MissionEvent mEvent : m_missionEvents) mEvent.EvalExpression();
 	}
 	
@@ -99,9 +96,10 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	
 	
-	// some public variables usable in custom mission scripts. you can add more using an entity script.
-	int mvar_counter = 0;
+	// some public variables usable in custom entity scripts. you can add more using a full entity script, these are just for convenience.
+	int mvar_integer = 0;
 	bool mvar_boolean = false;
+	string mvar_string = "";
 	
 	
 	// util variables
@@ -141,6 +139,8 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		if (!Replication.IsServer()) return; // MFE only runs on server
 		GetGame().GetCallqueue().Call(InsertListeners); // Insert listeners for player updates and game start
 		GetGame().GetCallqueue().Call(InitDefaultFlags); // Call, just to randomize time a little
+		
+		GetGame().GetCallqueue().CallLater(RecheckConditions, 10, false);
 	}
 	
 	override void EOnDeactivate(IEntity owner)
@@ -158,7 +158,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		// gamemode.GetOnPlayerKilled().Insert(PlayerUpdate);
 		gamemode.GetOnPlayerDeleted().Insert(PlayerUpdate);
 		gamemode.GetOnPlayerSpawned().Insert(PlayerUpdate);
-		gamemode.GetOnGameStateChange().Insert(GameModeStart);
+		gamemode.GetOnGameStateChange().Insert(GameStateChange);
 	}
 	
 	protected void RemoveListeners()
@@ -168,7 +168,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		// gamemode.GetOnPlayerKilled().Remove(PlayerUpdate);
 		gamemode.GetOnPlayerDeleted().Remove(PlayerUpdate);
 		gamemode.GetOnPlayerSpawned().Remove(PlayerUpdate);
-		gamemode.GetOnGameStart().Remove(GameModeStart);
+		gamemode.GetOnGameStart().Remove(GameStateChange);
 	}
 	
 	protected void InitDefaultFlags()
@@ -179,10 +179,9 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	// Gamemode Start
 	
-	protected void GameModeStart(SCR_EGameModeState state)
+	protected void GameStateChange(SCR_EGameModeState state)
 	{
-		if (state != SCR_EGameModeState.GAME) return;
-		RecheckConditions();
+		GetGame().GetCallqueue().CallLater(RecheckConditions, 10, false);
 	}
 	
 	void PlayerUpdate(int playerId, IEntity player)

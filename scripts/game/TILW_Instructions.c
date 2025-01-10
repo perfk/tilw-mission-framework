@@ -13,8 +13,14 @@ class TILW_MissionEvent
 	[Attribute("", UIWidgets.Object, desc: "Boolean expression defining under what conditions this event should occur. \nConsists of (true when): Literal (flag), Conjunction (ALL operands), Disjunction (ANY operand), Minjunction (MIN operands), Maxjunction (MAX operands).")]
 	ref TILW_BaseTerm m_condition;
 	
+	[Attribute("0", UIWidgets.Auto, desc: "Can this event already run before the briefing has ended (as opposed to just during the game phase)? \nIt is highly recommended to only use this with random (or no) flags in the condition, since many common flags will not be initialized yet.")];
+	bool m_pregameEvent;
+	
 	void EvalExpression()
 	{
+		SCR_BaseGameMode gm = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
+		if (gm.GetState() != SCR_EGameModeState.GAME && !m_pregameEvent) return;
+		
 		if (m_alreadyOccurred || !m_condition.Eval()) return;
 		m_alreadyOccurred = true;
 		Print("TILWMF | Running mission event: " + m_name, LogLevel.NORMAL);
@@ -345,5 +351,53 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 			default: return;
 		}
 		gm.TILW_SetFactionTicketCount(m_factionKey, num);
+	}
+}
+
+[BaseContainerProps(), BaseContainerCustomTitleField("m_factionKey")]
+class TILW_FactionVisibility
+{
+	[Attribute("", UIWidgets.Auto, desc: "Faction key to alter visibility of.")]
+	string m_factionKey;
+
+	[Attribute("", UIWidgets.Auto, desc: "Whether or not the map element should be visible to this faction.")]
+	bool m_visible;
+}
+
+class TILW_EditMapItemInstruction : TILW_BaseInstruction
+{
+	[Attribute("", UIWidgets.Auto, desc: "Names of the affected map marker or mission description entities.")]
+	protected ref array<string> m_itemNames;
+	
+	[Attribute("", UIWidgets.Auto, "Which factions the marker should be set to visible or not visible for.")]
+	protected ref array<ref TILW_FactionVisibility> m_factionVisibility;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Whether or not the marker should be visible to the empty faction.")]
+	protected bool m_visibleForEmpty;
+	
+	// If required, this could be extended with other properties like title, though only some are shared between marker and description
+	
+	override void Execute()
+	{
+		foreach (string itemName : m_itemNames)
+		{
+			IEntity itemEntity = GetGame().GetWorld().FindEntityByName(itemName);
+			if (!itemEntity) continue;
+			Managed m1 = itemEntity.FindComponent(PS_EditableMarkerComponent);
+			Managed m2 = itemEntity.FindComponent(PS_EditableMissionDescriptionComponent);
+			PS_EditableMarkerComponent c1;
+			PS_EditableMissionDescriptionComponent c2;
+			if (m1) c1 = PS_EditableMarkerComponent.Cast(m1);
+			if (m2) c2 = PS_EditableMissionDescriptionComponent.Cast(m2);
+			if (c1) c1.SetVisibleForEmptyFaction(m_visibleForEmpty);
+			if (c2) c2.SetDescriptionVisibleForEmpty(m_visibleForEmpty);
+			SCR_FactionManager factionManager = SCR_FactionManager.Cast(GetGame().GetFactionManager());
+			foreach (TILW_FactionVisibility fv : m_factionVisibility)
+			{
+				Faction f = factionManager.GetFactionByKey(fv.m_factionKey);
+				if (c1) c1.SetMarkerVisibleForFaction(f, fv.m_visible);
+				if (c2) c2.SetDescriptionVisibleForFaction(f, fv.m_visible);
+			}
+		}
 	}
 }

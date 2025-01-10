@@ -145,7 +145,7 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 	[Attribute("1", UIWidgets.Auto, desc: "Spawn Passengers", category: "Default Crew")]
 	protected bool m_spawnCargo;
 	
-	[Attribute("", UIWidgets.ResourceAssignArray, desc: "If defined, spawn the manually specified crew instead of the vehicles default characters, ignoring the checkboxes above. \nList of character prefabs, empty resources will become empty seats. \nCheck the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartments (e. g. BTR gunner) come afterwards.", category: "Crew", params: "et")]
+	[Attribute("", UIWidgets.ResourceAssignArray, desc: "If defined, fill seats with these characters instead of the vehicles default characters. \nList of character prefabs, empty resources will become empty seats. \nYou can check the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartsments (e. g. BTR gunner) come afterwards.", category: "Crew", params: "et")]
 	protected ref array<ResourceName> m_customCrew;
 	
 	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assinged after waypoint delay", category: "Waypoints")]

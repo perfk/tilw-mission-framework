@@ -12,7 +12,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	[Attribute("0", UIWidgets.Auto, desc: "Spawn Default Passengers", category: "Crew")]
 	protected bool m_spawnCargo;
 	
-	[Attribute("", UIWidgets.ResourceAssignArray, desc: "If defined, spawn the manually specified crew instead of the vehicles default characters, ignoring the checkboxes above. \nList of character prefabs, empty resources will become empty seats. \nCheck the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartsments (e. g. BTR gunner) come afterwards.", category: "Crew", params: "et")]
+	[Attribute("", UIWidgets.ResourceAssignArray, desc: "If defined, fill seats with these characters instead of the vehicles default characters. \nList of character prefabs, empty resources will become empty seats. \nYou can check the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartsments (e. g. BTR gunner) come afterwards.", category: "Crew", params: "et")]
 	protected ref array<ResourceName> m_customCrew;
 	
 	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assigned after delay", category: "Waypoints")]
@@ -54,7 +54,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	
 	static void SpawnCrew(array<BaseCompartmentSlot> slots, array<ECompartmentType> cTypes, array<ResourceName> characters, AIGroup mainGroup, AIGroup idleGroup, array<string> waypointNames = null, float wpDelay = 0, bool noTurretDismount = false, bool useIdleGroup = false)
 	{
-		if (slots.IsEmpty() || (characters.IsEmpty() && (!cTypes || cTypes.IsEmpty())))
+		if (slots.IsEmpty() || !characters) // No more slots, or characters have been exhausted (and array has been set to null)
 		{
 			// Finished spawning characters
 			GetGame().GetCallqueue().CallLater(AddWaypointsStatic, wpDelay * 1000, false, mainGroup, waypointNames);
@@ -63,11 +63,15 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		// Spawn character
 		IEntity ce;
-		if (characters && !characters.IsEmpty() && characters[0] != "") {
+		
+		
+		
+		bool isValidType = cTypes.IsEmpty() || cTypes.Contains(slots[0].GetType()); // no type restrictions, or this slots type allowed
+		if (!characters.IsEmpty() && characters[0] != "" && isValidType) { // character array not empty, use these
 			// Custom character
 			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET) ce = slots[0].SpawnCharacterInCompartment(characters[0], idleGroup);
 			else ce = slots[0].SpawnCharacterInCompartment(characters[0], mainGroup);
-		} else if (characters.IsEmpty() && cTypes.Contains(slots[0].GetType())) {
+		} else if (characters.IsEmpty() && isValidType) { // character array empty (but not null), use default characters
 			// Default character
 			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET) ce = slots[0].SpawnDefaultCharacterInCompartment(idleGroup);
 			else ce = slots[0].SpawnDefaultCharacterInCompartment(mainGroup);
@@ -84,7 +88,10 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		// Remove from spawn list
 		if (slots && !slots.IsEmpty()) slots.Remove(0);
-		if (characters && !characters.IsEmpty()) characters.Remove(0);
+		if (!characters.IsEmpty() && isValidType) { // if character from array was spawned, remove it
+			characters.Remove(0);
+			if (characters.IsEmpty()) characters = null; // if this was the last character, set to null as sign to stop
+		}
 		
 		// Queue up next character
 		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, characters, mainGroup, idleGroup, waypointNames, wpDelay, noTurretDismount, useIdleGroup);

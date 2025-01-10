@@ -11,7 +11,22 @@ $grp GenericEntity {
   coords 116.546 1 139.412
  }
 }
+Vehicle M1 : "{4A71F755A4513227}Prefabs/Vehicles/Wheeled/M998/M1025.et" {
+ components {
+  TILW_VehicleCrewComponent "{6454FC33205C5CD2}" {
+   m_spawnPilot 1
+   m_customCrew {
+    "{DCB41B3746FDD1BE}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_Rifleman.et" "{DCB41B3746FDD1BE}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_Rifleman.et"
+   }
+  }
+ }
+ coords 96.834 1 125.113
+}
 Vehicle uh : "{70BAEEFC2D3FEE64}Prefabs/Vehicles/Helicopters/UH1H/UH1H.et" {
+ components {
+  TILW_VehicleCrewComponent "{6454FC30E83A1AE0}" {
+  }
+ }
  coords 90.342 1 116.614
 }
 SCR_AIWaypoint : "{750A8D1695BD6998}Prefabs/AI/Waypoints/AIWaypoint_Move.et" {

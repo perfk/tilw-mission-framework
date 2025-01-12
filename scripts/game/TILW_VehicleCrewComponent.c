@@ -17,7 +17,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	
 	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assigned after delay", category: "Waypoints")]
 	protected ref array<string> m_waypointNames;
-	[Attribute("5", UIWidgets.Auto, desc: "After how many seconds to assign the waypoints", category: "Waypoints", params: "0 inf 0.1")]
+	[Attribute("5", UIWidgets.Auto, desc: "After how many seconds to assign the waypoints. \nThis timer starts counting right after spawning, and does not wait for briefing end! \nIf you want a delay that starts at briefing end, use a mission event with a spawn vehicle instruction!", category: "Waypoints", params: "0 inf 0.1")]
 	protected float m_waypointDelay;
 	
 	[Attribute("0", UIWidgets.Auto, desc: "If entity is a static turret, prevent the gunner from dismounting, even if unable to engage threats.", category: "Other")]
@@ -64,8 +64,6 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		// Spawn character
 		IEntity ce;
 		
-		
-		
 		bool isValidType = cTypes.IsEmpty() || cTypes.Contains(slots[0].GetType()); // no type restrictions, or this slots type allowed
 		if (!characters.IsEmpty() && characters[0] != "" && isValidType) { // character array not empty, use these
 			// Custom character
@@ -95,8 +93,6 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		// Queue up next character
 		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, characters, mainGroup, idleGroup, waypointNames, wpDelay, noTurretDismount, useIdleGroup);
-		
-		
 	}
 	
 	static void AddWaypointsStatic(AIGroup g, array<string> waypointNames)

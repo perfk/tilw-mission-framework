@@ -42,6 +42,8 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 	override bool AddEntity(IEntity e)
 	{
 		SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(e);
+		if (!cc) return true;
+		if (!cc.m_pFactionComponent) return true;
 		Faction f = cc.m_pFactionComponent.GetAffiliatedFaction();
 		if (!f) return true;
 		string fKey = f.GetFactionKey();

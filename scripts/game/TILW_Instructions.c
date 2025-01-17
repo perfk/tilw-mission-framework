@@ -364,6 +364,7 @@ class TILW_FactionVisibility
 	bool m_visible;
 }
 
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Edit map marker/description visibility")]
 class TILW_EditMapItemInstruction : TILW_BaseInstruction
 {
 	[Attribute("", UIWidgets.Auto, desc: "Names of the affected map marker or mission description entities.")]
@@ -385,18 +386,18 @@ class TILW_EditMapItemInstruction : TILW_BaseInstruction
 			if (!itemEntity) continue;
 			Managed m1 = itemEntity.FindComponent(PS_EditableMarkerComponent);
 			Managed m2 = itemEntity.FindComponent(PS_EditableMissionDescriptionComponent);
-			PS_EditableMarkerComponent c1;
-			PS_EditableMissionDescriptionComponent c2;
-			if (m1) c1 = PS_EditableMarkerComponent.Cast(m1);
-			if (m2) c2 = PS_EditableMissionDescriptionComponent.Cast(m2);
+			PS_ManualMarker c1;
+			PS_MissionDescription c2;
+			if (m1) c1 = PS_ManualMarker.Cast(itemEntity);
+			if (m2) c2 = PS_MissionDescription.Cast(itemEntity);
 			if (c1) c1.SetVisibleForEmptyFaction(m_visibleForEmpty);
-			if (c2) c2.SetDescriptionVisibleForEmpty(m_visibleForEmpty);
+			if (c2) c2.SetVisibleForEmptyFaction(m_visibleForEmpty);
 			SCR_FactionManager factionManager = SCR_FactionManager.Cast(GetGame().GetFactionManager());
 			foreach (TILW_FactionVisibility fv : m_factionVisibility)
 			{
 				Faction f = factionManager.GetFactionByKey(fv.m_factionKey);
-				if (c1) c1.SetMarkerVisibleForFaction(f, fv.m_visible);
-				if (c2) c2.SetDescriptionVisibleForFaction(f, fv.m_visible);
+				if (c1) c1.SetVisibleForFaction(f, fv.m_visible);
+				if (c2) c2.SetVisibleForFaction(f, fv.m_visible);
 			}
 		}
 	}

@@ -64,7 +64,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		// Spawn character
 		IEntity ce;
 		
-		bool isValidType = cTypes.IsEmpty() || cTypes.Contains(slots[0].GetType()); // no type restrictions, or this slots type allowed
+		bool isValidType = cTypes.Contains(slots[0].GetType()); // is this slots type allowed
 		if (!characters.IsEmpty() && characters[0] != "" && isValidType) { // character array not empty, use these
 			// Custom character
 			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET) ce = slots[0].SpawnCharacterInCompartment(characters[0], idleGroup);

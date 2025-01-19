@@ -336,6 +336,9 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 	[Attribute("0", UIWidgets.Auto, desc: "By what amount to affect the factions ticket count.", params: "0 inf")]
 	protected int m_amount;
 	
+	[Attribute("0", UIWidgets.Auto, desc: "If this operation made tickets available, try to respawn players who were previously sent into spectator.")]
+	bool m_allowSpecRespawn;
+	
 	override void Execute()
 	{
 		BaseGameMode bgm = GetGame().GetGameMode();
@@ -352,16 +355,19 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 		}
 		gm.TILW_SetFactionTicketCount(m_factionKey, num);
 		
-		PS_PlayableManager playableManager = PS_PlayableManager.GetInstance();
-		array<PS_PlayableComponent> playableComponents = playableManager.GetPlayablesSorted();
-		foreach (PS_PlayableComponent playable : playableComponents)
-		{
-			SCR_CharacterDamageManagerComponent damageManager = playable.GetCharacterDamageManagerComponent();
-			EDamageState damageState = damageManager.GetState();
-			if (damageState == EDamageState.DESTROYED)
+		if (m_allowSpecRespawn) {
+			PS_PlayableManager playableManager = PS_PlayableManager.GetInstance();
+			array<PS_PlayableComponent> playableComponents = playableManager.GetPlayablesSorted();
+			foreach (PS_PlayableComponent playable : playableComponents)
 			{
-				RplId playerId = playableManager.GetPlayerByPlayableRemembered(playable.GetId());
-				gm.TryRespawn(playable.GetId(), playerId);
+				SCR_CharacterDamageManagerComponent damageManager = playable.GetCharacterDamageManagerComponent();
+				EDamageState damageState = damageManager.GetState();
+				if (damageState == EDamageState.DESTROYED)
+				{
+					int playerId = playableManager.GetPlayerByPlayableRemembered(playable.GetId());
+					if (playerId == -1) continue;
+					gm.TryRespawn(playable.GetId(), playerId);
+				}
 			}
 		}
 	}

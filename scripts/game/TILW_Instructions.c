@@ -351,6 +351,19 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 			default: return;
 		}
 		gm.TILW_SetFactionTicketCount(m_factionKey, num);
+		
+		PS_PlayableManager playableManager = PS_PlayableManager.GetInstance();
+		array<PS_PlayableComponent> playableComponents = playableManager.GetPlayablesSorted();
+		foreach (PS_PlayableComponent playable : playableComponents)
+		{
+			SCR_CharacterDamageManagerComponent damageManager = playable.GetCharacterDamageManagerComponent();
+			EDamageState damageState = damageManager.GetState();
+			if (damageState == EDamageState.DESTROYED)
+			{
+				RplId playerId = playableManager.GetPlayerByPlayableRemembered(playable.GetId());
+				gm.TryRespawn(playable.GetId(), playerId);
+			}
+		}
 	}
 }
 

@@ -51,7 +51,10 @@ modded class TILW_MissionFrameworkEntity
 		ChimeraWorld world = GetGame().GetWorld();
 		WorldTimestamp currentTime = world.GetLocalTimestamp();
 		if(currentTime.LessEqual(m_startTime.PlusSeconds(120 * 1000)))
+		{
 			playerController.SetJIP(false);
+			m_JIP_List.Insert(player, uid);
+		}
 
 		if(m_denyJIPTime)
 		{

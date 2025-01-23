@@ -21,9 +21,9 @@ modded class TILW_MissionFrameworkEntity
 	[RplProp()]
 	WorldTimestamp m_startTime;
 	
-	override protected void GameModeStart(SCR_EGameModeState state)
+	override protected void GameStateChange(SCR_EGameModeState state)
 	{
-		super.GameModeStart(state);
+		super.GameStateChange(state);
 		
 		if(state == SCR_EGameModeState.GAME && !m_startTime)
 		{

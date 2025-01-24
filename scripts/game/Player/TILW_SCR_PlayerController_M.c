@@ -44,12 +44,13 @@ modded class SCR_PlayerController : PlayerController
 	
 	protected void CheckJIP()
 	{
-		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
+		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
+		if (!gm) return;
 		
-		if(!fw.m_startTime)
+		if(!gm.m_startTime)
 			return;
 		
-		switch (fw.m_eJIPState)
+		switch (gm.m_eJIPState)
 		{
 		    case EJIPState.Deny:
 		        return;
@@ -67,21 +68,23 @@ modded class SCR_PlayerController : PlayerController
 	
 	bool CanJIP()
 	{
-		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if(fw.m_eJIPState == EJIPState.Deny)
+		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
+		if (!gm) return false;
+		
+		if(gm.m_eJIPState == EJIPState.Deny)
 			return false;
 		
-		if(!fw.m_startTime)
+		if(!gm.m_startTime)
 			return false;
 		
 		ChimeraWorld world = GetGame().GetWorld();
 		WorldTimestamp currentTime = world.GetServerTimestamp();
-		if(currentTime.LessEqual(fw.m_startTime.PlusSeconds(120)))
+		if(currentTime.LessEqual(gm.m_startTime.PlusSeconds(120)))
 			return false;
 
-		if(fw.m_denyJIPTime)
+		if(gm.m_denyJIPTime)
 		{
-			if(currentTime.Greater(currentTime.PlusSeconds(fw.m_denyJIPTime)))
+			if(currentTime.Greater(currentTime.PlusSeconds(gm.m_denyJIPTime)))
 				return false;
 		}
 		
@@ -114,9 +117,11 @@ modded class SCR_PlayerController : PlayerController
 	[RplRpc(RplChannel.Reliable, RplRcver.Server)]
 	protected void RPC_AskTryJIP()
 	{
-		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if(fw)
-			fw.TryJIP(this);
+		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
+		if (!gm)
+			return;
+		if(gm)
+			gm.TryJIP(this);
 	}
 	
 	void SetJIP(bool isAllowed, string msg = string.Empty)
@@ -127,7 +132,7 @@ modded class SCR_PlayerController : PlayerController
 	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
 	protected void RPC_DoSetJIP(bool available, string msg)
 	{
-		Print("TILW_JIPPlayerComponent.RPC_DoSetJIP");
+		// Print("TILW_JIPPlayerComponent.RPC_DoSetJIP");
 
 		if(available)
 		{

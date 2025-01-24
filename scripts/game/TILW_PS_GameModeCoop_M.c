@@ -84,7 +84,7 @@ modded class PS_GameModeCoop : SCR_BaseGameMode
 		if(m_denyJIPTime)
 		{
 			if(currentTime.Greater(currentTime.PlusSeconds(m_denyJIPTime)))
-				playerController.SetJIP(false, "JIP deny time reached!");
+				return playerController.SetJIP(false, "JIP deny time reached!");
 		}
 		
 		SCR_PlayerControllerGroupComponent groupComp = SCR_PlayerControllerGroupComponent.GetPlayerControllerComponent(playerId);

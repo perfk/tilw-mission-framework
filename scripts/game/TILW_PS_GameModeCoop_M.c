@@ -78,6 +78,7 @@ modded class PS_GameModeCoop : SCR_BaseGameMode
 		{
 			playerController.SetJIP(false);
 			m_JIP_List.Insert(player, uid);
+			return playerController.SetJIP(false);
 		}
 
 		if(m_denyJIPTime)

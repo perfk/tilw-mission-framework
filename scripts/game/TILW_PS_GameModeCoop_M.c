@@ -74,7 +74,7 @@ modded class PS_GameModeCoop : SCR_BaseGameMode
 
 		ChimeraWorld world = GetGame().GetWorld();
 		WorldTimestamp currentTime = world.GetLocalTimestamp();
-		if(currentTime.LessEqual(m_startTime.PlusSeconds(120 * 1000)))
+		if(currentTime.LessEqual(m_startTime.PlusSeconds(120)))
 		{
 			playerController.SetJIP(false);
 			m_JIP_List.Insert(player, uid);

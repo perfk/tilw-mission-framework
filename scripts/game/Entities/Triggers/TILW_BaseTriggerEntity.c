@@ -14,8 +14,11 @@ class TILW_BaseTriggerEntity : GenericEntity
 	[Attribute("10", UIWidgets.Auto, "Period of query in seconds", category: "Trigger Query", params: "0.25 inf 0.25")]
 	protected float m_queryPeriod;
 	
-	[Attribute("1", UIWidgets.Auto, "Only run on the server.", category: "Trigger Query")]
+	[Attribute("1", UIWidgets.Auto, "Only run on the server", category: "Trigger Query")]
 	protected bool m_onlyOnServer;
+	
+	[Attribute("0", UIWidgets.Auto, "Skip the discovery query (which otherwise determines the initial state immediately, skipping capture iterations)", category: "Trigger Query")]
+	protected bool m_skipFirstQuery;
 	
 	
 	// FILTER SETTINGS
@@ -99,9 +102,12 @@ class TILW_BaseTriggerEntity : GenericEntity
 	override void EOnActivate(IEntity owner)
 	{
 		super.EOnActivate(owner);
-		// Call 5s later because AI may not have been spawned yet
-		// Better solution might be to only init the loop on game start - NOT. Since events could then be checked before all default queries are done.
-		if (!m_onlyOnServer || Replication.IsServer()) GetGame().GetCallqueue().CallLater(QueryLoop, 5 * 1000, false);
+		
+		if (m_onlyOnServer && !Replication.IsServer()) return;
+		if (m_skipFirstQuery) m_firstQuery = false;
+		
+		// Short delay because AI may not have been spawned yet
+		GetGame().GetCallqueue().CallLater(QueryLoop, 5 * 1000, false);
 	}
 	
 	// QueryLoop() is responsible for everything that happens within each query cycle
@@ -110,8 +116,8 @@ class TILW_BaseTriggerEntity : GenericEntity
 		RunQuery();
 		bool condition = EvaluateCondition();
 		
-		bool difference = (condition != m_lastResult);
-		bool shouldChange = difference && (m_currentIterations + 1 >= m_captureIterations) && !m_firstQuery; // changed
+		bool isDifferent = (condition != m_lastResult);
+		bool shouldChange = isDifferent && (m_currentIterations + 1 >= m_captureIterations) && !m_firstQuery; // changed
 		
 		// changed - when shouldChange is true, old is not new, and it's not the first query
 		// changing - when old is not new, but shouldChange is false
@@ -121,12 +127,12 @@ class TILW_BaseTriggerEntity : GenericEntity
 			// Result is changing now
 			UpdateProgressStatus(0 + 3 * (int) ( (m_lastResult && m_comparisonMode == 1) || (!m_lastResult && m_comparisonMode == 0) ) );
 			m_currentIterations = 0;
-		} else if (difference && !m_firstQuery) {
+		} else if (isDifferent && !m_firstQuery) {
 			// Result is not yet changing, but soon will if nothing changes
 			UpdateProgressStatus(1 + 3 * (int) ( (m_lastResult && m_comparisonMode == 1) || (!m_lastResult && m_comparisonMode == 0) ) );
 			m_currentIterations += 1;
 		}
-		if ((m_currentStatus == 1 || m_currentStatus == 4) && !difference) {
+		if ((m_currentStatus == 1 || m_currentStatus == 4) && !isDifferent) {
 			// Result is now not projected to change, but was before
 			UpdateProgressStatus(2 + 3 * (int) ( (m_lastResult && m_comparisonMode == 1) || (!m_lastResult && m_comparisonMode == 0) ) );
 			m_currentIterations = Math.Max(0,m_currentIterations-1);

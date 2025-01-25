@@ -1,0 +1,9 @@
+PolylineShapeEntity {
+ ID "6472B290267B96F9"
+ components {
+  TILW_CoverMapComponent "{64734633ABA43B46}" {
+  }
+ }
+ IsClosed 1
+ LineColor 1 0 0 1
+}

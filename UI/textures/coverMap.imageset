@@ -1,0 +1,18 @@
+ImageSetClass {
+ RefSize 50 50
+ Textures {
+  ImageSetTextureClass {
+   screenSize FHD
+   size 50 50
+   path "{1066755FC6C5032D}UI/textures/coverMap_ImageSet.edds"
+  }
+ }
+ Images {
+  ImageSetDefClass covermap {
+   Name "covermap"
+   Pos 7 7
+   Size 36 36
+   Flags 0
+  }
+ }
+}

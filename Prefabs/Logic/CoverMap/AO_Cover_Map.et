@@ -1,0 +1,14 @@
+PS_ManualMarker : "{CD85ADE9E0F54679}PrefabsEditable/Markers/EditableMarker.et" {
+ ID "5EDF4803173675DF"
+ coords 100 0 100
+ angleY 0
+ m_sImageSet "{1066755FC6C5032D}UI/textures/coverMap_ImageSet.edds"
+ m_sImageSetGlow ""
+ m_MarkerColor 0 0 0 1
+ m_sQuadName "covermap"
+ m_fWorldSize 100000
+ m_bVisibleForEmptyFaction 1
+ m_iZOrder -100
+ m_bShowForAnyFaction 1
+ m_bringToFront 0
+}

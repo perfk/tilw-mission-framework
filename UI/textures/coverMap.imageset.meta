@@ -1,0 +1,19 @@
+MetaFileClass {
+ Name "{6EE109A57EDD7C97}Textures/coverMap.imageset"
+ Configurations {
+  ImageSetResourceClass PC {
+  }
+  ImageSetResourceClass XBOX_ONE : PC {
+  }
+  ImageSetResourceClass XBOX_SERIES : PC {
+  }
+  ImageSetResourceClass PS4 : PC {
+  }
+  ImageSetResourceClass PS5 : PC {
+  }
+  ImageSetResourceClass HEADLESS : PC {
+  }
+  ImageSetResourceClass Xbox : PC {
+  }
+ }
+}

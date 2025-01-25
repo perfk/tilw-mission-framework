@@ -8,7 +8,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("20", UIWidgets.Auto, "After how many seconds outside of AO players are killed", params: "0 inf 0")]
 	protected float m_killTimer;
 	
-	[Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)")]
+	[RplProp(), Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)")]
 	protected ref array<string> m_factionKeys;
 	
 	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NEVER affected by the AO limit")]
@@ -17,12 +17,21 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25")]
 	protected float m_checkFrequency;
 	
+	[Attribute("", UIWidgets.ColorPicker, "The color of the AO.")]
+	protected ref Color m_AOLineColor;
+	
+	[Attribute("0", UIWidgets.Auto, "The drawn line width. 0 = not drawn", params: "0 inf 0")]
+	protected int m_AOLineWidth;
+	
+	[RplProp(onRplName: "OnPoints3DChange")]
 	protected ref array<vector> m_points3D = new array<vector>();
+
 	protected ref array<float> m_points2D = new array<float>();
+	
+	protected ref array<MapItem> m_markers = new array<MapItem>();
 	
 	protected float m_timeLeft = 0;
 	protected float m_checkDelta = 0;
-	
 	
 	protected bool m_wasOutsideAO = false;
 	
@@ -33,15 +42,15 @@ class TILW_AOLimitComponent : ScriptComponent
 		SetEventMask(ent, EntityEvent.INIT);
 	}
 	
-	protected override void EOnInit(IEntity owner)
+	protected override protected void EOnInit(IEntity owner)
 	{
-		PolylineShapeEntity pse = PolylineShapeEntity.Cast(owner);
+		PolylineShapeEntity pse = PolylineShapeEntity.Cast(GetOwner());
 		if (!pse) {
-			Print("TILW_AOLimitComponent | Owner entity (" + owner + ") is not a polyline!", LogLevel.WARNING);
+			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") is not a polyline!", LogLevel.WARNING);
 			return;
 		}
 		if (pse.GetPointCount() < 3) {
-			Print("TILW_AOLimitComponent | Owner entity (" + owner + ") does not have enough points!", LogLevel.WARNING);
+			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") does not have enough points!", LogLevel.WARNING);
 			return;
 		}
 
@@ -52,7 +61,8 @@ class TILW_AOLimitComponent : ScriptComponent
 		
 		if (RplSession.Mode() == RplMode.Dedicated) return;
 
-		SetEventMask(owner, EntityEvent.FIXEDFRAME);
+		SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);
+		DrawAO();
 	}
 	
 	protected override void EOnFixedFrame(IEntity owner, float timeSlice)
@@ -64,7 +74,7 @@ class TILW_AOLimitComponent : ScriptComponent
 		if (m_checkDelta > 0)
 			return;
 		m_checkDelta = m_checkFrequency;
-		
+
 		bool outsideAO = IsOutsideAO();
 		
 		if (m_wasOutsideAO && !outsideAO) // re-enters ao
@@ -74,7 +84,6 @@ class TILW_AOLimitComponent : ScriptComponent
 			PlayerLeavesAO();
 		
 		m_wasOutsideAO = outsideAO;
-	
 	}
 	
 	protected bool IsOutsideAO()
@@ -168,43 +177,47 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 	void SetFactions(array<string> factions)
 	{
-		RpcDo_SetFactions(factions);
-		Rpc(RpcDo_SetFactions, factions);
-	}
-	
-	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
-	protected void RpcDo_SetFactions(array<string> factions)
-	{
 		m_factionKeys = factions;
+		Replication.BumpMe();
 	}
-	
+
 	void SetPoints(array<vector> points)
 	{
 		if (points.Count() < 3) {
 			Print("TILW_AOLimitComponent | not enough points!", LogLevel.ERROR);
 			return;
 		}
-		RpcDo_SetPoints(points);
-		Rpc(RpcDo_SetPoints, points);
+		
+		m_points3D = points;
+		Replication.BumpMe();
+		
+		if(RplSession.Mode() != RplMode.Dedicated)
+			OnPoints3DChange();
 	}
 	
-	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
-	protected void RpcDo_SetPoints(array<vector> points)
+	protected void OnPoints3DChange()
 	{
-		m_points3D = points;
-		SCR_Math2D.Get2DPolygon(points, m_points2D);
+		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
 		
-		if(RplSession.Mode() == RplMode.Dedicated)
-			return;
-
 		EntityEvent mask = GetEventMask();
 		if(mask != EntityEvent.FIXEDFRAME)
 			SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);
+		
+		DrawAO();
 	}
 	
-	/*
-	void DrawAO()
+	protected void DrawAO()
 	{
+		if(!m_AOLineWidth)
+			return;
+		
+		foreach(MapItem marker : m_markers)
+		{
+			marker.SetVisible(false);
+			marker.Recycle();
+		}
+		m_markers.Clear();
+		
 		SCR_MapEntity mapEntity = SCR_MapEntity.GetMapInstance();
 		MapItem lastItem;
 		MapItem firstItem;
@@ -212,20 +225,21 @@ class TILW_AOLimitComponent : ScriptComponent
 		foreach(vector point : m_points3D)
 		{
 			MapItem item =  mapEntity.CreateCustomMapItem();
-			item.SetBaseType(EMapDescriptorType.MDT_ICON);
-			item.SetImageDef("editor-camera");
 			item.SetPos(point[0],point[2]);
 			item.SetVisible(true);
-			markers.Insert(item);
+			m_markers.Insert(item);
 
 			MapDescriptorProps props = item.GetProps();
+			props.SetFrontColor(Color.FromRGBA(0,0,0,0));
+			props.Activate(true);
+			item.SetProps(props);
 			
 			if(lastItem)
 			{
 				MapLink link = item.LinkTo(lastItem);
 				MapLinkProps linkProps = link.GetMapLinkProps();
-				linkProps.SetLineColor(AOColor);
-				linkProps.SetLineWidth(AOLineWidth);
+				linkProps.SetLineColor(m_AOLineColor);
+				linkProps.SetLineWidth(m_AOLineWidth);
 			}
 			
 			if(!firstItem)
@@ -236,8 +250,7 @@ class TILW_AOLimitComponent : ScriptComponent
 		MapLink link = lastItem.LinkTo(firstItem);
 		MapLinkProps linkProps = link.GetMapLinkProps();
 		
-		linkProps.SetLineColor(AOColor);
-		linkProps.SetLineWidth(AOLineWidth);
+		linkProps.SetLineColor(m_AOLineColor);
+		linkProps.SetLineWidth(m_AOLineWidth);
 	}
-	*/
 }

@@ -83,7 +83,11 @@ class TILW_AOLimitComponent : ScriptComponent
 		if (gamemode.GetState() != SCR_EGameModeState.GAME)
 			return false;
 
-		SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(GetGame().GetPlayerController().GetControlledEntity());
+		IEntity ce = GetGame().GetPlayerController().GetControlledEntity();
+		if (!ce)
+			return false;
+		
+		SCR_ChimeraCharacter player = SCR_ChimeraCharacter.Cast(ce);
 		if (!player)
 			return false;
 

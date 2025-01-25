@@ -17,13 +17,13 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	
 	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assigned after delay", category: "Waypoints")]
 	protected ref array<string> m_waypointNames;
-	[Attribute("5", UIWidgets.Auto, desc: "After how many seconds to assign the waypoints. \nThis timer starts counting right after spawning, and does not wait for briefing end! \nIf you want a delay that starts at briefing end, use a mission event with a spawn vehicle instruction!", category: "Waypoints", params: "0 inf 0.1")]
+	[Attribute("5", UIWidgets.Auto, desc: "After how many seconds to assign the waypoints. \nIMPORTANT: This timer starts counting right after spawning, and does not wait for briefing end! \nIf you want a delay that starts at briefing end, put a Wait WP before the actual one!", category: "Waypoints", params: "0 inf 0.1")]
 	protected float m_waypointDelay;
 	
 	[Attribute("0", UIWidgets.Auto, desc: "If entity is a static turret, prevent the gunner from dismounting, even if unable to engage threats.", category: "Other")]
 	protected bool m_noTurretDismount;
 	
-	[Attribute("0", UIWidgets.Auto, desc: "Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow the waypoint.", category: "Other")]
+	[Attribute("0", UIWidgets.Auto, desc: "Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow a higher priority waypoint.", category: "Other")]
 	protected bool m_idleGroup;
 	
 	

@@ -16,13 +16,15 @@ class TILW_MissionEvent
 	[Attribute("0", UIWidgets.Auto, desc: "Can this event already run before the briefing has ended (as opposed to just during the game phase)? \nIt is highly recommended to only use this with random (or no) flags in the condition, since many common flags will not be initialized yet.")];
 	bool m_pregameEvent;
 	
-	void EvalExpression()
+	void EvalExpression(bool ignoreCondition = false, bool ignoreOccurred = false)
 	{
 		SCR_BaseGameMode gm = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
 		if (gm.GetState() != SCR_EGameModeState.GAME && !m_pregameEvent) return;
 		
-		if (m_alreadyOccurred || !m_condition.Eval()) return;
+		if (m_alreadyOccurred && !ignoreOccurred) return;
+		if (!m_condition.Eval() && !ignoreCondition) return;
 		m_alreadyOccurred = true;
+		
 		Print("TILWMF | Running mission event: " + m_name, LogLevel.NORMAL);
 		foreach (TILW_BaseInstruction instruction : m_instructions) GetGame().GetCallqueue().CallLater(instruction.Execute, instruction.m_executionDelay * 1000, false, instruction);
 	}
@@ -415,5 +417,23 @@ class TILW_EditMapItemInstruction : TILW_BaseInstruction
 				if (c2) c2.SetVisibleForFaction(f, fv.m_visible);
 			}
 		}
+	}
+}
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Run Mission Events")]
+class TILW_RunEventsInstruction : TILW_BaseInstruction
+{
+	[Attribute("", UIWidgets.Auto, desc: "Names of mission events to run - after the delay, these events will be executed, regardless of their conditions.")]
+	protected ref array<string> m_eventNames;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "If true, even run events that already occured previously.")]
+	protected bool m_allowRerun;
+	
+	override void Execute()
+	{
+		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
+		if (!fw || !m_eventNames) return;
+		foreach (TILW_MissionEvent me : fw.m_missionEvents)
+			if (m_eventNames.Contains(me.m_name)) me.EvalExpression(true, m_allowRerun);
 	}
 }

@@ -196,6 +196,8 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	ref map<string, int> m_curAliveFactionPlayers = new map<string, int>();
 	ref map<string, int> m_maxAliveFactionPlayers = new map<string, int>();
+	ref map<string, int> m_factionAILifes = new map<string, int>();
+	ref map<string, int> m_factionAIDeaths = new map<string, int>();
 	
 	protected void RecountPlayers()
 	{
@@ -260,6 +262,39 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 }
 
+//! TILW_BaseCasualtyFlag is the base class for various player / AI casualty flags
+[BaseContainerProps(), BaseContainerCustomStringTitleField("NOT USEFUL")]
+class TILW_BaseCasualtyFlag
+{
+	void Evaluate();
+}
+
+// FactionCasualtyFlag, AICasualtyFlag, PlayerCasualtyFlag
+[BaseContainerProps(), BaseContainerCustomStringTitleField("FactionAIKilled Flag")]
+class TILW_FactionAIKilledFlag : TILW_BaseCasualtyFlag
+{
+	[Attribute("", UIWidgets.Auto, desc: "Flag to be set when the faction reaches the given casualty ratio, or to be cleared when it's below. Only AI is taken into account.")]
+	protected string m_flagName;
+	
+	[Attribute("", UIWidgets.Auto, desc: "Key of examined faction")]
+	protected string m_factionKey;
+	
+	[Attribute("1", UIWidgets.Auto, desc: "When the faction reaches/exceeds this casualty rate, the flag is set. \nTo be precise, when the current number of alive players divided by the historic maximum of concurrently alive players reaches this threshold. \nFor example, if the ratio is 0.9, the flag is set after 90% have been killed.", params: "0 1 0.01")]
+	protected float m_casualtyRatio;
+	
+	override void Evaluate()
+	{
+		return;
+		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
+		if (gamemode.GetState() != SCR_EGameModeState.GAME) return;
+		
+		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
+		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey)) return;
+		
+		//if (mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_factionAILifes.Get(m_factionKey) * (1 - m_casualtyRatio)) mfe.SetMissionFlag(m_flagName);
+		else mfe.ClearMissionFlag(m_flagName);
+	}
+}
 
 [BaseContainerProps(), BaseContainerCustomStringTitleField("FactionPlayersKilled Flag")]
 class TILW_FactionPlayersKilledFlag
@@ -343,7 +378,7 @@ class TILW_FlagSampling: TILW_BaseRandomFlag
 	}
 }
 
-
+// Unused
 class TILW_FactionRatioFlag
 {
 	[Attribute("", UIWidgets.Auto, desc: "Flag to be set/cleared when comparison returns true/false.")]
@@ -382,8 +417,6 @@ typedef ScriptInvokerBase<TILW_ScriptInvokerStringBoolMethod> TILW_ScriptInvoker
 
 // List of things I may still work on:
 // - Better notifications
-// - Runtime displayed trigger (very optional)
 // - Drawn AO Limit
 // - Polyline triggers
-// - Trigger which compares faction players in trigger to total amount of faction players
 // - Entity Spawners

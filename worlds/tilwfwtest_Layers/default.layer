@@ -18,6 +18,10 @@ Vehicle M1 : "{4A71F755A4513227}Prefabs/Vehicles/Wheeled/M998/M1025.et" {
    m_customCrew {
     "{DCB41B3746FDD1BE}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_Rifleman.et" "{DCB41B3746FDD1BE}Prefabs/Characters/Factions/OPFOR/USSR_Army/Character_USSR_Rifleman.et"
    }
+   m_waypointNames {
+    "wpm"
+   }
+   m_waypointDelay 10
   }
  }
  coords 96.834 1 125.113
@@ -29,7 +33,7 @@ Vehicle uh : "{70BAEEFC2D3FEE64}Prefabs/Vehicles/Helicopters/UH1H/UH1H.et" {
  }
  coords 90.342 1 116.614
 }
-SCR_AIWaypoint : "{750A8D1695BD6998}Prefabs/AI/Waypoints/AIWaypoint_Move.et" {
+SCR_AIWaypoint wpm : "{750A8D1695BD6998}Prefabs/AI/Waypoints/AIWaypoint_Move.et" {
  coords 61.409 1 138.27
 }
 SCR_ChimeraCharacter : "{84029128FA6F6BB9}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_GL.et" {
@@ -94,7 +98,4 @@ TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramewor
    m_factionKey "US"
   }
  }
-}
-GenericEntity ent : "{CFB893B8084ECD2B}Prefabs/Props/Furniture/Armchair_01.et" {
- coords 134.453 1 133.103
 }

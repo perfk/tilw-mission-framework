@@ -16,8 +16,8 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NEVER affected by the AO limit", category: "Logic")]
 	protected ref array<ResourceName> m_ignoredVehicles;
 	
-	[Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25", category: "Logic")]
-	protected float m_checkFrequency;
+	// [Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25", category: "Logic")]
+	protected float m_checkFrequency = 1;
 	
 	
 	// Visualization
@@ -31,7 +31,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("1", UIWidgets.Auto, "If this AO limit only affects certain factions, use the faction color of the first one instead.", category: "Visualization")]
 	protected bool m_useFactionColor;
 	
-	[Attribute("4", UIWidgets.Auto, "Width of the AO limit line.", params: "1 inf 0", category: "Visualization")]
+	[Attribute("3", UIWidgets.Auto, "Width of the AO limit line.", params: "1 inf 0", category: "Visualization")]
 	protected int m_lineWidth;
 	
 	
@@ -255,6 +255,9 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 	protected void DrawAO()
 	{
+		if (RplSession.Mode() == RplMode.Dedicated)
+			return;
+		
 		foreach (MapItem marker : m_markers)
 		{
 			marker.SetVisible(false);

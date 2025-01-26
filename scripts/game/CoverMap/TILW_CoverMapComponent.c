@@ -36,7 +36,7 @@ class TILW_CoverMapComponent : ScriptComponent
 		GetGame().GetCallqueue().CallLater(CenterMap, 2500, false, m_center, m_radius * 2);
 	}
 	
-	void CenterMap(vector position, float mapHeight)
+	protected void CenterMap(vector position, float mapHeight)
 	{
 		SCR_MapEntity mapEntity = SCR_MapEntity.GetMapInstance();
 		if(!mapEntity || !mapEntity.IsOpen())
@@ -49,7 +49,7 @@ class TILW_CoverMapComponent : ScriptComponent
 		mapEntity.ZoomPanSmooth(screenHeight / mapHeight, position[0], position[2], 0);
 	}
 	
-	void SetupCoverMap(array<vector> points)
+	protected void SetupCoverMap(array<vector> points)
 	{
 		foreach (vector point : points)
 		{
@@ -83,7 +83,7 @@ class TILW_CoverMapComponent : ScriptComponent
 		}
 	}
 
-	void SpawnMarker(vector positon, vector direction)
+	protected void SpawnMarker(vector positon, vector direction)
 	{
 		float radius = 100000 / 2;
 		
@@ -96,58 +96,4 @@ class TILW_CoverMapComponent : ScriptComponent
 
 		IEntity marker = GetGame().SpawnEntityPrefab(resource, null, spawnParams);
 	}
-<<<<<<< HEAD
 }
-=======
-}
-
-modded class PS_ManualMarkerComponent
-{
-	bool m_bringToFront = true;
-	
-	override bool OnMouseEnter(Widget w, int x, int y)
-	{
-		m_iZOrder = m_wRoot.GetZOrder();
-		if (m_bringToFront) m_wRoot.SetZOrder(10000);
-		if (m_bHasGlow) m_wMarkerIconGlow.SetVisible(true);
-		if (m_sDescription != "") m_wDescriptionPanel.SetVisible(true);
-		
-		return true;
-	}
-}
-
-modded class PS_ManualMarker
-{
-	[Attribute("true")]
-	protected bool m_bringToFront;
-	
-	override void CreateMapWidget(MapConfiguration mapConfig)
-	{
-		// If marker already exists ignore
-		if (m_wRoot)
-			return;
-		
-		// Faction visibility check
-		if (!IsCurrentFactionVisibility())
-			return;
-		
-		// Get map frame
-		Widget mapFrame = m_MapEntity.GetMapMenuRoot().FindAnyWidget(SCR_MapConstants.MAP_FRAME_NAME);
-		if (!mapFrame) mapFrame = m_MapEntity.GetMapMenuRoot();
-		if (!mapFrame) return; // Somethig gone wrong
-		
-		// Create and init marker
-		m_wRoot = GetGame().GetWorkspace().CreateWidgets(m_sMarkerPrefab, mapFrame);
-		m_wRoot.SetZOrder(m_iZOrder);
-		m_hManualMarkerComponent = PS_ManualMarkerComponent.Cast(m_wRoot.FindHandler(PS_ManualMarkerComponent));
-		m_hManualMarkerComponent.SetImage(m_sImageSet, m_sQuadName);
-		m_hManualMarkerComponent.SetImageGlow(m_sImageSetGlow, m_sQuadName);
-		m_hManualMarkerComponent.SetDescription(m_sDescription);
-		m_hManualMarkerComponent.SetColor(m_MarkerColor);
-		m_hManualMarkerComponent.OnMouseLeave(null, null, 0, 0);
-		m_hManualMarkerComponent.m_bringToFront = m_bringToFront;
-		// Enable every frame updating
-		SetEventMask(EntityEvent.POSTFRAME);
-	}
-}
->>>>>>> 2717aedb46a782ea83ce9d4275aff1eae70e8f1a

@@ -5,23 +5,36 @@ class TILW_AOLimitComponentClass : ScriptComponentClass
 
 class TILW_AOLimitComponent : ScriptComponent
 {
-	[Attribute("20", UIWidgets.Auto, "After how many seconds outside of AO players are killed", params: "0 inf 0")]
+	// Logic
+	
+	[Attribute("20", UIWidgets.Auto, "After how many seconds outside of AO players are killed", params: "0 inf 0", category: "Logic")]
 	protected float m_killTimer;
 	
-	[RplProp(), Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)")]
+	[RplProp(onRplName: "DrawAO"), Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)", category: "Logic")]
 	protected ref array<string> m_factionKeys;
 	
-	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NEVER affected by the AO limit")]
+	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NEVER affected by the AO limit", category: "Logic")]
 	protected ref array<ResourceName> m_ignoredVehicles;
 	
-	[Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25")]
+	[Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25", category: "Logic")]
 	protected float m_checkFrequency;
 	
-	[Attribute("", UIWidgets.ColorPicker, "The color of the AO.")]
-	protected ref Color m_AOLineColor;
 	
-	[Attribute("0", UIWidgets.Auto, "The drawn line width. 0 = not drawn", params: "0 inf 0")]
-	protected int m_AOLineWidth;
+	// Visualization
+	
+	[Attribute("2", UIWidgets.ComboBox, "Who can view the AO limit (everyone, affected factions, noone)", enums: ParamEnumArray.FromEnum(TILW_EVisibilityMode), category: "Visualization")]
+	protected TILW_EVisibilityMode m_visibility;
+	
+	[Attribute("0 0 0 1", UIWidgets.ColorPicker, "The default color of the drawn AO limit line.", category: "Visualization")]
+	protected ref Color m_defaultColor;
+	
+	[Attribute("1", UIWidgets.Auto, "If this AO limit only affects certain factions, use the faction color of the first one instead.", category: "Visualization")]
+	protected bool m_useFactionColor;
+	
+	[Attribute("4", UIWidgets.Auto, "Width of the AO limit line.", params: "1 inf 0", category: "Visualization")]
+	protected int m_lineWidth;
+	
+	
 	
 	[RplProp(onRplName: "OnPoints3DChange")]
 	protected ref array<vector> m_points3D = new array<vector>();
@@ -63,6 +76,24 @@ class TILW_AOLimitComponent : ScriptComponent
 
 		SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);
 		DrawAO();
+		
+		if (m_visibility == TILW_EVisibilityMode.FACTION)
+		{
+			PS_PlayableManager pm = PS_PlayableManager.GetInstance();
+			pm.GetOnFactionChange().Insert(FactionChange);
+		}
+	}
+	
+	void FactionChange(int playerId, FactionKey factionKey, FactionKey factionKeyOld)
+	{
+		if (m_factionKeys.IsEmpty() || m_visibility != TILW_EVisibilityMode.FACTION)
+			return;
+		PlayerController pc = GetGame().GetPlayerController();
+		if (!pc || pc.GetPlayerId() != playerId)
+			return;
+		if (factionKey == factionKeyOld || m_factionKeys.Contains(factionKey) == m_factionKeys.Contains(factionKeyOld))
+			return;
+		DrawAO();
 	}
 	
 	protected override void EOnFixedFrame(IEntity owner, float timeSlice)
@@ -91,7 +122,29 @@ class TILW_AOLimitComponent : ScriptComponent
 		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
 		if (gamemode.GetState() != SCR_EGameModeState.GAME)
 			return false;
-
+		
+		if (!IsPlayerAffected())
+			return false;
+		
+		IEntity ce = GetGame().GetPlayerController().GetControlledEntity();
+		vector playerPos = ce.GetOrigin();
+		bool inPolygon = Math2D.IsPointInPolygon(m_points2D, playerPos[0], playerPos[2]);
+		if (inPolygon)
+			return false;
+		
+		IEntity ve = CompartmentAccessComponent.GetVehicleIn(ce);
+		if (ve && IsVehicleIgnored(ve))
+			return false;
+		
+		return true;
+	}
+	
+	protected bool IsPlayerAffected()
+	{
+		PlayerController pc = GetGame().GetPlayerController();
+		if (!pc)
+			return false;
+		
 		IEntity ce = GetGame().GetPlayerController().GetControlledEntity();
 		if (!ce)
 			return false;
@@ -111,15 +164,6 @@ class TILW_AOLimitComponent : ScriptComponent
 			return false;
 		
 		if (!m_factionKeys.IsEmpty() && !m_factionKeys.Contains(faction.GetFactionKey()))
-			return false;
-		
-		vector playerPos = player.GetOrigin();
-		bool inPolygon = Math2D.IsPointInPolygon(m_points2D, playerPos[0], playerPos[2]);
-		if (inPolygon)
-			return false;
-		
-		IEntity ve = CompartmentAccessComponent.GetVehicleIn(player);
-		if (ve && IsVehicleIgnored(ve))
 			return false;
 		
 		return true;
@@ -179,6 +223,9 @@ class TILW_AOLimitComponent : ScriptComponent
 	{
 		m_factionKeys = factions;
 		Replication.BumpMe();
+		
+		if(RplSession.Mode() != RplMode.Dedicated)
+			DrawAO();
 	}
 
 	void SetPoints(array<vector> points)
@@ -208,19 +255,37 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 	protected void DrawAO()
 	{
-		if(!m_AOLineWidth)
-			return;
-		
-		foreach(MapItem marker : m_markers)
+		foreach (MapItem marker : m_markers)
 		{
 			marker.SetVisible(false);
 			marker.Recycle();
 		}
 		m_markers.Clear();
 		
+		switch (m_visibility)
+		{
+			case TILW_EVisibilityMode.ALL:
+				break;
+			case TILW_EVisibilityMode.FACTION:
+				PS_PlayableManager pm = PS_PlayableManager.GetInstance();
+				PlayerController pc = GetGame().GetPlayerController();
+				if (pm && pc && m_factionKeys.Contains(pm.GetPlayerFactionKey(pc.GetPlayerId())))
+					break;
+				else
+					return;
+			case TILW_EVisibilityMode.NONE:
+				return;
+			default:
+				break;
+		}
+		
 		SCR_MapEntity mapEntity = SCR_MapEntity.GetMapInstance();
 		MapItem lastItem;
 		MapItem firstItem;
+		
+		Color c = m_defaultColor;
+		if (m_useFactionColor && !m_factionKeys.IsEmpty())
+			c = GetGame().GetFactionManager().GetFactionByKey(m_factionKeys[0]).GetFactionColor();
 		
 		foreach(vector point : m_points3D)
 		{
@@ -238,8 +303,9 @@ class TILW_AOLimitComponent : ScriptComponent
 			{
 				MapLink link = item.LinkTo(lastItem);
 				MapLinkProps linkProps = link.GetMapLinkProps();
-				linkProps.SetLineColor(m_AOLineColor);
-				linkProps.SetLineWidth(m_AOLineWidth);
+				
+				linkProps.SetLineColor(c);
+				linkProps.SetLineWidth(m_lineWidth);
 			}
 			
 			if(!firstItem)
@@ -250,7 +316,14 @@ class TILW_AOLimitComponent : ScriptComponent
 		MapLink link = lastItem.LinkTo(firstItem);
 		MapLinkProps linkProps = link.GetMapLinkProps();
 		
-		linkProps.SetLineColor(m_AOLineColor);
-		linkProps.SetLineWidth(m_AOLineWidth);
+		linkProps.SetLineColor(c);
+		linkProps.SetLineWidth(m_lineWidth);
 	}
+}
+
+enum TILW_EVisibilityMode
+{
+	ALL = 0,
+	FACTION = 1,
+	NONE = 2
 }

@@ -2,7 +2,6 @@ PolylineShapeEntity {
  ID "621761787151A879"
  components {
   TILW_AOLimitComponent "{6217617AC21DEB7B}" {
-   m_AOLineColor 1 0 0 1
   }
   TILW_CoverMapComponent "{6473480FCAB7760B}" {
    Enabled 0

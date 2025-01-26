@@ -16,7 +16,7 @@ class TILW_CoverMapComponent : ScriptComponent
 		SetEventMask(ent, EntityEvent.INIT);
 	}
 	
-	protected override protected void EOnInit(IEntity owner)
+	protected override void EOnInit(IEntity owner)
 	{
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(owner);
 		if (!pse) {
@@ -39,9 +39,11 @@ class TILW_CoverMapComponent : ScriptComponent
 	void CenterMap(vector position, float mapHeight)
 	{
 		SCR_MapEntity mapEntity = SCR_MapEntity.GetMapInstance();
-		CanvasWidget widget = mapEntity.GetMapWidget();
+		if(!mapEntity || !mapEntity.IsOpen())
+			return;
 		
 		float screenWidth, screenHeight;
+		CanvasWidget widget = mapEntity.GetMapWidget();
 		widget.GetScreenSize(screenWidth, screenHeight);
 
 		mapEntity.ZoomPanSmooth(screenHeight / mapHeight, position[0], position[2], 0);
@@ -49,19 +51,19 @@ class TILW_CoverMapComponent : ScriptComponent
 	
 	void SetupCoverMap(array<vector> points)
 	{
-	    foreach (vector point : points)
-	    {
-	        m_center += point;
-	    }
+		foreach (vector point : points)
+		{
+			m_center += point;
+		}
 	
-	    m_center /= points.Count();
+		m_center /= points.Count();
 		
 		foreach (vector point : points)
-	    {
+		{
 			float distance = vector.Distance(m_center, point);
-	        if (distance > m_radius)
+	        	if (distance > m_radius)
 	        	m_radius = distance;
-	    }
+		}
 		
 		array<vector> directions = {
 		    Vector(-1, 0, 0), // Left
@@ -94,6 +96,9 @@ class TILW_CoverMapComponent : ScriptComponent
 
 		IEntity marker = GetGame().SpawnEntityPrefab(resource, null, spawnParams);
 	}
+<<<<<<< HEAD
+}
+=======
 }
 
 modded class PS_ManualMarkerComponent
@@ -145,3 +150,4 @@ modded class PS_ManualMarker
 		SetEventMask(EntityEvent.POSTFRAME);
 	}
 }
+>>>>>>> 2717aedb46a782ea83ce9d4275aff1eae70e8f1a

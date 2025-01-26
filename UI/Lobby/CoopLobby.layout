@@ -1,0 +1,107 @@
+FrameWidgetClass {
+ {
+  OverlayWidgetClass "{5D6D11E7CBA51223}" {
+   Prefab "{5D6D11E7CBA51223}"
+   {
+    VerticalLayoutWidgetClass "{5D6D00D805E13F99}" {
+     Prefab "{5D6D00D805E13F99}"
+     {
+      FrameWidgetClass "{5D6D1414CC52BBCE}" {
+       Prefab "{5D6D1414CC52BBCE}"
+       {
+        HorizontalLayoutWidgetClass "{5D6D00D78BA644A5}" {
+         Prefab "{5D6D00D78BA644A5}"
+         {
+          FrameWidgetClass "{5D6D1415C09A4316}" {
+           Prefab "{5D6D1415C09A4316}"
+           {
+            OverlayWidgetClass "{5D6F149FE4E8E67C}" {
+             Prefab "{5D6F149FE4E8E67C}"
+             {
+              TextWidgetClass "{64744331AD84E1B5}" {
+               Name "RatioHeader"
+               Slot OverlayWidgetSlot "{5D6F14918D6DE88A}" {
+                HorizontalAlign 0
+                Padding 8 28 0 0
+               }
+               Clipping False
+               Text "Ratio"
+               "Font Size" 36
+               "Min Font Size" 36
+               "Horizontal Alignment" Center
+               "Vertical Alignment" Center
+              }
+              TextWidgetClass "{5D6D1415C09A4317}" {
+               Prefab "{5D6D1415C09A4317}"
+               Slot OverlayWidgetSlot "{5D6F14918D6DE88A}" {
+                HorizontalAlign 2
+                Padding 4 28 132 0
+               }
+              }
+             }
+            }
+            OverlayWidgetClass "{64744331D4D6E4ED}" {
+             Name "OverlayRatioCounter"
+             Slot FrameWidgetSlot "{64745037A85E49F8}" {
+              PositionX 90.2
+              OffsetLeft 90.2
+              PositionY 79.471
+              OffsetTop 79.5
+              SizeX 145
+              OffsetRight -235.2
+              SizeY 40
+              OffsetBottom -119.5
+             }
+             {
+              PanelWidgetClass "{64744331D4D6E4EA}" {
+               Name "PanelRatioCounter"
+               Slot OverlayWidgetSlot "{64744331D4D6E4A9}" {
+               }
+               Color 0 0 0 0.25
+               {
+                TextWidgetClass "{64744331D4D6E4EB}" {
+                 Name "RatioCounter"
+                 Slot FrameWidgetSlot "{64744331C156D713}" {
+                  PositionX 0
+                  OffsetLeft 0
+                  PositionY 0
+                  OffsetTop 0
+                  SizeX 100
+                  OffsetRight -100
+                  SizeY 30
+                  OffsetBottom -30
+                  SizeToContent 1
+                 }
+                 Text ""
+                 "Font Size" 26
+                 "Min Font Size" 14
+                 "Horizontal Alignment" Center
+                 "Vertical Alignment" Center
+                 Wrap 1
+                }
+               }
+              }
+             }
+            }
+            OverlayWidgetClass "{60DD09FA511FB2E9}" {
+             Prefab "{60DD09FA511FB2E9}"
+             Slot FrameWidgetSlot "{60DD09FA60C60E28}" {
+              PositionX 330
+              OffsetLeft 330
+              OffsetTop 79.5
+              OffsetRight -492
+              OffsetBottom -119.5
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

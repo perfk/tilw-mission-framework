@@ -42,7 +42,7 @@ class TILW_AOLimitComponent : ScriptComponent
 		SetEventMask(ent, EntityEvent.INIT);
 	}
 	
-	protected override protected void EOnInit(IEntity owner)
+	protected override void EOnInit(IEntity owner)
 	{
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(GetOwner());
 		if (!pse) {

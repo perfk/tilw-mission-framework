@@ -79,6 +79,15 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		foreach (TILW_MissionEvent mEvent : m_missionEvents) mEvent.EvalExpression();
 	}
 	
+	void SetPlayersKilledFlags(array<ref TILW_FactionPlayersKilledFlag> factionPlayersKilledFlags)
+	{
+		m_factionPlayersKilledFlags = factionPlayersKilledFlags;
+	}
+	
+	void SetMissionEvents(array<ref TILW_MissionEvent> missionEvents)
+	{
+		m_missionEvents = missionEvents;
+	}
 	
 	// events
 	

@@ -15,6 +15,11 @@ class TILW_BaseTerm
 	{
 		return false;
 	}
+	
+	void SetInvert(bool invert)
+	{
+		m_invertTerm = invert;
+	}
 }
 
 //! TILW_OperationTerm adds an operand array to TILW_BaseTerm. Do not use this directly.
@@ -120,5 +125,10 @@ class TILW_LiteralTerm : TILW_BaseTerm
 	override bool Calc()
 	{
 		return TILW_MissionFrameworkEntity.GetInstance().IsMissionFlag(m_flagName);
+	}
+	
+	void SetFlag(string flag)
+	{
+		m_flagName = flag;
 	}
 }

@@ -319,6 +319,21 @@ class TILW_FactionPlayersKilledFlag
 		if (mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_maxAliveFactionPlayers.Get(m_factionKey) * (1 - m_casualtyRatio)) mfe.SetMissionFlag(m_flagName);
 		else mfe.ClearMissionFlag(m_flagName);
 	}
+	
+	void SetFlag(string flagName)
+	{
+		m_flagName = flagName;
+	}
+		
+	void SetKey(string key)
+	{
+		m_factionKey = key;
+	}
+		
+	void CasualtyRatio(float ratio)
+	{
+		m_casualtyRatio = ratio;
+	}
 }
 
 //! TILW_BaseRandomFlag is the base class for various probability experiments that can set mission flags

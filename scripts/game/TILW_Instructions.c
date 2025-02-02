@@ -28,9 +28,22 @@ class TILW_MissionEvent
 		Print("TILWMF | Running mission event: " + m_name, LogLevel.NORMAL);
 		foreach (TILW_BaseInstruction instruction : m_instructions) GetGame().GetCallqueue().CallLater(instruction.Execute, instruction.m_executionDelay * 1000, false, instruction);
 	}
+	
+	void SetName(string name)
+	{
+		m_name = name;
+	}
+	
+	void SetInstruction(array<ref TILW_BaseInstruction> instructions)
+	{
+		m_instructions = instructions;
+	}
+
+	void SetCondition(TILW_BaseTerm condition)
+	{
+		m_condition = condition;
+	}
 }
-
-
 
 
 //! TILW_BaseInstruction, only provides shared functionality. Instructions are executed by mission events.
@@ -41,6 +54,11 @@ class TILW_BaseInstruction
 	float m_executionDelay;
 	
 	void Execute();
+	
+	void SetExecutionDelay(float delay)
+	{
+		m_executionDelay = delay;
+	}
 }
 
 
@@ -64,6 +82,15 @@ class TILW_EndGameInstruction: TILW_BaseInstruction
 		gameMode.EndGameMode(SCR_GameModeEndData.CreateSimple(m_gameOverType, -1, fIndex));
 	}
 	
+	void SetKey(string key)
+	{
+		m_factionKey = key;
+	}
+	
+	void SetGameOverType(EGameOverTypes gameOverType)
+	{
+		m_gameOverType = gameOverType;
+	}
 }
 
 

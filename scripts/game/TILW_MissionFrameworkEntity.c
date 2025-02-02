@@ -330,7 +330,7 @@ class TILW_FactionPlayersKilledFlag
 		m_factionKey = key;
 	}
 		
-	void CasualtyRatio(float ratio)
+	void SetCasualtyRatio(float ratio)
 	{
 		m_casualtyRatio = ratio;
 	}

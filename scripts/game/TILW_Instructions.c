@@ -34,7 +34,7 @@ class TILW_MissionEvent
 		m_name = name;
 	}
 	
-	void SetInstruction(array<ref TILW_BaseInstruction> instructions)
+	void SetInstructions(array<ref TILW_BaseInstruction> instructions)
 	{
 		m_instructions = instructions;
 	}

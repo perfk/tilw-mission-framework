@@ -127,8 +127,8 @@ class TILW_LiteralTerm : TILW_BaseTerm
 		return TILW_MissionFrameworkEntity.GetInstance().IsMissionFlag(m_flagName);
 	}
 	
-	void SetFlag(string flag)
+	void SetFlag(string flagName)
 	{
-		m_flagName = flag;
+		m_flagName = flagName;
 	}
 }

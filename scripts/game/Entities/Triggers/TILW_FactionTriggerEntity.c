@@ -83,4 +83,9 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 		string factionName = GetGame().GetFactionManager().GetFactionByKey(m_ownerFactionKey).GetFactionName();
 		return string.Format(super.GetStatusMessage(status), factionName);
 	}
+	
+	void SetOwnerFaction(string key)
+	{
+		m_ownerFactionKey = key;
+	}
 }

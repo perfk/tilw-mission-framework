@@ -47,17 +47,10 @@ SCR_ChimeraCharacter : "{84029128FA6F6BB9}Prefabs/Characters/Factions/BLUFOR/US_
 }
 TILW_FactionTriggerEntity sdas : "{8C576D46F6579229}Prefabs/Logic/TILW_FactionTrigger.et" {
  coords 9.784 1 244.278
- OnResultChanged ""\
- "		/* code here */"\
- "		Print(\"ORC \" + result);"\
- "	"
  m_queryRadius 10
- m_comparisonMode EQUAL_OR_LESS
- m_captureIterations 2
  m_sendStatusMessages 1
  m_flagName "OBJ_B"
  m_ownerFactionKey "US"
- m_ratioThreshold 0
 }
 TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramework.et" {
  coords 69.217 1 186.542
@@ -80,15 +73,20 @@ TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramewor
     }
    }
   }
-  TILW_MissionEvent "{61F534F4D9123C7E}" {
-   m_instructions {
-    TILW_SendMessageInstruction "{61F534F523DE91F4}" {
-     m_messageTitle "us dead"
-     m_messageBody "adasd"
-    }
-   }
-   m_condition TILW_LiteralTerm "{61F534F4DFF404DD}" {
-    m_flagName "US_DEAD"
+ }
+ m_casualtyFlags {
+  TILW_FactionAIKilledFlag "{6486F7A16F442DD0}" {
+   m_flagName "US_KILLED"
+   m_factionKey "US"
+   m_casualtyRatio 0.5
+  }
+ }
+ m_metaFlags {
+  TILW_MetaFlag "{6486F7A021A69627}" {
+   m_flagName "mflag"
+   m_definition TILW_LiteralTerm "{6486F7A0B3B1A24E}" {
+    m_invertTerm 1
+    m_flagName "OBJ_B"
    }
   }
  }

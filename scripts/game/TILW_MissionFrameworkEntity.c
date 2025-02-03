@@ -84,11 +84,15 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	void RecheckConditions()
 	{	
-		foreach (TILW_MissionEvent mEvent : m_missionEvents)
-			mEvent.EvalExpression();
+		foreach (TILW_MetaFlag metaFlag : m_metaFlags)
+			metaFlag.Evaluate();
+		
+		foreach (TILW_MissionEvent missionEvent : m_missionEvents)
+			missionEvent.EvalExpression();
 	}
 	
-	// ----- SCRIPT SUPPORT -----------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	// ----- SCRIPTING SUPPORT -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	void SetPlayersKilledFlags(array<ref TILW_FactionPlayersKilledFlag> factionPlayersKilledFlags)
 	{
@@ -127,15 +131,18 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	ref array<ref TILW_MissionEvent> m_missionEvents;
 	
 	// FLAGS
-
-	[Attribute("", UIWidgets.Object, desc: "DEPRECATED - USE CASUALTY FLAGS INSTEAD\nUsed to set a flag when all players of a faction were killed", category: "Flags")] // TEMP
-	ref array<ref TILW_FactionPlayersKilledFlag> m_factionPlayersKilledFlags;
 	
 	[Attribute("", UIWidgets.Object, desc: "Used to set a flags based on KIA ratios of factions", category: "Flags")]
 	ref array<ref TILW_BaseCasualtyFlag> m_casualtyFlags;
 	
-	[Attribute("", UIWidgets.Object, desc: "Just like default flags, except that each one has a certain chance to be set on initialization.\nCan be used as a random factor, e. g. for switching between two QRF events with different locations, based on if a random flag was set or not.", category: "Flags")]
+	[Attribute("", UIWidgets.Object, desc: "Meta flags - these are defined as a combination of other flags. Useful for avoiding duplicates/redundancy of complex event conditions.", category: "Flags")]
+	ref array<ref TILW_MetaFlag> m_metaFlags;
+	
+	[Attribute("", UIWidgets.Object, desc: "Random Flags are randomly set (or not set) before the mission starts.\nThey can e. g. be used to switch between two QRF events with different locations, based on whether a random flag was set or not.", category: "Flags")]
 	ref array<ref TILW_BaseRandomFlag> m_randomFlags;
+	
+	[Attribute("", UIWidgets.Object, desc: "DEPRECATED - USE CASUALTY FLAGS INSTEAD\nUsed to set a flag when all players of a faction were killed", category: "Flags")] // TEMP
+	ref array<ref TILW_FactionPlayersKilledFlag> m_factionPlayersKilledFlags;
 	
 	// DEBUG
 	
@@ -318,6 +325,27 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		return false;
 	}
 	
+}
+
+
+// ----- META FLAGS -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Meta Flag")]
+class TILW_MetaFlag
+{
+	[Attribute("", UIWidgets.Auto, desc: "New flag to be defined as a combination of other flags.")]
+	protected string m_flagName;
+	
+	[Attribute("", UIWidgets.Object, desc: "Boolean expression defining the meta flag. \nConsists of (set when): Literal (flag), Conjunction (ALL operands), Disjunction (ANY operand), Minjunction (MIN operands), Maxjunction (MAX operands).")]
+	ref TILW_BaseTerm m_definition;
+	
+	void Evaluate()
+	{
+		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
+		if (!fw)
+			return;
+		fw.AdjustMissionFlag(m_flagName, m_definition.Eval());
+	}
 }
 
 

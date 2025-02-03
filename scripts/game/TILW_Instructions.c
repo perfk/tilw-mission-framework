@@ -19,14 +19,18 @@ class TILW_MissionEvent
 	void EvalExpression(bool ignoreCondition = false, bool ignoreOccurred = false)
 	{
 		SCR_BaseGameMode gm = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (gm.GetState() != SCR_EGameModeState.GAME && !m_pregameEvent) return;
+		if (gm.GetState() != SCR_EGameModeState.GAME && !m_pregameEvent)
+			return;
 		
-		if (m_alreadyOccurred && !ignoreOccurred) return;
-		if (!m_condition.Eval() && !ignoreCondition) return;
+		if (m_alreadyOccurred && !ignoreOccurred)
+			return;
+		if (!m_condition.Eval() && !ignoreCondition)
+			return;
 		m_alreadyOccurred = true;
 		
 		Print("TILWMF | Running mission event: " + m_name, LogLevel.NORMAL);
-		foreach (TILW_BaseInstruction instruction : m_instructions) GetGame().GetCallqueue().CallLater(instruction.Execute, instruction.m_executionDelay * 1000, false, instruction);
+		foreach (TILW_BaseInstruction instruction : m_instructions)
+			GetGame().GetCallqueue().CallLater(instruction.Execute, instruction.m_executionDelay * 1000, false, instruction);
 	}
 	
 	void SetName(string name)
@@ -75,7 +79,8 @@ class TILW_EndGameInstruction: TILW_BaseInstruction
 	
 	override void Execute()
 	{
-		if (TILW_MissionFrameworkEntity.GetInstance().m_suppressGameEnd) return;
+		if (TILW_MissionFrameworkEntity.GetInstance().m_suppressGameEnd)
+			return;
 		SCR_BaseGameMode gameMode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
 		Faction faction = GetGame().GetFactionManager().GetFactionByKey(m_factionKey);
 		int fIndex = GetGame().GetFactionManager().GetFactionIndex(faction);
@@ -308,14 +313,18 @@ class TILW_DeleteOpenSlotsInstruction : TILW_BaseInstruction
 		if (!pm) return;
 		foreach (RplId id, PS_PlayableComponent pc : pm.GetPlayables())
 		{
-			if (!pc || pm.GetPlayerByPlayable(pc.GetId()) != -1) continue;
+			if (!pc || pm.GetPlayerByPlayable(pc.GetId()) != -1)
+				continue;
 			
 			IEntity e = pc.GetOwner();
-			if (!m_factionKeys.IsEmpty()) {
+			if (!m_factionKeys.IsEmpty())
+			{
 				SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(e);
-				if (!cc || !cc.m_pFactionComponent) continue;
+				if (!cc || !cc.m_pFactionComponent)
+					continue;
 				Faction f = cc.m_pFactionComponent.GetAffiliatedFaction();
-				if (!f || !m_factionKeys.Contains(f.GetFactionKey())) continue;
+				if (!f || !m_factionKeys.Contains(f.GetFactionKey()))
+					continue;
 			}
 			
 			SCR_EntityHelper.DeleteEntityAndChildren(e);
@@ -333,8 +342,11 @@ class TILW_ReactivateEventsInstruction : TILW_BaseInstruction
 	override void Execute()
 	{
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if (!fw || !m_eventNames) return;
-		foreach (TILW_MissionEvent me : fw.m_missionEvents) if (me.m_alreadyOccurred && m_eventNames.Contains(me.m_name)) me.m_alreadyOccurred = false;
+		if (!fw || !m_eventNames)
+			return;
+		foreach (TILW_MissionEvent me : fw.m_missionEvents)
+			if (me.m_alreadyOccurred && m_eventNames.Contains(me.m_name))
+				me.m_alreadyOccurred = false;
 		GetGame().GetCallqueue().Call(fw.RecheckConditions);
 	}
 }
@@ -348,8 +360,11 @@ class TILW_DeactivateEventsInstruction : TILW_BaseInstruction
 	override void Execute()
 	{
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if (!fw || !m_eventNames) return;
-		foreach (TILW_MissionEvent me : fw.m_missionEvents) if (!me.m_alreadyOccurred && m_eventNames.Contains(me.m_name)) me.m_alreadyOccurred = true;
+		if (!fw || !m_eventNames)
+			return;
+		foreach (TILW_MissionEvent me : fw.m_missionEvents)
+			if (!me.m_alreadyOccurred && m_eventNames.Contains(me.m_name))
+				me.m_alreadyOccurred = true;
 	}
 }
 
@@ -394,7 +409,8 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 				if (damageState == EDamageState.DESTROYED)
 				{
 					int playerId = playableManager.GetPlayerByPlayableRemembered(playable.GetId());
-					if (playerId == -1) continue;
+					if (playerId == -1)
+						continue;
 					gm.TryRespawn(playable.GetId(), playerId);
 				}
 			}
@@ -431,7 +447,8 @@ class TILW_EditMapItemInstruction : TILW_BaseInstruction
 		foreach (string itemName : m_itemNames)
 		{
 			IEntity itemEntity = GetGame().GetWorld().FindEntityByName(itemName);
-			if (!itemEntity) continue;
+			if (!itemEntity)
+				continue;
 			PS_ManualMarker c1 = PS_ManualMarker.Cast(itemEntity);
 			PS_MissionDescription c2 = PS_MissionDescription.Cast(itemEntity);
 			if (c1) c1.SetVisibleForEmptyFaction(m_visibleForEmpty);
@@ -459,8 +476,10 @@ class TILW_RunEventsInstruction : TILW_BaseInstruction
 	override void Execute()
 	{
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if (!fw || !m_eventNames) return;
+		if (!fw || !m_eventNames)
+			return;
 		foreach (TILW_MissionEvent me : fw.m_missionEvents)
-			if (m_eventNames.Contains(me.m_name)) me.EvalExpression(true, m_allowRerun);
+			if (m_eventNames.Contains(me.m_name))
+				me.EvalExpression(true, m_allowRerun);
 	}
 }

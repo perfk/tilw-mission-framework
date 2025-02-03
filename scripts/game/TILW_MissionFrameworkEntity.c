@@ -5,7 +5,7 @@ class TILW_MissionFrameworkEntityClass: GenericEntityClass
 class TILW_MissionFrameworkEntity: GenericEntity
 {
 	
-	// reference shit
+	// ----- INSTANCE MANAGEMENT -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	protected static TILW_MissionFrameworkEntity s_Instance = null;
 	
@@ -14,7 +14,8 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		if (!s_Instance && create) {
 			Print("TILWMF | No MFE instance present, creating new one...");
 			BaseWorld world = GetGame().GetWorld();
-			if (world) s_Instance = TILW_MissionFrameworkEntity.Cast(GetGame().SpawnEntityPrefab(Resource.Load("{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrameworkEntity.et"), world));
+			if (world)
+				s_Instance = TILW_MissionFrameworkEntity.Cast(GetGame().SpawnEntityPrefab(Resource.Load("{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrameworkEntity.et"), world));
 		}
 		return s_Instance;
 	}
@@ -30,36 +31,41 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	}
 	void ~TILW_MissionFrameworkEntity()
 	{
-		if (s_Instance == this) s_Instance = null;
+		if (s_Instance == this)
+			s_Instance = null;
 	}
 	
 	
-	// flag set
+	// ----- FLAG MANAGEMENT -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	protected ref set<string> m_flagSet = new set<string>();
 	
 	
 	void SetMissionFlag(string name, bool recheck = true)
 	{
-		if (IsMissionFlag(name) || name == "") return;
+		if (IsMissionFlag(name) || name == "")
+			return;
 		m_flagSet.Insert(name);
 		Print("TILWMF | Set flag: " + name);
 		if (recheck) {
 			RecheckConditions();
 			OnFlagChanged(name, true);
-			if (m_OnFlagChanged) m_OnFlagChanged.Invoke(name, true);
+			if (m_OnFlagChanged)
+				m_OnFlagChanged.Invoke(name, true);
 		}
 	}
 	
 	void ClearMissionFlag(string name, bool recheck = true)
 	{
-		if (!IsMissionFlag(name)) return;
+		if (!IsMissionFlag(name) || name == "")
+			return;
 		m_flagSet.RemoveItem(name);
 		Print("TILWMF | Clear flag: " + name);
 		if (recheck) {
 			RecheckConditions();
 			OnFlagChanged(name, false);
-			if (m_OnFlagChanged) m_OnFlagChanged.Invoke(name, false);
+			if (m_OnFlagChanged)
+				m_OnFlagChanged.Invoke(name, false);
 		}
 	}
 	
@@ -70,14 +76,19 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	void AdjustMissionFlag(string name, bool setFlag, bool recheck = true)
 	{
-		if (setFlag) SetMissionFlag(name, recheck);
-		else ClearMissionFlag(name, recheck);
+		if (setFlag)
+			SetMissionFlag(name, recheck);
+		else
+			ClearMissionFlag(name, recheck);
 	}
 	
 	void RecheckConditions()
 	{	
-		foreach (TILW_MissionEvent mEvent : m_missionEvents) mEvent.EvalExpression();
+		foreach (TILW_MissionEvent mEvent : m_missionEvents)
+			mEvent.EvalExpression();
 	}
+	
+	// ----- SCRIPT SUPPORT -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	void SetPlayersKilledFlags(array<ref TILW_FactionPlayersKilledFlag> factionPlayersKilledFlags)
 	{
@@ -89,21 +100,18 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		m_missionEvents = missionEvents;
 	}
 	
-	// events
-	
 	protected ref TILW_ScriptInvokerStringBool m_OnFlagChanged;
 	
 	//! Provides a ScriptInvoker for outsiders that want to subscribe to flag changes. \nInsertedMethod(string flagName, bool wasSetNotCleared);
 	TILW_ScriptInvokerStringBool GetOnFlagChanged()
 	{
-		if (!m_OnFlagChanged) m_OnFlagChanged = new TILW_ScriptInvokerStringBool();
+		if (!m_OnFlagChanged)
+			m_OnFlagChanged = new TILW_ScriptInvokerStringBool();
 		return m_OnFlagChanged;
 	}
 	
 	//! Event: OnFlagChanged, occurs whenever a mission flag changes. To be overridden by entity scripts.
 	event void OnFlagChanged(string name, bool value);
-	
-	
 	
 	// some public variables usable in custom entity scripts. you can add more using a full entity script, these are just for convenience.
 	int mvar_integer = 0;
@@ -111,41 +119,38 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	string mvar_string = "";
 	
 	
-	// util variables
-	protected bool m_recountScheduled = false;
+	// ----- ATTRIBUTES -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	
-	// mission events
-	
+	// EVENTS
 	
 	[Attribute("", UIWidgets.Object, desc: "Mission Events can be triggered by combinations of flags, resulting in the execution of the events instructions", category: "Events")]
 	ref array<ref TILW_MissionEvent> m_missionEvents;
 	
-	
-	// faction player count things
-	
-	[Attribute("", UIWidgets.Object, desc: "Used to set a flag when all players of a faction were killed", category: "Flags")]
+	// FLAGS
+
+	[Attribute("", UIWidgets.Object, desc: "DEPRECATED - USE CASUALTY FLAGS INSTEAD\nUsed to set a flag when all players of a faction were killed", category: "Flags")] // TEMP
 	ref array<ref TILW_FactionPlayersKilledFlag> m_factionPlayersKilledFlags;
 	
-	// [Attribute("", UIWidgets.Auto, desc: "This array sets given flags on initialization. \nThis is not required for regular framework usage.", category: "Flags")]
-	// ref array<string> m_defaultFlags;
+	[Attribute("", UIWidgets.Object, desc: "Used to set a flags based on KIA ratios of factions", category: "Flags")]
+	ref array<ref TILW_BaseCasualtyFlag> m_casualtyFlags;
 	
 	[Attribute("", UIWidgets.Object, desc: "Just like default flags, except that each one has a certain chance to be set on initialization.\nCan be used as a random factor, e. g. for switching between two QRF events with different locations, based on if a random flag was set or not.", category: "Flags")]
 	ref array<ref TILW_BaseRandomFlag> m_randomFlags;
 	
-	
-	// debug
+	// DEBUG
 	
 	[Attribute("0", UIWidgets.Auto, desc: "Should TILW_EndGameInstructions be prevented from actually ending the game?", category: "Debug")]
 	bool m_suppressGameEnd;
 	
-	// Initial setup
+
+	// ----- SETUP -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	override void EOnActivate(IEntity owner)
 	{
 		super.EOnActivate(owner);
 		Print("TILWMF | Framework EOnActivate()");
-		if (!Replication.IsServer()) return; // MFE only runs on server
+		if (!Replication.IsServer())
+			return; // MFE only runs on server
 		GetGame().GetCallqueue().Call(InsertListeners); // Insert listeners for player updates and game start
 		GetGame().GetCallqueue().Call(InitDefaultFlags); // Call, just to randomize time a little
 		
@@ -156,14 +161,16 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	{
 		super.EOnDeactivate(owner);
 		Print("TILWMF | Framework EOnDeactivate()");
-		if (!Replication.IsServer()) return;
+		if (!Replication.IsServer())
+			return;
 		GetGame().GetCallqueue().Call(RemoveListeners);
 	}
 	
 	protected void InsertListeners()
 	{
 		PS_GameModeCoop gamemode = PS_GameModeCoop.Cast(GetGame().GetGameMode());
-		if (!gamemode) return;
+		if (!gamemode)
+			return;
 		// gamemode.GetOnPlayerKilled().Insert(PlayerUpdate);
 		gamemode.GetOnPlayerDeleted().Insert(PlayerUpdate);
 		gamemode.GetOnPlayerSpawned().Insert(PlayerUpdate);
@@ -173,7 +180,8 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	protected void RemoveListeners()
 	{
 		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (!gamemode) return;
+		if (!gamemode)
+			return;
 		// gamemode.GetOnPlayerKilled().Remove(PlayerUpdate);
 		gamemode.GetOnPlayerDeleted().Remove(PlayerUpdate);
 		gamemode.GetOnPlayerSpawned().Remove(PlayerUpdate);
@@ -182,35 +190,40 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	protected void InitDefaultFlags()
 	{
-		// foreach (string flag : m_defaultFlags) SetMissionFlag(flag, false);
-		foreach (TILW_BaseRandomFlag rf : m_randomFlags) rf.Evaluate();
+		foreach (TILW_BaseRandomFlag rf : m_randomFlags)
+			rf.Evaluate();
 	}
-	
-	// Gamemode Start
 	
 	protected void GameStateChange(SCR_EGameModeState state)
 	{
+		if (state != SCR_EGameModeState.GAME)
+			return;
 		GetGame().GetCallqueue().CallLater(RecheckConditions, 10, false);
 	}
+	
+	
+	// ----- CASUALTY COUNTING -----------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	// PLAYERS
+	
+	protected bool m_playerRecountScheduled = false;
+	ref map<string, int> m_curAliveFactionPlayers = new map<string, int>();
+	ref map<string, int> m_maxAliveFactionPlayers = new map<string, int>();
 	
 	void PlayerUpdate(int playerId, IEntity player)
 	{
 		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (!gamemode || gamemode.GetState() != SCR_EGameModeState.GAME) return;
-		if (!m_recountScheduled) {
+		if (!gamemode || gamemode.GetState() != SCR_EGameModeState.GAME)
+			return;
+		if (!m_playerRecountScheduled) {
 			GetGame().GetCallqueue().CallLater(RecountPlayers, 5000, false); // Postpone it a bit, in case players don't have PCEs during loading. Perhaps not necessary.
-			m_recountScheduled = true;
+			m_playerRecountScheduled = true;
 		}
 	}
 	
-	ref map<string, int> m_curAliveFactionPlayers = new map<string, int>();
-	ref map<string, int> m_maxAliveFactionPlayers = new map<string, int>();
-	ref map<string, int> m_factionAILifes = new map<string, int>();
-	ref map<string, int> m_factionAIDeaths = new map<string, int>();
-	
 	protected void RecountPlayers()
 	{
-		m_recountScheduled = false;
+		m_playerRecountScheduled = false;
 		
 		m_curAliveFactionPlayers.Clear();
 		array<int> playerIds = {};
@@ -220,27 +233,59 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		foreach (int playerId : playerIds)
 		{
 			IEntity controlled = GetGame().GetPlayerManager().GetPlayerControlledEntity(playerId);
-			if (!controlled) continue;
+			if (!controlled)
+				continue;
 			SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(controlled);
-			if (!cc) continue;
-			if (!SCR_AIDamageHandling.IsAlive(controlled)) continue;
-			
+			if (!cc)
+				continue;
+			if (!SCR_AIDamageHandling.IsAlive(controlled))
+				continue;
 			Faction f = factionManager.GetPlayerFaction(playerId);
-			if (!f) continue;
+			if (!f)
+				continue;
 			string fkey = f.GetFactionKey();
+			if (fkey == "")
+				continue;
 			m_curAliveFactionPlayers.Set(fkey, m_curAliveFactionPlayers.Get(fkey) + 1);
 		}
 		
 		foreach (string f, int n : m_curAliveFactionPlayers) {
-			if (n > m_maxAliveFactionPlayers.Get(f)) m_maxAliveFactionPlayers.Set(f, n);
+			if (n > m_maxAliveFactionPlayers.Get(f))
+				m_maxAliveFactionPlayers.Set(f, n);
 		}
 		
-		foreach (TILW_FactionPlayersKilledFlag fpkf : m_factionPlayersKilledFlags) fpkf.Evaluate();
+		foreach (TILW_FactionPlayersKilledFlag fpkf : m_factionPlayersKilledFlags) // TEMP
+			fpkf.Evaluate();
+		
+		foreach (TILW_BaseCasualtyFlag cf : m_casualtyFlags)
+			if (TILW_FactionPlayersKilledFlag.Cast(cf))
+				cf.Evaluate();
+	}
+	
+	// AI
+	
+	protected bool m_aiRecountScheduled = false;
+	ref map<string, int> m_factionAILifes = new map<string, int>();
+	ref map<string, int> m_factionAIDeaths = new map<string, int>();
+	
+	void ScheduleRecountAI()
+	{
+		if (m_aiRecountScheduled)
+			return;
+		GetGame().GetCallqueue().CallLater(RecountAI, 1000, false);
+	}
+	
+	protected void RecountAI()
+	{
+		m_aiRecountScheduled = false;
+		
+		foreach (TILW_BaseCasualtyFlag cf : m_casualtyFlags)
+			if (TILW_FactionAIKilledFlag.Cast(cf))
+				cf.Evaluate();
 	}
 	
 	
-	
-	// Utils
+	// ----- UTILS -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	void ShowGlobalHint(string hl, string msg, int dur, array<string> fkeys)
 	{
@@ -253,10 +298,13 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	{
 		if (fkeys && !fkeys.IsEmpty()) {
 			SCR_FactionManager fm = SCR_FactionManager.Cast(GetGame().GetFactionManager());
-			if (!fm) return;
+			if (!fm)
+				return;
 			Faction f = fm.GetLocalPlayerFaction();
-			if (!f) return;
-			if (!fkeys.Contains(f.GetFactionKey())) return;
+			if (!f)
+				return;
+			if (!fkeys.Contains(f.GetFactionKey()))
+				return;
 		}
 		ShowHint(msg, hl, dur);
 	}
@@ -265,69 +313,30 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	{
 		SCR_HintUIInfo customHint = SCR_HintUIInfo.CreateInfo(description, name, duration, type, fieldManualEntry, isTimerVisible);
 		SCR_HintManagerComponent hintManager = SCR_HintManagerComponent.GetInstance();
-		if (hintManager) return hintManager.Show(customHint, isSilent, ignoreShown);
+		if (hintManager)
+			return hintManager.Show(customHint, isSilent, ignoreShown);
 		return false;
 	}
 	
 }
 
+
+// ----- CASUALTY FLAGS -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 //! TILW_BaseCasualtyFlag is the base class for various player / AI casualty flags
 [BaseContainerProps(), BaseContainerCustomStringTitleField("NOT USEFUL")]
 class TILW_BaseCasualtyFlag
 {
+	[Attribute("", UIWidgets.Auto, desc: "Flag to be set when the faction reaches the given casualty ratio, or to be cleared when it's below. \nFactionPlayersKilledFlag: Only players are taken into account. \nFactionAIKilledFlag: Only AI is taken into account.")]
+	protected string m_flagName;
+	
+	[Attribute("", UIWidgets.Auto, desc: "Key of examined faction")]
+	protected string m_factionKey;
+	
+	[Attribute("1", UIWidgets.Auto, desc: "When the faction reaches/exceeds this casualty rate, the flag is set (e. g. 0.9 = 90% have been killed). \nFactionPlayersKilledFlag: Compares current alive players to historic simultaneous maximum of alive players. \nFactionAIKilledFlag: Compares AI deaths to (possibly non-simultaneous) AI lifes.", params: "0 1 0.01")]
+	protected float m_casualtyRatio;
+	
 	void Evaluate();
-}
-
-// FactionCasualtyFlag, AICasualtyFlag, PlayerCasualtyFlag
-[BaseContainerProps(), BaseContainerCustomStringTitleField("FactionAIKilled Flag")]
-class TILW_FactionAIKilledFlag : TILW_BaseCasualtyFlag
-{
-	[Attribute("", UIWidgets.Auto, desc: "Flag to be set when the faction reaches the given casualty ratio, or to be cleared when it's below. Only AI is taken into account.")]
-	protected string m_flagName;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Key of examined faction")]
-	protected string m_factionKey;
-	
-	[Attribute("1", UIWidgets.Auto, desc: "When the faction reaches/exceeds this casualty rate, the flag is set. \nTo be precise, when the current number of alive players divided by the historic maximum of concurrently alive players reaches this threshold. \nFor example, if the ratio is 0.9, the flag is set after 90% have been killed.", params: "0 1 0.01")]
-	protected float m_casualtyRatio;
-	
-	override void Evaluate()
-	{
-		return;
-		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (gamemode.GetState() != SCR_EGameModeState.GAME) return;
-		
-		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
-		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey)) return;
-		
-		//if (mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_factionAILifes.Get(m_factionKey) * (1 - m_casualtyRatio)) mfe.SetMissionFlag(m_flagName);
-		else mfe.ClearMissionFlag(m_flagName);
-	}
-}
-
-[BaseContainerProps(), BaseContainerCustomStringTitleField("FactionPlayersKilled Flag")]
-class TILW_FactionPlayersKilledFlag
-{
-	[Attribute("", UIWidgets.Auto, desc: "Flag to be set when the faction reaches the given casualty ratio, or to be cleared when it's below. Only players are taken into account.")]
-	protected string m_flagName;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Key of examined faction")]
-	protected string m_factionKey;
-	
-	[Attribute("1", UIWidgets.Auto, desc: "When the faction reaches/exceeds this casualty rate, the flag is set. \nTo be precise, when the current number of alive players divided by the historic maximum of concurrently alive players reaches this threshold. \nFor example, if the ratio is 0.9, the flag is set after 90% have been killed.", params: "0 1 0.01")]
-	protected float m_casualtyRatio;
-	
-	void Evaluate()
-	{
-		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (gamemode.GetState() != SCR_EGameModeState.GAME) return;
-		
-		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
-		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey)) return;
-		
-		if (mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_maxAliveFactionPlayers.Get(m_factionKey) * (1 - m_casualtyRatio)) mfe.SetMissionFlag(m_flagName);
-		else mfe.ClearMissionFlag(m_flagName);
-	}
 	
 	void SetFlag(string flagName)
 	{
@@ -344,6 +353,51 @@ class TILW_FactionPlayersKilledFlag
 		m_casualtyRatio = ratio;
 	}
 }
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Player Casualty Flag")]
+class TILW_FactionPlayersKilledFlag : TILW_BaseCasualtyFlag
+{
+	override void Evaluate()
+	{
+		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
+		if (gamemode.GetState() != SCR_EGameModeState.GAME)
+			return;
+		
+		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
+		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey)) return;
+		
+		if (mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_maxAliveFactionPlayers.Get(m_factionKey) * (1 - m_casualtyRatio))
+			mfe.SetMissionFlag(m_flagName);
+		else
+			mfe.ClearMissionFlag(m_flagName);
+	}
+}
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("AI Casualty Flag")]
+class TILW_FactionAIKilledFlag : TILW_BaseCasualtyFlag
+{
+	override void Evaluate()
+	{
+		SCR_BaseGameMode gamemode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
+		if (gamemode.GetState() != SCR_EGameModeState.GAME)
+			return;
+		
+		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
+		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey))
+			return;
+		
+		int totalLifes = mfe.m_factionAILifes.Get(m_factionKey);
+		int totalDeaths = mfe.m_factionAIDeaths.Get(m_factionKey);
+		
+		if (totalLifes > 0 && totalDeaths / totalLifes >= m_casualtyRatio)
+			mfe.SetMissionFlag(m_flagName);
+		else
+			mfe.ClearMissionFlag(m_flagName);
+	}
+}
+
+
+// ----- RANDOM FLAGS -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //! TILW_BaseRandomFlag is the base class for various probability experiments that can set mission flags
 [BaseContainerProps(), BaseContainerCustomStringTitleField("NOT USEFUL")]
@@ -366,11 +420,13 @@ class TILW_RandomFlag: TILW_BaseRandomFlag
 	{
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
 		float f = Math.RandomFloat01();
-		if (mfe && m_chance >= f) mfe.SetMissionFlag(m_flagName);
+		if (mfe && m_chance >= f)
+			mfe.SetMissionFlag(m_flagName);
 		// Fun fact: A chance of 0 can technically still set the flag, because RandomFloat01 is inclusive. I don't know an elegant way to fix this.
 		// Anyway, this will never happen! Okay, maybe once in about 4 billion times...
 		// I'm gonna print a cool message just in case!
-		if (f == 0 && m_chance == 0) Print("You should have played lotto instead of Arma. Too bad!");
+		if (f == 0 && m_chance == 0)
+			Print("You should have played lotto instead of Arma. Too bad!");
 		// ...But why would you even add a flag with a chance of 0?
 	}
 }
@@ -394,13 +450,18 @@ class TILW_FlagSampling: TILW_BaseRandomFlag
 		
 		for (int k = m_k; k > 0; k--)
 		{
-			if (m_flagNames.IsEmpty()) break;
+			if (m_flagNames.IsEmpty())
+				break;
 			string flag = m_flagNames.GetRandomElement();
-			if (!m_withReplacement) m_flagNames.RemoveItem(flag);
+			if (!m_withReplacement)
+				m_flagNames.RemoveItem(flag);
 			mfe.SetMissionFlag(flag);
 		}
 	}
 }
+
+
+// ----- WIP STUFF -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Unused
 class TILW_FactionRatioFlag
@@ -425,6 +486,9 @@ class TILW_FactionRatioFlag
 	}
 }
 
+
+// ----- OTHER STUFF -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 enum TILW_EVariableOperation
 {
 	SET,
@@ -438,6 +502,7 @@ enum TILW_EVariableOperation
 void TILW_ScriptInvokerStringBoolMethod(string s, bool b);
 typedef func TILW_ScriptInvokerStringBoolMethod;
 typedef ScriptInvokerBase<TILW_ScriptInvokerStringBoolMethod> TILW_ScriptInvokerStringBool;
+
 
 // List of things I may still work on:
 // - Better notifications

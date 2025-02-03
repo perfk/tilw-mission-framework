@@ -7,7 +7,7 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		if (!Replication.IsServer())
 			return;
 		if (m_fwCount == "")
-			GetGame().GetCallqueue().Call(AddLife);
+			GetGame().GetCallqueue().CallLater(AddLife, 250, false); // 5 delay is enough in mptest
 	}
 	override void OnDeath(IEntity instigatorEntity, notnull Instigator instigator)
 	{
@@ -15,7 +15,7 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		if (!Replication.IsServer())
 			return;
 		if (m_fwCount != "")
-			AddDeath();
+			GetGame().GetCallqueue().CallLater(AddDeath, 250, false); // symmetry to avoid life removal attempt before addition
 	}
 	void ~SCR_CharacterControllerComponent()
 	{
@@ -40,6 +40,9 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		if (pc.GetPlayable())
 			return;
 		// Is not a player?
+		
+		Print("player: " + EntityUtils.IsPlayer(cc));
+		
 		if (EntityUtils.IsPlayer(cc))
 			return;
 		// Does it have a faction?
@@ -67,7 +70,7 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
 		if (!fw)
 			return;
-		fw.m_factionAILifes.Set(m_fwCount, fw.m_factionAIDeaths.Get(m_fwCount) + 1);
+		fw.m_factionAIDeaths.Set(m_fwCount, fw.m_factionAIDeaths.Get(m_fwCount) + 1);
 		m_fwCount = "";
 		fw.ScheduleRecountAI();
 	}

@@ -280,6 +280,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		if (m_aiRecountScheduled)
 			return;
 		GetGame().GetCallqueue().CallLater(RecountAI, 1000, false);
+		m_aiRecountScheduled = true;
 	}
 	
 	protected void RecountAI()
@@ -414,8 +415,8 @@ class TILW_FactionAIKilledFlag : TILW_BaseCasualtyFlag
 		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey))
 			return;
 		
-		int totalLifes = mfe.m_factionAILifes.Get(m_factionKey);
-		int totalDeaths = mfe.m_factionAIDeaths.Get(m_factionKey);
+		float totalLifes = mfe.m_factionAILifes.Get(m_factionKey);
+		float totalDeaths = mfe.m_factionAIDeaths.Get(m_factionKey);
 		
 		if (totalLifes > 0 && totalDeaths / totalLifes >= m_casualtyRatio)
 			mfe.SetMissionFlag(m_flagName);

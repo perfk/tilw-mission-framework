@@ -20,12 +20,15 @@ class TILW_BaseInteraction : ScriptedUserAction
 	//------------------------------------------------------------------------------------------------
     override void PerformAction(IEntity pOwnerEntity, IEntity pUserEntity)
     {
-		if (m_singleUse) m_completed = true;
+		if (m_singleUse)
+			m_completed = true;
 		
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if (fw) fw.SetMissionFlag(m_flagName);
+		if (fw)
+			fw.AdjustMissionFlag(m_flagName, true);
 		
-		if (m_deleteParent && pOwnerEntity.GetParent()) SCR_EntityHelper.DeleteEntityAndChildren(pOwnerEntity.GetParent());
+		if (m_deleteParent && pOwnerEntity.GetParent())
+			SCR_EntityHelper.DeleteEntityAndChildren(pOwnerEntity.GetParent());
     }
 	//------------------------------------------------------------------------------------------------
     override bool GetActionNameScript(out string outName)
@@ -43,7 +46,8 @@ class TILW_BaseInteraction : ScriptedUserAction
     {
 		if (!m_factionKeys.IsEmpty()) {
 			SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(user);
-			if (!cc || !m_factionKeys.Contains(cc.GetFactionKey())) return false;
+			if (!cc || !m_factionKeys.Contains(cc.GetFactionKey()))
+				return false;
 		}
 		return !m_completed;
     }

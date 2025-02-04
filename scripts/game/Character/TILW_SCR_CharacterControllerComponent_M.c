@@ -7,7 +7,7 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		if (!Replication.IsServer())
 			return;
 		if (m_fwCount == "")
-			GetGame().GetCallqueue().CallLater(AddLife, 250, false); // 5 delay is enough in mptest
+			GetGame().GetCallqueue().CallLater(AddLife, 250, false); // 5 delay is enough for player check to work in mptest
 	}
 	override void OnDeath(IEntity instigatorEntity, notnull Instigator instigator)
 	{
@@ -37,12 +37,9 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 			return;
 		// Is not playable?
 		PS_PlayableComponent pc = PS_PlayableComponent.Cast(cc.FindComponent(PS_PlayableComponent));
-		if (pc.GetPlayable())
+		if (!pc || pc.GetPlayable())
 			return;
 		// Is not a player?
-		
-		Print("player: " + EntityUtils.IsPlayer(cc));
-		
 		if (EntityUtils.IsPlayer(cc))
 			return;
 		// Does it have a faction?

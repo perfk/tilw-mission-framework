@@ -16,7 +16,8 @@ class TILW_TeleportInteraction : ScriptedUserAction
     override void PerformAction(IEntity pOwnerEntity, IEntity pUserEntity)
     {
 		int playerId = GetGame().GetPlayerManager().GetPlayerIdFromControlledEntity(pUserEntity);
-		if (playerId == 0) return;
+		if (playerId == 0)
+			return;
 		IEntity e = GetGame().GetWorld().FindEntityByName(m_locationName);
 		if (!e) {
 			Print("TILW_TeleportInteraction | Entity '" + m_locationName + "' could not be found!", LogLevel.ERROR);
@@ -33,7 +34,8 @@ class TILW_TeleportInteraction : ScriptedUserAction
     //------------------------------------------------------------------------------------------------
     override bool CanBePerformedScript(IEntity user)
     {
-		if (m_conditionFlag == "") return true;
+		if (m_conditionFlag == "")
+			return true;
 		
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
 		return (fw && fw.IsMissionFlag(m_conditionFlag));
@@ -43,7 +45,8 @@ class TILW_TeleportInteraction : ScriptedUserAction
     {
 		if (!m_factionKeys.IsEmpty()) {
 			SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(user);
-			if (!cc || !m_factionKeys.Contains(cc.GetFactionKey())) return false;
+			if (!cc || !m_factionKeys.Contains(cc.GetFactionKey()))
+				return false;
 		}
 		return true;
     }

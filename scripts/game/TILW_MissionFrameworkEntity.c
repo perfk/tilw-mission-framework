@@ -29,6 +29,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	{
 		s_Instance = this;
 	}
+	
 	void ~TILW_MissionFrameworkEntity()
 	{
 		if (s_Instance == this)
@@ -40,46 +41,43 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	protected ref set<string> m_flagSet = new set<string>();
 	
-	
-	void SetMissionFlag(string name, bool recheck = true)
+	void AdjustMissionFlag(string name, bool value, bool recheck = true, bool asProxy = false)
 	{
-		if (IsMissionFlag(name) || name == "")
+		if (m_rplComp.IsProxy() && !asProxy)
+		{
+			Print("TILWMF | Error: Proxy attempted to autonomously adjust a flag (" + name + ")!", LogLevel.ERROR);
 			return;
-		m_flagSet.Insert(name);
-		Print("TILWMF | Set flag: " + name);
-		if (recheck) {
-			RecheckConditions();
-			OnFlagChanged(name, true);
-			if (m_OnFlagChanged)
-				m_OnFlagChanged.Invoke(name, true);
 		}
-	}
-	
-	void ClearMissionFlag(string name, bool recheck = true)
-	{
-		if (!IsMissionFlag(name) || name == "")
+		
+		if (IsMissionFlag(name) == value || name == "")
 			return;
-		m_flagSet.RemoveItem(name);
-		Print("TILWMF | Clear flag: " + name);
-		if (recheck) {
-			RecheckConditions();
-			OnFlagChanged(name, false);
-			if (m_OnFlagChanged)
-				m_OnFlagChanged.Invoke(name, false);
+		
+		if (value)
+		{
+			m_flagSet.Insert(name);
+			Print("TILWMF | Set flag: " + name);
 		}
+		else
+		{
+			m_flagSet.RemoveItem(name);
+			Print("TILWMF | Clear flag: " + name);
+		}
+		
+		if (!m_rplComp.IsProxy())
+		{
+			Rpc(RpcDo_BroadcastFlagChange, name, value, recheck);
+			if (recheck)
+				RecheckConditions();
+		}
+		
+		OnFlagChanged(name, value);
+		if (m_OnFlagChanged)
+			m_OnFlagChanged.Invoke(name, true);
 	}
 	
 	bool IsMissionFlag(string name)
 	{
 		return m_flagSet.Contains(name);
-	}
-	
-	void AdjustMissionFlag(string name, bool setFlag, bool recheck = true)
-	{
-		if (setFlag)
-			SetMissionFlag(name, recheck);
-		else
-			ClearMissionFlag(name, recheck);
 	}
 	
 	void RecheckConditions()
@@ -90,6 +88,37 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		foreach (TILW_MissionEvent missionEvent : m_missionEvents)
 			missionEvent.EvalExpression();
 	}
+	
+	// Intended for reading only, for writing use AdjustMissionFlag instead!
+	set<string> GetFlagSet()
+	{
+		return m_flagSet;
+	}
+	
+	// ----- FLAG REPLICATION -----------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	protected RplComponent m_rplComp;
+	
+	protected void InitFlagReplication()
+	{
+		if (m_rplComp.IsProxy())
+		{
+			SCR_PlayerController pc = SCR_PlayerController.Cast(GetGame().GetPlayerController());
+			if (!pc)
+			{
+				GetGame().GetCallqueue().CallLater(InitFlagReplication, 1000, false); // Wait for player controller
+				return;
+			}
+			pc.RequestMissionFlags();
+		}
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	protected void RpcDo_BroadcastFlagChange(string name, bool value, bool recheck)
+	{
+		AdjustMissionFlag(name, value, recheck, true);
+	};
 	
 	
 	// ----- SCRIPTING SUPPORT -----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,12 +181,21 @@ class TILW_MissionFrameworkEntity: GenericEntity
 
 	// ----- SETUP -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
+	override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
+		m_rplComp = RplComponent.Cast(FindComponent(RplComponent));
+		GetGame().GetCallqueue().CallLater(InitFlagReplication, 1000, false);
+	}
+	
 	override void EOnActivate(IEntity owner)
 	{
 		super.EOnActivate(owner);
+		
 		Print("TILWMF | Framework EOnActivate()");
-		if (!Replication.IsServer())
-			return; // MFE only runs on server
+		if (m_rplComp.IsProxy())
+			return;
+		
 		GetGame().GetCallqueue().Call(InsertListeners); // Insert listeners for player updates and game start
 		GetGame().GetCallqueue().Call(InitDefaultFlags); // Call, just to randomize time a little
 		
@@ -395,10 +433,7 @@ class TILW_FactionPlayersKilledFlag : TILW_BaseCasualtyFlag
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
 		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey)) return;
 		
-		if (mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_maxAliveFactionPlayers.Get(m_factionKey) * (1 - m_casualtyRatio))
-			mfe.SetMissionFlag(m_flagName);
-		else
-			mfe.ClearMissionFlag(m_flagName);
+		mfe.AdjustMissionFlag(m_flagName, mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_maxAliveFactionPlayers.Get(m_factionKey) * (1 - m_casualtyRatio));
 	}
 }
 
@@ -418,10 +453,7 @@ class TILW_FactionAIKilledFlag : TILW_BaseCasualtyFlag
 		float totalLifes = mfe.m_factionAILifes.Get(m_factionKey);
 		float totalDeaths = mfe.m_factionAIDeaths.Get(m_factionKey);
 		
-		if (totalLifes > 0 && totalDeaths / totalLifes >= m_casualtyRatio)
-			mfe.SetMissionFlag(m_flagName);
-		else
-			mfe.ClearMissionFlag(m_flagName);
+		mfe.AdjustMissionFlag(m_flagName, totalLifes > 0 && totalDeaths / totalLifes >= m_casualtyRatio);
 	}
 }
 
@@ -450,7 +482,7 @@ class TILW_RandomFlag: TILW_BaseRandomFlag
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
 		float f = Math.RandomFloat01();
 		if (mfe && m_chance >= f)
-			mfe.SetMissionFlag(m_flagName);
+			mfe.AdjustMissionFlag(m_flagName, true);
 		// Fun fact: A chance of 0 can technically still set the flag, because RandomFloat01 is inclusive. I don't know an elegant way to fix this.
 		// Anyway, this will never happen! Okay, maybe once in about 4 billion times...
 		// I'm gonna print a cool message just in case!
@@ -484,7 +516,7 @@ class TILW_FlagSampling: TILW_BaseRandomFlag
 			string flag = m_flagNames.GetRandomElement();
 			if (!m_withReplacement)
 				m_flagNames.RemoveItem(flag);
-			mfe.SetMissionFlag(flag);
+			mfe.AdjustMissionFlag(flag, true);
 		}
 	}
 }

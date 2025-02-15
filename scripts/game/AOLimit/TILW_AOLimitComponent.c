@@ -68,7 +68,8 @@ class TILW_AOLimitComponent : ScriptComponent
 		}
 
 		pse.GetPointsPositions(m_points3D);
-		for (int i = 0; i < m_points3D.Count(); i++) m_points3D[i] = pse.CoordToParent(m_points3D[i]);
+		for (int i = 0; i < m_points3D.Count(); i++)
+			m_points3D[i] = pse.CoordToParent(m_points3D[i]);
 		
 		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
 		
@@ -287,7 +288,7 @@ class TILW_AOLimitComponent : ScriptComponent
 		MapItem firstItem;
 		
 		Color c = m_defaultColor;
-		if (m_useFactionColor && !m_factionKeys.IsEmpty())
+		if (m_useFactionColor && !m_factionKeys.IsEmpty() && m_factionKeys[0] != "")
 			c = GetGame().GetFactionManager().GetFactionByKey(m_factionKeys[0]).GetFactionColor();
 		
 		foreach(vector point : m_points3D)

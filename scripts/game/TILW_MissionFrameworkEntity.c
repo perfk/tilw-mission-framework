@@ -421,7 +421,7 @@ class TILW_BaseCasualtyFlag
 	}
 }
 
-[BaseContainerProps(), BaseContainerCustomStringTitleField("Player Casualty Flag")]
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Player Casualties Flag")]
 class TILW_FactionPlayersKilledFlag : TILW_BaseCasualtyFlag
 {
 	override void Evaluate()
@@ -437,7 +437,7 @@ class TILW_FactionPlayersKilledFlag : TILW_BaseCasualtyFlag
 	}
 }
 
-[BaseContainerProps(), BaseContainerCustomStringTitleField("AI Casualty Flag")]
+[BaseContainerProps(), BaseContainerCustomStringTitleField("AI Casualties Flag")]
 class TILW_FactionAIKilledFlag : TILW_BaseCasualtyFlag
 {
 	override void Evaluate()

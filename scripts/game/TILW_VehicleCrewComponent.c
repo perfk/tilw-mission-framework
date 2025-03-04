@@ -32,20 +32,24 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	{
 		super.OnPostInit(owner);
 		
-		if (!Replication.IsServer()) return;
+		if (!Replication.IsServer())
+			return;
 		
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
-		if (!gm) return;
+		if (!gm)
+			return;
 		gm.GetOnGameStateChange().Insert(GameStateChange);
 		GameStateChange(gm.GetState());
 	}
 	
 	protected void GameStateChange(SCR_EGameModeState state)
 	{
-		if (state != SCR_EGameModeState.GAME) return;
+		if (state != SCR_EGameModeState.GAME)
+			return;
 		
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
-		if (!gm) return;
+		if (!gm)
+			return;
 		gm.GetOnGameStateChange().Remove(GameStateChange);
 		
 		GetGame().GetCallqueue().Call(AddCrew);
@@ -54,17 +58,22 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	protected void AddCrew()
 	{
 		Managed m = GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent);
-		if (!m) return;
+		if (!m)
+			return;
 		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
-		if (!cm) return;
+		if (!cm)
+			return;
 		
 		array<BaseCompartmentSlot> slots = {};
 		cm.GetCompartments(slots);
 		
 		array<ECompartmentType> cTypes = {};
-		if (m_spawnPilot) cTypes.Insert(ECompartmentType.PILOT);
-		if (m_spawnTurret) cTypes.Insert(ECompartmentType.TURRET);
-		if (m_spawnCargo) cTypes.Insert(ECompartmentType.CARGO);
+		if (m_spawnPilot)
+			cTypes.Insert(ECompartmentType.PILOT);
+		if (m_spawnTurret)
+			cTypes.Insert(ECompartmentType.TURRET);
+		if (m_spawnCargo)
+			cTypes.Insert(ECompartmentType.CARGO);
 		
 		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, m_customCrew, null, null, m_waypointNames, m_waypointDelay, m_noTurretDismount, m_idleGroup);
 	}
@@ -84,12 +93,16 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		bool isValidType = cTypes.Contains(slots[0].GetType()); // is this slots type allowed
 		if (!characters.IsEmpty() && characters[0] != "" && isValidType) { // character array not empty, use these
 			// Custom character
-			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET) ce = slots[0].SpawnCharacterInCompartment(characters[0], idleGroup);
-			else ce = slots[0].SpawnCharacterInCompartment(characters[0], mainGroup);
+			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET)
+				ce = slots[0].SpawnCharacterInCompartment(characters[0], idleGroup);
+			else
+				ce = slots[0].SpawnCharacterInCompartment(characters[0], mainGroup);
 		} else if (characters.IsEmpty() && isValidType) { // character array empty (but not null), use default characters
 			// Default character
-			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET) ce = slots[0].SpawnDefaultCharacterInCompartment(idleGroup);
-			else ce = slots[0].SpawnDefaultCharacterInCompartment(mainGroup);
+			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET)
+				ce = slots[0].SpawnDefaultCharacterInCompartment(idleGroup);
+			else
+				ce = slots[0].SpawnDefaultCharacterInCompartment(mainGroup);
 		}
 		
 		// Prevent turret dismount
@@ -102,10 +115,12 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		}
 		
 		// Remove from spawn list
-		if (slots && !slots.IsEmpty()) slots.Remove(0);
+		if (slots && !slots.IsEmpty())
+			slots.Remove(0);
 		if (!characters.IsEmpty() && isValidType) { // if character from array was spawned, remove it
 			characters.Remove(0);
-			if (characters.IsEmpty()) characters = null; // if this was the last character, set to null as sign to stop
+			if (characters.IsEmpty())
+				characters = null; // if this was the last character, set to null as sign to stop
 		}
 		
 		// Queue up next character
@@ -114,13 +129,16 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	
 	static void AddWaypointsStatic(AIGroup g, array<string> waypointNames)
 	{
-		if (!g || !waypointNames || waypointNames.IsEmpty()) return;
+		if (!g || !waypointNames || waypointNames.IsEmpty())
+			return;
 		foreach (string name : waypointNames)
 		{
 			IEntity e = GetGame().GetWorld().FindEntityByName(name);
-			if (!e) continue;
+			if (!e)
+				continue;
 			AIWaypoint wp = AIWaypoint.Cast(e);
-			if (!wp) continue;
+			if (!wp)
+				continue;
 			g.AddWaypoint(wp);
 		}
 	}
@@ -132,7 +150,8 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		foreach(IEntity gunner : occupants)
 		{
 			Managed m = gunner.FindComponent(SCR_AICombatComponent);
-			if (!m) continue;
+			if (!m)
+				continue;
 			SCR_AICombatComponent combComp = SCR_AICombatComponent.Cast(m);
 			combComp.m_neverDismountTurret = true;
 		}

@@ -48,7 +48,8 @@ modded class SCR_PlayerController : PlayerController
 	{
 		SCR_HintUIInfo customHint = SCR_HintUIInfo.CreateInfo(description, name, duration, type, fieldManualEntry, isTimerVisible);
 		SCR_HintManagerComponent hintManager = SCR_HintManagerComponent.GetInstance();
-		if (hintManager) return hintManager.Show(customHint, isSilent, ignoreShown);
+		if (hintManager)
+			return hintManager.Show(customHint, isSilent, ignoreShown);
 		return false;
 	}
 	
@@ -70,7 +71,8 @@ modded class SCR_PlayerController : PlayerController
 	protected void CheckJIP()
 	{
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
-		if (!gm) return;
+		if (!gm)
+			return;
 		
 		if(!gm.m_startTime)
 			return;
@@ -78,7 +80,7 @@ modded class SCR_PlayerController : PlayerController
 		switch (gm.m_eJIPState)
 		{
 		    case EJIPState.Deny:
-		        return;
+				return;
 		
 		    case EJIPState.Manual:
 		        RPC_DoSetJIP(true, string.Empty);
@@ -94,7 +96,8 @@ modded class SCR_PlayerController : PlayerController
 	bool CanJIP()
 	{
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
-		if (!gm) return false;
+		if (!gm)
+			return false;
 		
 		if(gm.m_eJIPState == EJIPState.Deny)
 			return false;

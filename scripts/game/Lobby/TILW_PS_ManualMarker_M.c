@@ -15,8 +15,10 @@ modded class PS_ManualMarker
 		
 		// Get map frame
 		Widget mapFrame = m_MapEntity.GetMapMenuRoot().FindAnyWidget(SCR_MapConstants.MAP_FRAME_NAME);
-		if (!mapFrame) mapFrame = m_MapEntity.GetMapMenuRoot();
-		if (!mapFrame) return; // Somethig gone wrong
+		if (!mapFrame)
+			mapFrame = m_MapEntity.GetMapMenuRoot();
+		if (!mapFrame)
+			return; // Somethig gone wrong
 		
 		// Create and init marker
 		m_wRoot = GetGame().GetWorkspace().CreateWidgets(m_sMarkerPrefab, mapFrame);

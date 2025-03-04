@@ -24,8 +24,10 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 	
 	override bool EvaluateCondition()
 	{
-		if (m_comparisonMode == TILW_EComparisonMode.EQUAL_OR_LESS) return (m_totalCount <= m_countThreshold);
-		else return (m_totalCount >= m_countThreshold);
+		if (m_comparisonMode == TILW_EComparisonMode.EQUAL_OR_LESS)
+			return (m_totalCount <= m_countThreshold);
+		else
+			return (m_totalCount >= m_countThreshold);
 	}
 	
 	
@@ -39,11 +41,14 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 	
 	override bool FilterEntity(IEntity e)
 	{
-		if (!super.FilterEntity(e)) return false;
+		if (!super.FilterEntity(e))
+			return false;
 		
-		if (!m_nameFilter.IsEmpty() && !m_nameFilter.Contains(GetName())) return false;
+		if (!m_nameFilter.IsEmpty() && !m_nameFilter.Contains(GetName()))
+			return false;
 		
-		if (!m_allowDestroyed && IsEntityDestroyed(e)) return false;
+		if (!m_allowDestroyed && IsEntityDestroyed(e))
+			return false;
 		
 		return true;
 	}

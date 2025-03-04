@@ -92,7 +92,8 @@ class TILW_BaseTriggerEntity : GenericEntity
 	//! Provides a ScriptInvoker for outsiders that want to subscribe to trigger result changes.
 	ScriptInvokerBool GetOnResultChanged()
 	{
-		if (!m_OnResultChanged) m_OnResultChanged = new ScriptInvokerBool();
+		if (!m_OnResultChanged)
+			m_OnResultChanged = new ScriptInvokerBool();
 		return m_OnResultChanged;
 	}
 	
@@ -103,8 +104,10 @@ class TILW_BaseTriggerEntity : GenericEntity
 	{
 		super.EOnActivate(owner);
 		
-		if (m_onlyOnServer && !Replication.IsServer()) return;
-		if (m_skipFirstQuery) m_firstQuery = false;
+		if (m_onlyOnServer && !Replication.IsServer())
+			return;
+		if (m_skipFirstQuery)
+			m_firstQuery = false;
 		
 		// Short delay because AI may not have been spawned yet
 		GetGame().GetCallqueue().CallLater(QueryLoop, 5 * 1000, false);
@@ -140,7 +143,8 @@ class TILW_BaseTriggerEntity : GenericEntity
 		
 		if (shouldChange || m_firstQuery) {
 			TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
-			if (mfe) mfe.AdjustMissionFlag(m_flagName, condition, !m_firstQuery); // Update mission flag
+			if (mfe)
+				mfe.AdjustMissionFlag(m_flagName, condition, !m_firstQuery); // Update mission flag
 			m_lastResult = condition;
 		}
 		
@@ -149,11 +153,14 @@ class TILW_BaseTriggerEntity : GenericEntity
 		if (shouldChange && (!m_eventsOnlyDuringGame || (gamemode && gamemode.GetState() == SCR_EGameModeState.GAME)))
 		{
 			GetGame().GetCallqueue().Call(OnResultChanged, condition); // Call Event method
-			if (m_OnResultChanged) m_OnResultChanged.Invoke(condition); // Invoke ScriptInvoker
-			if (m_stopAfterFirstChange) return; // Perhaps stop doing queries
+			if (m_OnResultChanged)
+				m_OnResultChanged.Invoke(condition); // Invoke ScriptInvoker
+			if (m_stopAfterFirstChange)
+				return; // Perhaps stop doing queries
 		}
 		
-		if (m_firstQuery) m_firstQuery = false;
+		if (m_firstQuery)
+			m_firstQuery = false;
 		GetGame().GetCallqueue().CallLater(QueryLoop, m_queryPeriod * 1000, false);
 	}
 	
@@ -178,8 +185,10 @@ class TILW_BaseTriggerEntity : GenericEntity
 	//! FilterEntity is responsible for filtering out entities that do not meet the triggers requirements.
 	protected bool FilterEntity(IEntity e)
 	{
-		if (!IsMatchingClass(e)) return false;
-		if (!IsMatchingPrefab(e)) return false;
+		if (!IsMatchingClass(e))
+			return false;
+		if (!IsMatchingPrefab(e))
+			return false;
 		
 		return true;
 	}
@@ -190,16 +199,20 @@ class TILW_BaseTriggerEntity : GenericEntity
 	//! IsMatchingPrefab checks if the entity was created from a prefab included in the m_prefabFilter array.
 	protected bool IsMatchingPrefab(IEntity e)
 	{
-		if (m_prefabFilter.IsEmpty()) return true;
+		if (m_prefabFilter.IsEmpty())
+			return true;
 		
 		EntityPrefabData epd = e.GetPrefabData();
-		if (!epd) return false;
+		if (!epd)
+			return false;
 		BaseContainer bc = epd.GetPrefab();
-		if (!bc) return false;
+		if (!bc)
+			return false;
 		
 		foreach (ResourceName rn : m_prefabFilter)
 		{
-			if (SCR_BaseContainerTools.IsKindOf(bc, rn)) return true;
+			if (SCR_BaseContainerTools.IsKindOf(bc, rn))
+				return true;
 		}
 			
 		return false;
@@ -215,11 +228,13 @@ class TILW_BaseTriggerEntity : GenericEntity
 	//! UpdateProgressStatus updated the capture status, and potentially sends a status message to players
 	protected void UpdateProgressStatus(int status) // 0 = was set, 1 = is changing 2 = is no longer changing
 	{	
-		if (status == m_currentStatus) return;
+		if (status == m_currentStatus)
+			return;
 		
 		if (m_sendStatusMessages) {
 			string message = GetStatusMessage(status);
-			if (message != "") SendStatusMessage(message);
+			if (message != "")
+				SendStatusMessage(message);
 		}
 		m_currentStatus = status;
 	}
@@ -268,10 +283,13 @@ class TILW_BaseTriggerEntity : GenericEntity
 		Color c = m_setShapeColor;
 		c.SetA(0.1);
 		
-		if (!m_drawShapeSurface && !m_drawShapeOutline) return;
+		if (!m_drawShapeSurface && !m_drawShapeOutline)
+			return;
 		ShapeFlags flags = ShapeFlags.TRANSP | ShapeFlags.DOUBLESIDE | ShapeFlags.NOZWRITE | ShapeFlags.ONCE | ShapeFlags.NOCULL;
-		if (!m_drawShapeSurface && m_drawShapeOutline) flags = flags | ShapeFlags.WIREFRAME;
-		if (m_drawShapeSurface && !m_drawShapeOutline) flags = flags | ShapeFlags.NOOUTLINE;
+		if (!m_drawShapeSurface && m_drawShapeOutline)
+			flags = flags | ShapeFlags.WIREFRAME;
+		if (m_drawShapeSurface && !m_drawShapeOutline)
+			flags = flags | ShapeFlags.NOOUTLINE;
 		
 		dbgShape = Shape.CreateSphere(c.PackToInt(), flags, GetOrigin(), m_queryRadius);
 	}

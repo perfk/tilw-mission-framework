@@ -73,7 +73,8 @@ class TILW_AOLimitComponent : ScriptComponent
 		
 		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
 		
-		if (RplSession.Mode() == RplMode.Dedicated) return;
+		if (RplSession.Mode() == RplMode.Dedicated)
+			return;
 
 		SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);
 		DrawAO();
@@ -174,13 +175,17 @@ class TILW_AOLimitComponent : ScriptComponent
 	{
 		// Possible optimization: Save result for this vehicle
 		
-		if (m_ignoredVehicles.IsEmpty()) return false;
+		if (m_ignoredVehicles.IsEmpty())
+			return false;
 		
 		EntityPrefabData epd = e.GetPrefabData();
-		if (!epd) return false;
+		if (!epd)
+			return false;
 		BaseContainer bc = epd.GetPrefab();
-		if (!bc) return false;
-		foreach (ResourceName rn : m_ignoredVehicles) if (SCR_BaseContainerTools.IsKindOf(bc, rn)) return true;
+		if (!bc)
+			return false;
+		foreach (ResourceName rn : m_ignoredVehicles) if (SCR_BaseContainerTools.IsKindOf(bc, rn))
+			return true;
 			
 		return false;
 	}
@@ -303,7 +308,7 @@ class TILW_AOLimitComponent : ScriptComponent
 			props.Activate(true);
 			item.SetProps(props);
 			
-			if(lastItem)
+			if (lastItem)
 			{
 				MapLink link = item.LinkTo(lastItem);
 				MapLinkProps linkProps = link.GetMapLinkProps();
@@ -312,7 +317,7 @@ class TILW_AOLimitComponent : ScriptComponent
 				linkProps.SetLineWidth(m_lineWidth);
 			}
 			
-			if(!firstItem)
+			if (!firstItem)
 				firstItem = item;
 			lastItem = item;
 		}

@@ -33,8 +33,8 @@ class TILW_BaseInteraction : ScriptedUserAction
 	//------------------------------------------------------------------------------------------------
     override bool GetActionNameScript(out string outName)
     {
-        outName = (m_actionName);
-        return true;
+		outName = (m_actionName);
+		return true;
     }
     //------------------------------------------------------------------------------------------------
     override bool CanBePerformedScript(IEntity user)
@@ -54,12 +54,12 @@ class TILW_BaseInteraction : ScriptedUserAction
 	//------------------------------------------------------------------------------------------------
 	override bool HasLocalEffectOnlyScript()
 	{
-	    return false;
+		return false;
 	}
 	//------------------------------------------------------------------------------------------------
 	override bool CanBroadcastScript()
 	{
-	    return true;
+		return true;
 	}
 	
 };

@@ -18,8 +18,10 @@ modded class SCR_BaseLockComponent : ScriptComponent
 		if (m_factionLock && !m_factionLock.IsEmpty())
 		{
 			SCR_ChimeraCharacter character = SCR_ChimeraCharacter.Cast(user);
-			if (!character || !character.m_pFactionComponent) return true;
-			if (m_factionLock.Contains(character.m_pFactionComponent.GetAffiliatedFactionKey())) return super.IsLocked(user, compartmentSlot);
+			if (!character || !character.m_pFactionComponent)
+				return true;
+			if (m_factionLock.Contains(character.m_pFactionComponent.GetAffiliatedFactionKey()))
+				return super.IsLocked(user, compartmentSlot);
 		}
 		return IsCompartmentLocked(compartmentSlot) || super.IsLocked(user, compartmentSlot);
 	}
@@ -28,9 +30,12 @@ modded class SCR_BaseLockComponent : ScriptComponent
 	{
 		switch(compartmentSlot.GetType())
 		{
-			case ECompartmentType.PILOT: return m_lockPilot;
-			case ECompartmentType.TURRET: return m_lockTurret;
-			case ECompartmentType.CARGO: return m_lockCargo;
+			case ECompartmentType.PILOT:
+				return m_lockPilot;
+			case ECompartmentType.TURRET:
+				return m_lockTurret;
+			case ECompartmentType.CARGO:
+				return m_lockCargo;
 		}
 		return false;
 	}

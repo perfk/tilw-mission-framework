@@ -21,17 +21,20 @@ class TILW_Flag_EntityDamage : ScriptComponent
 	
 	override void OnPostInit(IEntity owner)
 	{
-		if (!Replication.IsServer()) return;
+		if (!Replication.IsServer())
+			return;
 		GetGame().GetCallqueue().Call(InitDamageFlag);
 	}
 	
 	protected void InitDamageFlag()
 	{
 		SCR_HitZone hz = GetTargetHitZone();
-		if (!hz) return;
+		if (!hz)
+			return;
 		
 		hz.GetOnDamageStateChanged().Insert(OnDamageStateChangedHZ);
-		if (m_initialHealth != 1.0) hz.SetHealthScaled(m_initialHealth);
+		if (m_initialHealth != 1.0)
+			hz.SetHealthScaled(m_initialHealth);
 		GetGame().GetCallqueue().Call(OnDamageStateChangedHZ);
 	}
 	
@@ -39,7 +42,8 @@ class TILW_Flag_EntityDamage : ScriptComponent
 	{
 		EDamageState newState = GetTargetHitZone().GetDamageState();
 		TILW_MissionFrameworkEntity.GetInstance().AdjustMissionFlag(m_flagName, newState == m_targetState);
-		if (!m_continuous && newState == m_targetState) GetTargetHitZone().GetOnDamageStateChanged().Remove(OnDamageStateChangedHZ);
+		if (!m_continuous && newState == m_targetState)
+			GetTargetHitZone().GetOnDamageStateChanged().Remove(OnDamageStateChangedHZ);
 	}
 	
 	protected SCR_HitZone GetTargetHitZone()
@@ -52,8 +56,10 @@ class TILW_Flag_EntityDamage : ScriptComponent
 		SCR_DamageManagerComponent dmc = SCR_DamageManagerComponent.Cast(m);
 		
 		HitZone hitZone;
-		if (m_targetZone != "") hitZone = dmc.GetHitZoneByName(m_targetZone);
-		else hitZone = dmc.GetDefaultHitZone();
+		if (m_targetZone != "")
+			hitZone = dmc.GetHitZoneByName(m_targetZone);
+		else
+			hitZone = dmc.GetDefaultHitZone();
 		
 		if (!hitZone) {
 			Print("TILW_Flag_EntityDamage | Failed to find '" + m_targetZone + "' HitZone - flag will not work.", LogLevel.ERROR);

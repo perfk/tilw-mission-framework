@@ -4,7 +4,8 @@ modded class PS_GameModeCoop : SCR_BaseGameMode
 	{
 		super.TryRespawn(playableId, playerId);
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
-		if (mfe) mfe.PlayerUpdate(0, null);
+		if (mfe)
+			mfe.PlayerUpdate(0, null);
 	}
 	
 	void TILW_SetFactionTicketCount(string fkey, int num)
@@ -22,7 +23,8 @@ modded class PS_GameModeCoop : SCR_BaseGameMode
 	int TILW_GetFactionTicketCount(string fkey)
 	{
 		PS_FactionRespawnCount frc = m_mFactionRespawnCount.Get(fkey);
-		if (!frc) return 0;
+		if (!frc)
+			return 0;
 		return frc.m_iCount;
 	}
 	

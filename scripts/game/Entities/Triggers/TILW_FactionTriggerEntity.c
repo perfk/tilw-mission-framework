@@ -30,10 +30,13 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 	
 	override bool EvaluateCondition()
 	{
-		if (m_totalCount == 0) return !m_comparisonMode;
+		if (m_totalCount == 0)
+			return !m_comparisonMode;
 		float ratio = m_specialCount / m_totalCount;
-		if (!m_comparisonMode) return (ratio <= m_ratioThreshold);
-		else return (m_comparisonMode && ratio >= m_ratioThreshold);
+		if (!m_comparisonMode)
+			return (ratio <= m_ratioThreshold);
+		else
+			return (m_comparisonMode && ratio >= m_ratioThreshold);
 	}
 	
 	
@@ -42,29 +45,38 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 	override bool AddEntity(IEntity e)
 	{
 		SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(e);
-		if (!cc) return true;
-		if (!cc.m_pFactionComponent) return true;
+		if (!cc)
+			return true;
+		if (!cc.m_pFactionComponent)
+			return true;
 		Faction f = cc.m_pFactionComponent.GetAffiliatedFaction();
-		if (!f) return true;
+		if (!f)
+			return true;
 		string fKey = f.GetFactionKey();
-		if (m_ignoredFactions.Contains(fKey)) return true;
+		if (m_ignoredFactions.Contains(fKey))
+			return true;
 		m_totalCount += 1;
-		if (fKey == m_ownerFactionKey) m_specialCount += 1;
+		if (fKey == m_ownerFactionKey)
+			m_specialCount += 1;
 		return true;
 	}
 	
 	override bool FilterEntity(IEntity e)
 	{
-		if (!super.FilterEntity(e)) return false;
+		if (!super.FilterEntity(e))
+			return false;
 		
-		if (IsEntityDestroyed(e)) return false;
+		if (IsEntityDestroyed(e))
+			return false;
 		
 		if (!EntityUtils.IsPlayer(e)) {
-			if (m_playersOnly) return false; // Only players allowed
+			if (m_playersOnly)
+				return false; // Only players allowed
 			Managed m = e.FindComponent(PS_PlayableComponent);
 			if (m_excludeUnusedPlayables && m) {
 				PS_PlayableComponent pc = PS_PlayableComponent.Cast(m);
-				if (pc.GetPlayable()) return false; // Not slotted
+				if (pc.GetPlayable())
+					return false; // Not slotted
 				
 			}
 		}

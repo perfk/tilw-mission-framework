@@ -31,30 +31,40 @@ class TILW_ExtractionTriggerEntity : TILW_BaseTriggerEntity
 		foreach (int playerId : playerIds)
 		{
 			IEntity controlled = GetGame().GetPlayerManager().GetPlayerControlledEntity(playerId);
-			if (!controlled) continue;
+			if (!controlled)
+				continue;
 			SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(controlled);
-			if (!cc) continue;
-			if (!SCR_AIDamageHandling.IsAlive(controlled)) continue;
+			if (!cc)
+				continue;
+			if (!SCR_AIDamageHandling.IsAlive(controlled))
+				continue;
 			
 			Faction f = factionManager.GetPlayerFaction(playerId);
-			if (!f) continue;
+			if (!f)
+				continue;
 			string fkey = f.GetFactionKey();
-			if (fkey != m_factionKey) continue;
+			if (fkey != m_factionKey)
+				continue;
 			
-			if (!IsMatchingPrefab(controlled)) continue;
+			if (!IsMatchingPrefab(controlled))
+				continue;
 			
 			m_totalCount += 1;
-			if (vector.Distance(controlled.GetOrigin(), GetOrigin()) <= m_queryRadius) m_specialCount += 1;
+			if (vector.Distance(controlled.GetOrigin(), GetOrigin()) <= m_queryRadius)
+				m_specialCount += 1;
 			
 		}
 	}
 	
 	override bool EvaluateCondition()
 	{
-		if (m_totalCount == 0) return !m_comparisonMode;
+		if (m_totalCount == 0)
+			return !m_comparisonMode;
 		float ratio = m_specialCount / m_totalCount;
-		if (!m_comparisonMode) return (ratio <= m_ratioThreshold);
-		else return (m_comparisonMode && ratio >= m_ratioThreshold);
+		if (!m_comparisonMode)
+			return (ratio <= m_ratioThreshold);
+		else
+			return (m_comparisonMode && ratio >= m_ratioThreshold);
 	}
 	
 	

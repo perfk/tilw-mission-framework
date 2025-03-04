@@ -7,8 +7,10 @@ class TILW_BaseTerm
 	
 	bool Eval()
 	{
-		if (m_invertTerm) return !Calc();
-		else return Calc();
+		if (m_invertTerm)
+			return !Calc();
+		else
+			return Calc();
 	}
 	
 	bool Calc()
@@ -39,7 +41,8 @@ class TILW_ConjunctionTerm : TILW_OperationTerm
 	{
 		foreach (TILW_BaseTerm term: m_operands)
 		{
-			if (!term.Eval()) return false;
+			if (!term.Eval())
+				return false;
 		}
 		return true;
 	}
@@ -53,7 +56,8 @@ class TILW_DisjunctionTerm : TILW_OperationTerm
 	{
 		foreach (TILW_BaseTerm term: m_operands)
 		{
-			if (term.Eval()) return true;
+			if (term.Eval())
+				return true;
 		}
 		return false;
 	}
@@ -71,8 +75,10 @@ class TILW_MinjunctionTerm : TILW_OperationTerm
 		int numTrue = 0;
 		foreach (TILW_BaseTerm term: m_operands)
 		{
-			if (term.Eval()) numTrue += 1;
-			if (numTrue >= m_minTrue) return true;
+			if (term.Eval())
+				numTrue += 1;
+			if (numTrue >= m_minTrue)
+				return true;
 		}
 		return false;
 	}
@@ -90,8 +96,10 @@ class TILW_MaxjunctionTerm : TILW_OperationTerm
 		int numTrue = 0;
 		foreach (TILW_BaseTerm term: m_operands)
 		{
-			if (term.Eval()) numTrue += 1;
-			if (numTrue > m_maxTrue) return false;
+			if (term.Eval())
+				numTrue += 1;
+			if (numTrue > m_maxTrue)
+				return false;
 		}
 		return true;
 	}
@@ -109,7 +117,8 @@ class TILW_MatchjunctionTerm : TILW_OperationTerm
 		int numTrue = 0;
 		foreach (TILW_BaseTerm term: m_operands)
 		{
-			if (term.Eval()) numTrue += 1;
+			if (term.Eval())
+				numTrue += 1;
 		}
 		return (numTrue == m_matchTrue);
 	}

@@ -12,16 +12,20 @@ class TILW_NavmeshRegenComponent: ScriptComponent
 		return;
 		
 		VolumeEntity ve = VolumeEntity.Cast(owner);
-		if (!ve) GetGame().GetCallqueue().Call(RegenEntity, owner);
-		else GetGame().GetCallqueue().Call(RegenVolume, ve);
+		if (!ve)
+			GetGame().GetCallqueue().Call(RegenEntity, owner);
+		else
+			GetGame().GetCallqueue().Call(RegenVolume, ve);
 	}
 	
 	protected static void RegenEntity(IEntity owner)
 	{
 		AIWorld aiw = GetGame().GetAIWorld();
-		if (!aiw) return;
+		if (!aiw)
+			return;
 		SCR_AIWorld scr_aiw = SCR_AIWorld.Cast(aiw);
-		if (!scr_aiw) return;
+		if (!scr_aiw)
+			return;
 		scr_aiw.RequestNavmeshRebuildEntity(owner);
 	}
 	
@@ -31,8 +35,10 @@ class TILW_NavmeshRegenComponent: ScriptComponent
 		array<float> points2D = new array<float>();
 		
 		AIWorld aiw = GetGame().GetAIWorld();
-		if (!aiw) return;
+		if (!aiw)
+			return;
 		SCR_AIWorld scr_aiw = SCR_AIWorld.Cast(aiw);
-		if (!scr_aiw) return;
+		if (!scr_aiw)
+			return;
 	}
 }

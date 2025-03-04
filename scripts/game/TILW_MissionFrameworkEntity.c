@@ -431,7 +431,8 @@ class TILW_FactionPlayersKilledFlag : TILW_BaseCasualtyFlag
 			return;
 		
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
-		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey)) return;
+		if (!GetGame().GetFactionManager().GetFactionByKey(m_factionKey))
+			return;
 		
 		mfe.AdjustMissionFlag(m_flagName, mfe.m_curAliveFactionPlayers.Get(m_factionKey) <= mfe.m_maxAliveFactionPlayers.Get(m_factionKey) * (1 - m_casualtyRatio));
 	}

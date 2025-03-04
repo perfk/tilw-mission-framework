@@ -4,7 +4,8 @@ modded class SCR_AICombatComponent : ScriptComponent
 	
 	override bool DismountTurretCondition(inout vector targetPos, bool targetPosProvided)
 	{
-		if (m_neverDismountTurret) return false;
+		if (m_neverDismountTurret)
+			return false;
 		return super.DismountTurretCondition(targetPos, targetPosProvided);
 	}
 }

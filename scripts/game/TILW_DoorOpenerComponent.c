@@ -13,7 +13,8 @@ class TILW_DoorOpenerComponent: ScriptComponent
 	
 	override void OnPostInit(IEntity owner)
 	{
-		if (!Replication.IsServer()) return;
+		if (!Replication.IsServer())
+			return;
 		GetGame().GetCallqueue().Call(PerformDoorQuery, owner);
 	}
 	
@@ -24,11 +25,13 @@ class TILW_DoorOpenerComponent: ScriptComponent
 	
 	protected bool ProcessEntity(IEntity e)
 	{
-		if (!e) return true;
+		if (!e)
+			return true;
 		
 		array<Managed> comps = {};
 		e.FindComponents(DoorComponent, comps);
-		if (comps.IsEmpty()) return true;
+		if (comps.IsEmpty())
+			return true;
 		
 		foreach (Managed c : comps)
 		{

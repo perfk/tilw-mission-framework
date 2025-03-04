@@ -137,13 +137,15 @@ class TILW_SpawnPrefabInstruction : TILW_BaseInstruction
 	override void Execute()
 	{
 		IEntity e = GetGame().GetWorld().FindEntityByName(m_locationName);
-		if (!e) return;
+		if (!e)
+			return;
 		EntitySpawnParams spawnParams = new EntitySpawnParams();
 		vector mat[4];
 		e.GetWorldTransform(mat);
 		spawnParams.Transform = mat;
 		m_spawnedEntity = GetGame().SpawnEntityPrefab(Resource.Load(m_prefab), GetGame().GetWorld(), spawnParams);
-		if (m_spawnedEntity && m_setEntityName != "") m_spawnedEntity.SetName(m_setEntityName);
+		if (m_spawnedEntity && m_setEntityName != "")
+			m_spawnedEntity.SetName(m_setEntityName);
 	}
 	
 }
@@ -160,16 +162,20 @@ class TILW_SpawnGroupInstruction : TILW_SpawnPrefabInstruction
 	override void Execute()
 	{
 		super.Execute();
-		if (!m_spawnedEntity) return;
+		if (!m_spawnedEntity)
+			return;
 		SCR_AIGroup group = SCR_AIGroup.Cast(m_spawnedEntity);
-		if (!group) return;
+		if (!group)
+			return;
 		
 		foreach (string wpn : m_waypointNames)
 		{
 			IEntity e = GetGame().GetWorld().FindEntityByName(wpn);
-			if (!e) continue;
+			if (!e)
+				continue;
 			AIWaypoint wp = AIWaypoint.Cast(e);
-			if (wp) group.AddWaypoint(wp);
+			if (wp)
+				group.AddWaypoint(wp);
 		}
 	}
 }
@@ -204,18 +210,23 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 	
 	protected void AddCrew()
 	{
-		if (!m_spawnedEntity) return;
+		if (!m_spawnedEntity)
+			return;
 		Managed m = m_spawnedEntity.FindComponent(SCR_BaseCompartmentManagerComponent);
-		if (!m) return;
+		if (!m)
+			return;
 		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
 		
 		array<BaseCompartmentSlot> slots = {};
 		cm.GetCompartments(slots);
 		
 		array<ECompartmentType> cTypes = {};
-		if (m_spawnPilot) cTypes.Insert(ECompartmentType.PILOT);
-		if (m_spawnTurret) cTypes.Insert(ECompartmentType.TURRET);
-		if (m_spawnCargo) cTypes.Insert(ECompartmentType.CARGO);
+		if (m_spawnPilot)
+			cTypes.Insert(ECompartmentType.PILOT);
+		if (m_spawnTurret)
+			cTypes.Insert(ECompartmentType.TURRET);
+		if (m_spawnCargo)
+			cTypes.Insert(ECompartmentType.CARGO);
 		
 		GetGame().GetCallqueue().Call(TILW_VehicleCrewComponent.SpawnCrew, slots, cTypes, m_customCrew, null, null, m_waypointNames, m_waypointDelay, false, m_idleGroup);
 	}
@@ -238,23 +249,28 @@ class TILW_AssignWaypointsInstruction : TILW_BaseInstruction
 	override void Execute()
 	{
 		IEntity ge = GetGame().GetWorld().FindEntityByName(m_groupName);
-		if (!ge) return;
+		if (!ge)
+			return;
 		SCR_AIGroup group = SCR_AIGroup.Cast(ge);
-		if (!group) return;
+		if (!group)
+			return;
 		
 		if (m_clearExisting)
 		{
 			array<AIWaypoint> wps = {};
 			group.GetWaypoints(wps);
-			foreach (AIWaypoint wp: wps) group.RemoveWaypoint(wp);
+			foreach (AIWaypoint wp: wps)
+				group.RemoveWaypoint(wp);
 		}
 		
 		foreach (string wpn : m_waypointNames)
 		{
 			IEntity e = GetGame().GetWorld().FindEntityByName(wpn);
-			if (!e) continue;
+			if (!e)
+				continue;
 			AIWaypoint wp = AIWaypoint.Cast(e);
-			if (wp) group.AddWaypoint(wp);
+			if (wp)
+				group.AddWaypoint(wp);
 		}
 	}
 }
@@ -272,7 +288,8 @@ class TILW_DeleteEntitiesInstruction : TILW_BaseInstruction
 		foreach (string name : m_entityNames)
 		{
 			IEntity e = GetGame().GetWorld().FindEntityByName(name);
-			if (e) SCR_EntityHelper.DeleteEntityAndChildren(e);
+			if (e)
+				SCR_EntityHelper.DeleteEntityAndChildren(e);
 		}
 	}
 }
@@ -310,7 +327,8 @@ class TILW_DeleteOpenSlotsInstruction : TILW_BaseInstruction
 	override void Execute()
 	{
 		PS_PlayableManager pm = PS_PlayableManager.GetInstance();
-		if (!pm) return;
+		if (!pm)
+			return;
 		foreach (RplId id, PS_PlayableComponent pc : pm.GetPlayables())
 		{
 			if (!pc || pm.GetPlayerByPlayable(pc.GetId()) != -1)
@@ -386,16 +404,28 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 	override void Execute()
 	{
 		BaseGameMode bgm = GetGame().GetGameMode();
-		if (!bgm) return;
+		if (!bgm)
+			return;
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(bgm);
 		int num = gm.TILW_GetFactionTicketCount(m_factionKey);
 		switch (m_operation) {
-			case TILW_EVariableOperation.SET:	num = m_amount; break;
-			case TILW_EVariableOperation.ADD:	num += m_amount; break;
-			case TILW_EVariableOperation.SUB: num -= m_amount; break;
-			case TILW_EVariableOperation.MUL:	num *= m_amount; break;
-			case TILW_EVariableOperation.DIV: num /= m_amount; break;
-			default: return;
+			case TILW_EVariableOperation.SET:
+				num = m_amount;
+				break;
+			case TILW_EVariableOperation.ADD:
+				num += m_amount;
+				break;
+			case TILW_EVariableOperation.SUB:
+				num -= m_amount;
+				break;
+			case TILW_EVariableOperation.MUL:
+				num *= m_amount;
+				break;
+			case TILW_EVariableOperation.DIV:
+				num /= m_amount;
+				break;
+			default:
+				return;
 		}
 		gm.TILW_SetFactionTicketCount(m_factionKey, num);
 		
@@ -451,14 +481,18 @@ class TILW_EditMapItemInstruction : TILW_BaseInstruction
 				continue;
 			PS_ManualMarker c1 = PS_ManualMarker.Cast(itemEntity);
 			PS_MissionDescription c2 = PS_MissionDescription.Cast(itemEntity);
-			if (c1) c1.SetVisibleForEmptyFaction(m_visibleForEmpty);
-			if (c2) c2.SetVisibleForEmptyFaction(m_visibleForEmpty);
+			if (c1)
+				c1.SetVisibleForEmptyFaction(m_visibleForEmpty);
+			if (c2)
+				c2.SetVisibleForEmptyFaction(m_visibleForEmpty);
 			SCR_FactionManager factionManager = SCR_FactionManager.Cast(GetGame().GetFactionManager());
 			foreach (TILW_FactionVisibility fv : m_factionVisibility)
 			{
 				Faction f = factionManager.GetFactionByKey(fv.m_factionKey);
-				if (c1) c1.SetVisibleForFaction(f, fv.m_visible);
-				if (c2) c2.SetVisibleForFaction(f, fv.m_visible);
+				if (c1)
+					c1.SetVisibleForFaction(f, fv.m_visible);
+				if (c2)
+					c2.SetVisibleForFaction(f, fv.m_visible);
 			}
 		}
 	}

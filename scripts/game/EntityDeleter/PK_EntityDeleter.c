@@ -1,4 +1,4 @@
-[EntityEditorProps(category: "GameScripted/ScriptWizard", description: "Deletes entities in certain radius.")]
+[EntityEditorProps(category: "GameScripted/", description: "Deletes entities in certain radius.")]
 class PK_EntityDeleterClass : GenericEntityClass
 {
 }

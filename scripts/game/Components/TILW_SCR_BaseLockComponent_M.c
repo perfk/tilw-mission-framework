@@ -1,17 +1,17 @@
 modded class SCR_BaseLockComponent : ScriptComponent
 {
-	[Attribute("0", UIWidgets.Auto, desc: "Lock Driver compartments", category: "Lock"), RplProp()]
+	
+	// DOES NOT WORK IN MP BECAUSE OF RPL SYSTEM FAILURE WHEN ADDING RPLPROP
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Lock Driver compartments", category: "Lock")]
 	protected bool m_lockPilot;
-	[Attribute("0", UIWidgets.Auto, desc: "Lock Gunner compartments\nWarning, this will not affect separate entities with their own lock components, like the BTR turret.", category: "Lock"), RplProp()]
+	[Attribute("0", UIWidgets.Auto, desc: "Lock Gunner compartments\nWarning, this will not affect separate entities with their own lock components, like the BTR turret.", category: "Lock")]
 	protected bool m_lockTurret;
-	[Attribute("0", UIWidgets.Auto, desc: "Lock Passenger compartments", category: "Lock"), RplProp()]
+	[Attribute("0", UIWidgets.Auto, desc: "Lock Passenger compartments", category: "Lock")]
 	protected bool m_lockCargo;
 	
-	[Attribute("", UIWidgets.ResourceAssignArray, "If defined, only the specified factions are allowed to access the locked compartments.", category: "Lock"), RplProp()]
+	[Attribute("", UIWidgets.ResourceAssignArray, "If defined, only the specified factions are allowed to access the locked compartments.", category: "Lock")]
 	protected ref array<string> m_factionLock;
-	
-	// compartment locking
-	// faction locking
 	
 	override bool IsLocked(IEntity user, BaseCompartmentSlot compartmentSlot)
 	{

@@ -369,7 +369,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 
 // ----- META FLAGS -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-[BaseContainerProps(), BaseContainerCustomStringTitleField("Meta Flag")]
+[BaseContainerProps(), BaseContainerCustomTitleField("m_flagName")]
 class TILW_MetaFlag
 {
 	[Attribute("", UIWidgets.Auto, desc: "New flag to be defined as a combination of other flags.")]

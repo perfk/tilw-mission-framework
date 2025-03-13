@@ -184,22 +184,25 @@ class TILW_SpawnGroupInstruction : TILW_SpawnPrefabInstruction
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Spawn Crewed Vehicle")]
 class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 {
-	[Attribute("1", UIWidgets.Auto, desc: "Spawn Driver", category: "Default Crew")]
+	[Attribute("", UIWidgets.Object, desc: "Defines the vehicles crew - you may drag existing configs into here.", category: "Crew")]
+	protected ref TILW_CrewConfig m_crewConfig;
+	
+	[Attribute("1", UIWidgets.Auto, desc: "Spawn Driver", category: "Deprecated")]
 	protected bool m_spawnPilot;
-	[Attribute("1", UIWidgets.Auto, desc: "Spawn Gunner", category: "Default Crew")]
+	[Attribute("1", UIWidgets.Auto, desc: "Spawn Gunner", category: "Deprecated")]
 	protected bool m_spawnTurret;
-	[Attribute("1", UIWidgets.Auto, desc: "Spawn Passengers", category: "Default Crew")]
+	[Attribute("1", UIWidgets.Auto, desc: "Spawn Passengers", category: "Deprecated")]
 	protected bool m_spawnCargo;
 	
-	[Attribute("", UIWidgets.ResourceAssignArray, desc: "If defined, fill seats with these characters instead of the vehicles default characters. \nList of character prefabs, empty resources will become empty seats. \nYou can check the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartsments (e. g. BTR gunner) come afterwards.", category: "Crew", params: "et")]
+	[Attribute("", UIWidgets.ResourceAssignArray, desc: "If defined, fill seats with these characters instead of the vehicles default characters. \nList of character prefabs, empty resources will become empty seats. \nYou can check the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartsments (e. g. BTR gunner) come afterwards.", category: "Deprecated", params: "et")]
 	protected ref array<ResourceName> m_customCrew;
 	
-	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assinged after waypoint delay", category: "Waypoints")]
+	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assinged after waypoint delay", category: "Deprecated")]
 	protected ref array<string> m_waypointNames;
-	[Attribute("5", UIWidgets.Auto, desc: "After how many additional seconds to assign the waypoints", category: "Waypoints", params: "0 inf 0.1")]
+	[Attribute("5", UIWidgets.Auto, desc: "After how many additional seconds to assign the waypoints", category: "Deprecated", params: "0 inf 0.1")]
 	protected float m_waypointDelay;
 	
-	[Attribute("0", UIWidgets.Auto, desc: "Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow the waypoint.", category: "Other")]
+	[Attribute("0", UIWidgets.Auto, desc: "Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow the waypoint.", category: "Deprecated")]
 	protected bool m_idleGroup;
 	
 	override void Execute()
@@ -217,6 +220,13 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 			return;
 		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
 		
+		if (m_crewConfig)
+		{
+			m_crewConfig.m_cm = cm;
+			m_crewConfig.SpawnNextGroup(false);
+			return;
+		}
+		
 		array<BaseCompartmentSlot> slots = {};
 		cm.GetCompartments(slots);
 		
@@ -228,7 +238,9 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 		if (m_spawnCargo)
 			cTypes.Insert(ECompartmentType.CARGO);
 		
-		GetGame().GetCallqueue().Call(TILW_VehicleCrewComponent.SpawnCrew, slots, cTypes, m_customCrew, null, null, m_waypointNames, m_waypointDelay, false, m_idleGroup);
+		array<AIGroup> groups = {null, null};
+		array<bool> boolParams = {false, m_idleGroup};
+		GetGame().GetCallqueue().Call(TILW_VehicleCrewComponent.SpawnCrew, slots, cTypes, m_customCrew, groups, boolParams, m_waypointNames, m_waypointDelay);
 	}
 }
 

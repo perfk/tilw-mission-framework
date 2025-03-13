@@ -164,19 +164,11 @@ class TILW_SpawnGroupInstruction : TILW_SpawnPrefabInstruction
 		super.Execute();
 		if (!m_spawnedEntity)
 			return;
-		SCR_AIGroup group = SCR_AIGroup.Cast(m_spawnedEntity);
+		AIGroup group = AIGroup.Cast(m_spawnedEntity);
 		if (!group)
 			return;
 		
-		foreach (string wpn : m_waypointNames)
-		{
-			IEntity e = GetGame().GetWorld().FindEntityByName(wpn);
-			if (!e)
-				continue;
-			AIWaypoint wp = AIWaypoint.Cast(e);
-			if (wp)
-				group.AddWaypoint(wp);
-		}
+		TILW_CrewGroup.AssignWaypoints(group, m_waypointNames);
 	}
 }
 
@@ -187,22 +179,22 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 	[Attribute("", UIWidgets.Object, desc: "Defines the vehicles crew - you may drag existing configs into here.", category: "Crew")]
 	protected ref TILW_CrewConfig m_crewConfig;
 	
-	[Attribute("1", UIWidgets.Auto, desc: "Spawn Driver", category: "Deprecated")]
+	[Attribute("1", UIWidgets.Auto, desc: "DEPRECATED - Spawn Driver", category: "Deprecated")]
 	protected bool m_spawnPilot;
-	[Attribute("1", UIWidgets.Auto, desc: "Spawn Gunner", category: "Deprecated")]
+	[Attribute("1", UIWidgets.Auto, desc: "DEPRECATED - Spawn Gunner", category: "Deprecated")]
 	protected bool m_spawnTurret;
-	[Attribute("1", UIWidgets.Auto, desc: "Spawn Passengers", category: "Deprecated")]
+	[Attribute("1", UIWidgets.Auto, desc: "DEPRECATED - Spawn Passengers", category: "Deprecated")]
 	protected bool m_spawnCargo;
 	
-	[Attribute("", UIWidgets.ResourceAssignArray, desc: "If defined, fill seats with these characters instead of the vehicles default characters. \nList of character prefabs, empty resources will become empty seats. \nYou can check the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartsments (e. g. BTR gunner) come afterwards.", category: "Deprecated", params: "et")]
+	[Attribute("", UIWidgets.ResourceAssignArray, desc: "DEPRECATED - If defined, fill seats with these characters instead of the vehicles default characters. \nList of character prefabs, empty resources will become empty seats. \nYou can check the vehicles CompartmentManagerComponent for the primary compartments slot order, secondary compartsments (e. g. BTR gunner) come afterwards.", category: "Deprecated", params: "et")]
 	protected ref array<ResourceName> m_customCrew;
 	
-	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assinged after waypoint delay", category: "Deprecated")]
+	[Attribute("", UIWidgets.Auto, desc: "DEPRECATED - Names of existing waypoints to be assinged after waypoint delay", category: "Deprecated")]
 	protected ref array<string> m_waypointNames;
-	[Attribute("5", UIWidgets.Auto, desc: "After how many additional seconds to assign the waypoints", category: "Deprecated", params: "0 inf 0.1")]
+	[Attribute("5", UIWidgets.Auto, desc: "DEPRECATED - After how many additional seconds to assign the waypoints", category: "Deprecated", params: "0 inf 0.1")]
 	protected float m_waypointDelay;
 	
-	[Attribute("0", UIWidgets.Auto, desc: "Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow the waypoint.", category: "Deprecated")]
+	[Attribute("0", UIWidgets.Auto, desc: "DEPRECATED - Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow the waypoint.", category: "Deprecated")]
 	protected bool m_idleGroup;
 	
 	override void Execute()
@@ -263,7 +255,7 @@ class TILW_AssignWaypointsInstruction : TILW_BaseInstruction
 		IEntity ge = GetGame().GetWorld().FindEntityByName(m_groupName);
 		if (!ge)
 			return;
-		SCR_AIGroup group = SCR_AIGroup.Cast(ge);
+		AIGroup group = AIGroup.Cast(ge);
 		if (!group)
 			return;
 		
@@ -275,15 +267,7 @@ class TILW_AssignWaypointsInstruction : TILW_BaseInstruction
 				group.RemoveWaypoint(wp);
 		}
 		
-		foreach (string wpn : m_waypointNames)
-		{
-			IEntity e = GetGame().GetWorld().FindEntityByName(wpn);
-			if (!e)
-				continue;
-			AIWaypoint wp = AIWaypoint.Cast(e);
-			if (wp)
-				group.AddWaypoint(wp);
-		}
+		TILW_CrewGroup.AssignWaypoints(group, m_waypointNames);
 	}
 }
 

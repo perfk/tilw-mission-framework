@@ -5,7 +5,7 @@ class TILW_CrewConfig
 	[Attribute("", UIWidgets.Object, desc: "AI groups spawned in the vehicle. You could e. g. separate the gunner from the rest, or the crew and multiple squads.")]
 	protected ref array<ref TILW_CrewGroup> m_crewGroups;
 	
-	[Attribute("0", UIWidgets.Auto, desc: "If entity is a static turret, prevent the gunner from dismounting, even if unable to engage threats.")]
+	[Attribute("0", UIWidgets.Auto, desc: "If entity is a static turret, prevent gunner AI from dismounting, even if unable to engage threats.")]
 	bool m_noTurretDismount;
 	
 	SCR_BaseCompartmentManagerComponent m_cm;
@@ -36,6 +36,9 @@ class TILW_CrewGroup
 	[Attribute("", UIWidgets.Auto, desc: "Names of existing waypoints to be assigned to the group", category: "Waypoints")]
 	protected ref array<string> m_waypointNames;
 	
+	[Attribute("0", UIWidgets.Auto, desc: "After how many seconds to assign these waypoints", category: "Waypoints", params: "0 inf 0.1")]
+	protected float m_waypointDelay;
+	
 	protected TILW_CrewConfig m_cc;
 	protected AIGroup m_aiGroup = null;
 	protected ref array<BaseCompartmentSlot> m_validSlots = {};
@@ -53,7 +56,7 @@ class TILW_CrewGroup
 		if (m_validSlots.IsEmpty())
 		{
 			// Finished spawning
-			AssignWaypoints();
+			GetGame().GetCallqueue().CallLater(AssignWaypoints, m_waypointDelay * 1000, false, m_aiGroup, m_waypointNames);
 			m_cc.SpawnNextGroup();
 			return;
 		}
@@ -87,11 +90,11 @@ class TILW_CrewGroup
 		
 	}
 	
-	protected void AssignWaypoints()
+	static void AssignWaypoints(AIGroup g, array<string> waypointNames)
 	{
-		if (!m_aiGroup)
+		if (!g || !waypointNames)
 			return;
-		foreach (string name : m_waypointNames)
+		foreach (string name : waypointNames)
 		{
 			IEntity e = GetGame().GetWorld().FindEntityByName(name);
 			if (!e)
@@ -99,7 +102,7 @@ class TILW_CrewGroup
 			AIWaypoint wp = AIWaypoint.Cast(e);
 			if (!wp)
 				continue;
-			m_aiGroup.AddWaypoint(wp);
+			g.AddWaypoint(wp);
 		}
 	}
 	

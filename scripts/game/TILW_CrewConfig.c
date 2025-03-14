@@ -38,7 +38,7 @@ class TILW_CrewGroup
 	[Attribute("", UIWidgets.Auto, desc: "Optional. Display name, used to set the name of player groups. ONLY DISPLAYED IN MP.", category: "Group")]
 	string m_displayName; // only works in mp
 	
-	[Attribute("", UIWidgets.Auto, desc: "Optional. Unique entity name for this group, to be used when creating a group with members outside of this vehicle.", category: "Group")]
+	[Attribute("", UIWidgets.Auto, desc: "Optional. Unique entity name for this group, to be used when creating a group with members outside of this vehicle. Groups with the same name are essentially merged.\nONLY SET THIS ON A MISSION LEVEL!", category: "Group")]
 	string m_entityName;
 	
 	[Attribute("1", UIWidgets.Auto, desc: "Whether this group should be spawned.", category: "Group")]

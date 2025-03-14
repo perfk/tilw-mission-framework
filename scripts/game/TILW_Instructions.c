@@ -179,6 +179,7 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 	[Attribute("", UIWidgets.Object, desc: "Defines the vehicles crew - you may drag existing configs into here.", category: "Crew")]
 	protected ref TILW_CrewConfig m_crewConfig;
 	
+	
 	[Attribute("1", UIWidgets.Auto, desc: "DEPRECATED - Spawn Driver", category: "Deprecated")]
 	protected bool m_spawnPilot;
 	[Attribute("1", UIWidgets.Auto, desc: "DEPRECATED - Spawn Gunner", category: "Deprecated")]
@@ -230,9 +231,7 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 		if (m_spawnCargo)
 			cTypes.Insert(ECompartmentType.CARGO);
 		
-		array<AIGroup> groups = {null, null};
-		array<bool> boolParams = {false, m_idleGroup};
-		GetGame().GetCallqueue().Call(TILW_VehicleCrewComponent.SpawnCrew, slots, cTypes, m_customCrew, groups, boolParams, m_waypointNames, m_waypointDelay);
+		GetGame().GetCallqueue().Call(TILW_VehicleCrewComponent.SpawnCrew, slots, cTypes, m_customCrew, null, null, m_waypointNames, m_waypointDelay, false, m_idleGroup);
 	}
 }
 

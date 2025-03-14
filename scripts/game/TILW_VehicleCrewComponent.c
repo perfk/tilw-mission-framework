@@ -35,9 +35,6 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	[Attribute("0", UIWidgets.Auto, desc: "Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow a higher priority waypoint.", category: "Deprecated")]
 	protected bool m_idleGroup;
 	
-	[Attribute("0", UIWidgets.Auto, desc: "After how many seconds to spawn the crew - useful for timing otherwise simultaneous VCC spawns.", category: "Deprecated", params: "0 inf 0.1")]
-	protected float m_spawnDelay;
-	
 	
 	override void OnPostInit(IEntity owner)
 	{
@@ -75,7 +72,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		if (m_crewConfig)
 			m_crewConfig.SpawnNextGroup(false);
 		else
-			GetGame().GetCallqueue().CallLater(AddCrew, m_spawnDelay * 1000, false);
+			GetGame().GetCallqueue().Call(AddCrew);
 	}
 	
 	protected void AddCrew()
@@ -89,7 +86,6 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		array<BaseCompartmentSlot> slots = {};
 		cm.GetCompartments(slots);
-		Print(slots);
 		
 		array<ECompartmentType> cTypes = {};
 		if (m_spawnPilot)
@@ -99,29 +95,15 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		if (m_spawnCargo)
 			cTypes.Insert(ECompartmentType.CARGO);
 		
-		array<AIGroup> groups = {null, null};
-		array<bool> boolParams = {m_noTurretDismount, m_idleGroup};
-		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, m_customCrew, groups, boolParams, m_waypointNames, m_waypointDelay, this);
+		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, m_customCrew, null, null, m_waypointNames, m_waypointDelay, m_noTurretDismount, m_idleGroup);
 	}
 	
-	static void SpawnCrew(array<BaseCompartmentSlot> slots, array<ECompartmentType> cTypes, array<ResourceName> characters, array<AIGroup> groups, array<bool> boolParams, array<string> waypointNames = null, float wpDelay = 0, TILW_VehicleCrewComponent vcc = null)
+	static void SpawnCrew(array<BaseCompartmentSlot> slots, array<ECompartmentType> cTypes, array<ResourceName> characters, AIGroup mainGroup, AIGroup idleGroup, array<string> waypointNames = null, float wpDelay = 0, bool noTurretDismount = false, bool useIdleGroup = false)
 	{
-		bool noTurretDismount = boolParams[0];
-		bool useIdleGroup = boolParams[1];
-		
-		AIGroup mainGroup = groups[0];
-		AIGroup idleGroup = groups[1];
-		
 		if (slots.IsEmpty() || !characters) // No more slots, or characters have been exhausted (and array has been set to null)
 		{
-			GetGame().GetCallqueue().CallLater(AddWaypointsStatic, wpDelay * 1000, false, groups[0], waypointNames);
-			return;
-		}
-		
-		if (slots[0].IsOccupied())
-		{
-			slots.RemoveOrdered(0);
-			GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, characters, groups, boolParams, waypointNames, wpDelay);
+			// Finished spawning characters
+			GetGame().GetCallqueue().CallLater(AddWaypointsStatic, wpDelay * 1000, false, mainGroup, waypointNames);
 			return;
 		}
 		
@@ -129,16 +111,13 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		IEntity ce;
 		
 		bool isValidType = cTypes.Contains(slots[0].GetType()); // is this slots type allowed
-		if (!characters.IsEmpty() && characters[0] != "" && isValidType)
-		{ // character array not empty, use these
+		if (!characters.IsEmpty() && characters[0] != "" && isValidType) { // character array not empty, use these
 			// Custom character
 			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET)
 				ce = slots[0].SpawnCharacterInCompartment(characters[0], idleGroup);
 			else
 				ce = slots[0].SpawnCharacterInCompartment(characters[0], mainGroup);
-		}
-		else if (characters.IsEmpty() && isValidType)
-		{ // character array empty (but not null), use default characters
+		} else if (characters.IsEmpty() && isValidType) { // character array empty (but not null), use default characters
 			// Default character
 			if (useIdleGroup && slots[0].GetType() == ECompartmentType.TURRET)
 				ce = slots[0].SpawnDefaultCharacterInCompartment(idleGroup);
@@ -146,15 +125,10 @@ class TILW_VehicleCrewComponent: ScriptComponent
 				ce = slots[0].SpawnDefaultCharacterInCompartment(mainGroup);
 		}
 		
-		
-		groups[0] = mainGroup;
-		groups[1] = idleGroup;
-		
 		// Prevent turret dismount
 		if (ce && noTurretDismount && slots[0].GetType() == ECompartmentType.TURRET) {
 			Managed m = ce.FindComponent(SCR_AICombatComponent);
-			if (m)
-			{
+			if (m) {
 				SCR_AICombatComponent cc = SCR_AICombatComponent.Cast(m);
 				cc.m_neverDismountTurret = true;
 			}
@@ -162,16 +136,15 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		// Remove from spawn list
 		if (slots && !slots.IsEmpty())
-			slots.RemoveOrdered(0);
-		if (!characters.IsEmpty() && isValidType)
-		{ // if character from array was spawned, remove it
-			characters.RemoveOrdered(0);
+			slots.Remove(0);
+		if (!characters.IsEmpty() && isValidType) { // if character from array was spawned, remove it
+			characters.Remove(0);
 			if (characters.IsEmpty())
 				characters = null; // if this was the last character, set to null as sign to stop
 		}
 		
 		// Queue up next character
-		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, characters, groups, boolParams, waypointNames, wpDelay);
+		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, characters, mainGroup, idleGroup, waypointNames, wpDelay, noTurretDismount, useIdleGroup);
 	}
 	
 	static void AddWaypointsStatic(AIGroup g, array<string> waypointNames)

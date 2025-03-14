@@ -89,6 +89,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		array<BaseCompartmentSlot> slots = {};
 		cm.GetCompartments(slots);
+		Print(slots);
 		
 		array<ECompartmentType> cTypes = {};
 		if (m_spawnPilot)
@@ -100,7 +101,6 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		array<AIGroup> groups = {null, null};
 		array<bool> boolParams = {m_noTurretDismount, m_idleGroup};
-		Print(m_customCrew);
 		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, m_customCrew, groups, boolParams, m_waypointNames, m_waypointDelay, this);
 	}
 	

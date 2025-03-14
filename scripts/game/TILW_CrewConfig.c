@@ -67,15 +67,25 @@ class TILW_CrewGroup
 		else
 		{
 			// Finished spawning group
-			GetGame().GetCallqueue().CallLater(AssignWaypoints, m_waypointDelay * 1000, false, m_aiGroup, m_waypointNames);
+			GetGame().GetCallqueue().CallLater(AssignWaypoints, m_waypointDelay * 1000, false, m_aiGroup, m_waypointNames, false, true);
 			m_cc.SpawnNextGroup();
 		}
 	}
 	
-	static void AssignWaypoints(AIGroup g, array<string> waypointNames)
+	static void AssignWaypoints(AIGroup g, array<string> waypointNames, bool clearExisting = false, bool initial = false)
 	{
 		if (!g || !waypointNames)
 			return;
+		if (clearExisting || initial)
+		{
+			array<AIWaypoint> wps = {};
+			g.GetWaypoints(wps);
+			if (initial && wps.Count() > 0)
+				return;
+			if (clearExisting)
+				foreach (AIWaypoint wp: wps)
+					g.RemoveWaypoint(wp);
+		}
 		foreach (string name : waypointNames)
 		{
 			IEntity e = GetGame().GetWorld().FindEntityByName(name);

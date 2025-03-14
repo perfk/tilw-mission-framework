@@ -258,15 +258,7 @@ class TILW_AssignWaypointsInstruction : TILW_BaseInstruction
 		if (!group)
 			return;
 		
-		if (m_clearExisting)
-		{
-			array<AIWaypoint> wps = {};
-			group.GetWaypoints(wps);
-			foreach (AIWaypoint wp: wps)
-				group.RemoveWaypoint(wp);
-		}
-		
-		TILW_CrewGroup.AssignWaypoints(group, m_waypointNames);
+		TILW_CrewGroup.AssignWaypoints(group, m_waypointNames, m_clearExisting, false);
 	}
 }
 

@@ -103,7 +103,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		if (slots.IsEmpty() || !characters) // No more slots, or characters have been exhausted (and array has been set to null)
 		{
 			// Finished spawning characters
-			GetGame().GetCallqueue().CallLater(AddWaypointsStatic, wpDelay * 1000, false, mainGroup, waypointNames);
+			GetGame().GetCallqueue().CallLater(TILW_CrewGroup.AssignWaypoints, wpDelay * 1000, false, mainGroup, waypointNames, false, false);
 			return;
 		}
 		
@@ -145,22 +145,6 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		// Queue up next character
 		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, characters, mainGroup, idleGroup, waypointNames, wpDelay, noTurretDismount, useIdleGroup);
-	}
-	
-	static void AddWaypointsStatic(AIGroup g, array<string> waypointNames)
-	{
-		if (!g || !waypointNames || waypointNames.IsEmpty())
-			return;
-		foreach (string name : waypointNames)
-		{
-			IEntity e = GetGame().GetWorld().FindEntityByName(name);
-			if (!e)
-				continue;
-			AIWaypoint wp = AIWaypoint.Cast(e);
-			if (!wp)
-				continue;
-			g.AddWaypoint(wp);
-		}
 	}
 	
 	static void PreventTurretDismount(SCR_BaseCompartmentManagerComponent cm)

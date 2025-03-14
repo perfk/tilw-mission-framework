@@ -63,7 +63,7 @@ class TILW_CrewGroup
 		if (removePrevious)
 			m_crewStations.RemoveOrdered(0);
 		if (!m_crewStations.IsEmpty())
-			m_crewStations[0].Spawn(this);
+			GetGame().GetCallqueue().Call(m_crewStations[0].Spawn, this);
 		else
 		{
 			// Finished spawning group

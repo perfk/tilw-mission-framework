@@ -217,7 +217,7 @@ class TILW_CrewStation
 		foreach (BaseCompartmentSlot slot: compartmentSlots)
 		{
 			if (slot && cTypes.Contains(slot.GetType()) && !slot.IsOccupied() && slot.IsCompartmentAccessible() && (!m_characters.IsEmpty() || !slot.GetDefaultOccupantPrefab().IsEmpty()))
-				m_validSlots.InsertAt(slot, 0);
+				m_validSlots.Insert(slot);
 		}
 	}
 }

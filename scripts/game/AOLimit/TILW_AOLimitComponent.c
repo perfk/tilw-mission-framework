@@ -17,7 +17,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	protected ref array<ResourceName> m_ignoredVehicles;
 	
 	// [Attribute("1", UIWidgets.Auto, "How many seconds pass between checking if players are still in AO", params: "0.25 inf 0.25", category: "Logic")]
-	protected float m_checkFrequency = 1;
+	protected float m_checkFrequency = 0.5;
 	
 	
 	// Visualization

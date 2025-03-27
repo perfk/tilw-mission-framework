@@ -43,15 +43,6 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		if (!Replication.IsServer() || !GetGame().InPlayMode())
 			return;
 		
-		if (m_crewConfig)
-		{
-		
-			Managed m = GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent);
-			if (!m)
-				return;
-			m_crewConfig.m_cm = SCR_BaseCompartmentManagerComponent.Cast(m);
-		}
-		
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
 		if (!gm)
 			return;
@@ -70,7 +61,12 @@ class TILW_VehicleCrewComponent: ScriptComponent
 			gm.GetOnGameStateChange().Remove(GameStateChange);
 		
 		if (m_crewConfig)
-			m_crewConfig.SpawnNextGroup(false);
+		{
+			Managed m = GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent);
+			if (!m)
+				return;
+			m_crewConfig.SpawnNextGroup(SCR_BaseCompartmentManagerComponent.Cast(m), 0);
+		}
 		else
 			GetGame().GetCallqueue().Call(AddCrew);
 	}

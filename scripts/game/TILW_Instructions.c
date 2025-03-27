@@ -215,8 +215,7 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 		
 		if (m_crewConfig)
 		{
-			m_crewConfig.m_cm = cm;
-			m_crewConfig.SpawnNextGroup(false);
+			m_crewConfig.SpawnNextGroup(cm, 0);
 			return;
 		}
 		

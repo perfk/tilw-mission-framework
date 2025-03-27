@@ -1,4 +1,3 @@
-//! TILW_BaseTerm provides inverting functionality. Do not use this directly.
 [BaseContainerProps(configRoot: true), BaseContainerCustomStringTitleField("Crew Config")]
 class TILW_CrewConfig
 {
@@ -11,14 +10,10 @@ class TILW_CrewConfig
 	[Attribute("1", UIWidgets.Auto, desc: "If a group has waypoints assigned, spawn gunners in a separate group.")]
 	bool m_useIdleGroups;
 	
-	SCR_BaseCompartmentManagerComponent m_cm;
-	
-	void SpawnNextGroup(bool removePrevious = true)
+	void SpawnNextGroup(SCR_BaseCompartmentManagerComponent cm, int groupIndex)
 	{
-		if (removePrevious)
-			m_crewGroups.RemoveOrdered(0);
-		if (!m_crewGroups.IsEmpty())
-			m_crewGroups[0].Spawn(this);
+		if (m_crewGroups.Count() > groupIndex)
+			m_crewGroups[groupIndex].Spawn(this, cm, groupIndex);
 	}
 	
 }
@@ -45,30 +40,27 @@ class TILW_CrewGroup
 	protected bool m_enabled;
 	
 	TILW_CrewConfig m_cc;
-	AIGroup m_aiGroup = null;
 	
-	void Spawn(TILW_CrewConfig cc)
+	void Spawn(TILW_CrewConfig cc, SCR_BaseCompartmentManagerComponent cm, int groupIndex)
 	{
 		if (!m_enabled)
 		{
-			cc.SpawnNextGroup();
+			cc.SpawnNextGroup(cm, groupIndex + 1);
 			return;
 		}
 		m_cc = cc;
-		SpawnNextStation(false);
+		SpawnNextStation(cm, groupIndex, 0, null);
 	}
 	
-	void SpawnNextStation(bool removePrevious = true)
+	void SpawnNextStation(SCR_BaseCompartmentManagerComponent cm, int groupIndex, int stationIndex, AIGroup aiGroup)
 	{
-		if (removePrevious)
-			m_crewStations.RemoveOrdered(0);
-		if (!m_crewStations.IsEmpty())
-			GetGame().GetCallqueue().Call(m_crewStations[0].Spawn, this);
+		if (m_crewStations.Count() > stationIndex)
+			GetGame().GetCallqueue().Call(m_crewStations[stationIndex].Spawn, this, cm, groupIndex, stationIndex, aiGroup);
 		else
 		{
 			// Finished spawning group
-			GetGame().GetCallqueue().CallLater(AssignWaypoints, m_waypointDelay * 1000, false, m_aiGroup, m_waypointNames, false, true);
-			m_cc.SpawnNextGroup();
+			GetGame().GetCallqueue().CallLater(AssignWaypoints, m_waypointDelay * 1000, false, aiGroup, m_waypointNames, false, true);
+			m_cc.SpawnNextGroup(cm, groupIndex + 1);
 		}
 	}
 	
@@ -115,47 +107,39 @@ class TILW_CrewStation
 	[Attribute("1", UIWidgets.Auto, desc: "Whether this station should be spawned.")]
 	protected bool m_enabled;
 	
-	protected ref array<BaseCompartmentSlot> m_validSlots = {};
 	protected TILW_CrewGroup m_cg;
-	protected bool m_spawnDefaultCharacters = false;
 	
-	void Spawn(TILW_CrewGroup cg)
+	void Spawn(TILW_CrewGroup cg, SCR_BaseCompartmentManagerComponent cm, int groupIndex, int stationIndex, AIGroup aiGroup)
 	{
 		if (!m_enabled)
 		{
-			cg.SpawnNextStation();
+			cg.SpawnNextStation(cm, groupIndex, stationIndex + 1, aiGroup);
 			return;
 		}
 		m_cg = cg;
-		SetFreeCompartmentsOfTypes();
-		if (m_characters.IsEmpty())
-			m_spawnDefaultCharacters = true;
-		GetGame().GetCallqueue().Call(ProcessSlot);
+		GetGame().GetCallqueue().Call(ProcessSlot, cm, groupIndex, stationIndex, 0, aiGroup);
 	}
 	
-	protected void ProcessSlot()
+	protected void ProcessSlot(SCR_BaseCompartmentManagerComponent cm, int groupIndex, int stationIndex, int characterIndex, AIGroup aiGroup)
 	{
-		// Check if finished
-		if (m_validSlots.IsEmpty() || (!m_spawnDefaultCharacters && m_characters.IsEmpty()))
+		BaseCompartmentSlot slot = GetNextSlot(cm);
+		// Check if finished (no more slots available, or no characters left to spawn)
+		if (!slot || (!m_characters.IsEmpty() && characterIndex > m_characters.Count() - 1))
 		{
-			m_cg.SpawnNextStation();
+			m_cg.SpawnNextStation(cm, groupIndex, stationIndex + 1, aiGroup);
 			return;
 		}
 		
-		// Select next slot
-		BaseCompartmentSlot slot = m_validSlots[0];
-		m_validSlots.RemoveOrdered(0);
-		
-		if (slot && !slot.IsOccupied())
+		if (!slot.IsOccupied())
 		{
 			// Decide on AI group
-			AIGroup g = m_cg.m_aiGroup;
+			AIGroup g = aiGroup;
 			bool spawnIdle = (slot.GetType() == ECompartmentType.TURRET) && m_cg.m_cc.m_useIdleGroups && !m_cg.m_waypointNames.IsEmpty();
 			if (spawnIdle)
 				g = null;
 			else if (!g && m_cg.m_entityName != "")
 			{
-				g = m_cg.m_aiGroup;
+				g = aiGroup;
 				IEntity e = GetGame().GetWorld().FindEntityByName(m_cg.m_entityName);
 				if (e)
 					g = SCR_AIGroup.Cast(e);
@@ -163,13 +147,12 @@ class TILW_CrewStation
 			
 			// Spawn character
 			IEntity ce;
-			if (m_spawnDefaultCharacters)
+			if (m_characters.IsEmpty())
 				ce = slot.SpawnDefaultCharacterInCompartment(g);
 			else
 			{
 				if (m_characters[0] != "")
-					ce = slot.SpawnCharacterInCompartment(m_characters[0], g);
-				m_characters.RemoveOrdered(0);
+					ce = slot.SpawnCharacterInCompartment(m_characters[characterIndex], g);
 			}
 			
 			// Maybe prevent dismount
@@ -183,7 +166,7 @@ class TILW_CrewStation
 			}
 			
 			// Configure new group and save it for later
-			if (!m_cg.m_aiGroup && ce && g && !spawnIdle)
+			if (!aiGroup && ce && g && !spawnIdle)
 			{
 				if (m_cg.m_entityName != "")
 					g.SetName(m_cg.m_entityName);
@@ -195,14 +178,14 @@ class TILW_CrewStation
 					g = scr_g;
 				}
 				
-				m_cg.m_aiGroup = g;
+				aiGroup = g;
 			}
 		}
 		
-		GetGame().GetCallqueue().Call(ProcessSlot);
+		GetGame().GetCallqueue().Call(ProcessSlot, cm, groupIndex, stationIndex, characterIndex + 1, aiGroup);
 	}
-	
-	protected void SetFreeCompartmentsOfTypes()
+	 
+	protected BaseCompartmentSlot GetNextSlot(SCR_BaseCompartmentManagerComponent cm)
 	{
 		array<ECompartmentType> cTypes = {};
 		if (m_allowPilot)
@@ -213,11 +196,15 @@ class TILW_CrewStation
 			cTypes.Insert(ECompartmentType.CARGO);
 		
 		array<BaseCompartmentSlot> compartmentSlots = {}; 
-		m_cg.m_cc.m_cm.GetCompartments(compartmentSlots);
+		cm.GetCompartments(compartmentSlots);
 		foreach (BaseCompartmentSlot slot: compartmentSlots)
 		{
 			if (slot && cTypes.Contains(slot.GetType()) && !slot.IsOccupied() && slot.IsCompartmentAccessible() && (!m_characters.IsEmpty() || !slot.GetDefaultOccupantPrefab().IsEmpty()))
-				m_validSlots.Insert(slot);
+			{
+				Print(slot);
+				return slot;
+			}
 		}
+		return null;
 	}
 }

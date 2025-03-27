@@ -315,12 +315,14 @@ class TILW_DeleteOpenSlotsInstruction : TILW_BaseInstruction
 		PS_PlayableManager pm = PS_PlayableManager.GetInstance();
 		if (!pm)
 			return;
-		foreach (RplId id, PS_PlayableComponent pc : pm.GetPlayables())
+		foreach (RplId id, PS_PlayableContainer pc : pm.GetPlayables())
 		{
-			if (!pc || pm.GetPlayerByPlayable(pc.GetId()) != -1)
+			PS_PlayableComponent pcomp = pc.GetPlayableComponent();
+			
+			if (!pc || pm.GetPlayerByPlayable(pcomp.GetId()) != -1)
 				continue;
 			
-			IEntity e = pc.GetOwner();
+			IEntity e = pcomp.GetOwner();
 			if (!m_factionKeys.IsEmpty())
 			{
 				SCR_ChimeraCharacter cc = SCR_ChimeraCharacter.Cast(e);
@@ -417,17 +419,18 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 		
 		if (m_allowSpecRespawn) {
 			PS_PlayableManager playableManager = PS_PlayableManager.GetInstance();
-			array<PS_PlayableComponent> playableComponents = playableManager.GetPlayablesSorted();
-			foreach (PS_PlayableComponent playable : playableComponents)
+			array<PS_PlayableContainer> playableContainers = playableManager.GetPlayablesSorted();
+			foreach (PS_PlayableContainer container : playableContainers)
 			{
-				SCR_CharacterDamageManagerComponent damageManager = playable.GetCharacterDamageManagerComponent();
+				PS_PlayableComponent pcomp = container.GetPlayableComponent();
+				SCR_CharacterDamageManagerComponent damageManager = pcomp.GetCharacterDamageManagerComponent();
 				EDamageState damageState = damageManager.GetState();
 				if (damageState == EDamageState.DESTROYED)
 				{
-					int playerId = playableManager.GetPlayerByPlayableRemembered(playable.GetId());
+					int playerId = playableManager.GetPlayerByPlayableRemembered(pcomp.GetId());
 					if (playerId == -1)
 						continue;
-					gm.TryRespawn(playable.GetId(), playerId);
+					gm.TryRespawn(pcomp.GetId(), playerId);
 				}
 			}
 		}

@@ -319,7 +319,7 @@ class TILW_DeleteOpenSlotsInstruction : TILW_BaseInstruction
 		{
 			PS_PlayableComponent pcomp = pc.GetPlayableComponent();
 			
-			if (!pc || pm.GetPlayerByPlayable(pcomp.GetId()) != -1)
+			if (!pc || pm.GetPlayerByPlayable(pcomp.GetRplId()) != -1)
 				continue;
 			
 			IEntity e = pcomp.GetOwner();
@@ -427,10 +427,10 @@ class TILW_EditRespawnTicketsInstruction : TILW_BaseInstruction
 				EDamageState damageState = damageManager.GetState();
 				if (damageState == EDamageState.DESTROYED)
 				{
-					int playerId = playableManager.GetPlayerByPlayableRemembered(pcomp.GetId());
+					int playerId = playableManager.GetPlayerByPlayableRemembered(pcomp.GetRplId());
 					if (playerId == -1)
 						continue;
-					gm.TryRespawn(pcomp.GetId(), playerId);
+					gm.TryRespawn(pcomp.GetRplId(), playerId);
 				}
 			}
 		}

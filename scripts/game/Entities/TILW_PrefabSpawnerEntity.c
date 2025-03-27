@@ -137,7 +137,7 @@ class TILW_PrefabSpawnerEntity : GenericEntity
 		if (m_crewConfig && m)
 		{
 			SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
-			m_crewConfig.SpawnNextGroup(cm, 0);
+			GetGame().GetCallqueue().Call(m_crewConfig.SpawnCrew, cm);
 			return;
 		}
 	}

@@ -215,7 +215,7 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 		
 		if (m_crewConfig)
 		{
-			m_crewConfig.SpawnNextGroup(cm, 0);
+			GetGame().GetCallqueue().Call(m_crewConfig.SpawnCrew, cm);
 			return;
 		}
 		

@@ -65,7 +65,8 @@ class TILW_VehicleCrewComponent: ScriptComponent
 			Managed m = GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent);
 			if (!m)
 				return;
-			m_crewConfig.SpawnNextGroup(SCR_BaseCompartmentManagerComponent.Cast(m), 0);
+			SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
+			GetGame().GetCallqueue().Call(m_crewConfig.SpawnCrew, cm);
 		}
 		else
 			GetGame().GetCallqueue().Call(AddCrew);

@@ -71,7 +71,11 @@ class PK_EntityDeleter : GenericEntity
 	}
 
 #ifdef WORKBENCH	
-
+	
+	override int _WB_GetAfterWorldUpdateSpecs(IEntitySource src)
+	{
+		return EEntityFrameUpdateSpecs.CALL_ALWAYS;
+	}
 
 	//------------------------------------------------------------------------------------------------
 	override void _WB_AfterWorldUpdate(float timeSlice)

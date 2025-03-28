@@ -266,8 +266,12 @@ class TILW_BaseTriggerEntity : GenericEntity
 	[Attribute("0.25 0.5 0 1", UIWidgets.ColorPicker, "Color of debug sphere", category: "Debug")]
 	protected ref Color m_setShapeColor;
 	
-	//[Attribute("0", UIWidgets.Auto, "Also display sphere ingame (vs. just in the World Editor)", category: "Debug")]
-	protected bool m_drawShapeIngame;
+#ifdef WORKBENCH
+	
+	override int _WB_GetAfterWorldUpdateSpecs(IEntitySource src)
+	{
+		return EEntityFrameUpdateSpecs.CALL_ALWAYS;
+	}
 	
 	override void _WB_AfterWorldUpdate(float timeSlice)
 	{
@@ -298,6 +302,8 @@ class TILW_BaseTriggerEntity : GenericEntity
 	{
 		m_queryRadius = radius;
 	}
+	
+#endif
 }
 
 enum TILW_EComparisonMode

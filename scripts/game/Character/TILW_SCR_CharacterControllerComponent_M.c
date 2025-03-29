@@ -1,7 +1,7 @@
 modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 {
 	protected string m_fwCount = "";
-	
+
 	void SCR_CharacterControllerComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
 		if (!Replication.IsServer())
@@ -24,7 +24,7 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		if (m_fwCount != "")
 			RemoveLife();
 	}
-	
+
 	protected void AddLife()
 	{
 		// Is framework there?
@@ -46,12 +46,12 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		string fkey = cc.GetFactionKey();
 		if (!fkey || fkey == "")
 			return;
-		
+
 		fw.m_factionAILifes.Set(fkey, fw.m_factionAILifes.Get(fkey) + 1);
 		m_fwCount = fkey;
 		fw.ScheduleRecountAI();
 	}
-	
+
 	protected void RemoveLife()
 	{
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
@@ -61,7 +61,7 @@ modded class SCR_CharacterControllerComponent : CharacterControllerComponent
 		m_fwCount = "";
 		fw.ScheduleRecountAI();
 	}
-	
+
 	protected void AddDeath()
 	{
 		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();

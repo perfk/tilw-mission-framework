@@ -47,7 +47,7 @@ class PK_EntityDeleter : GenericEntity
 		world.QueryEntitiesBySphere(owner.GetOrigin(), m_fRadius, QueryEntities);
 
 		// Removes all entities. This is a hack, until the original SCR_PrefabDeleter works correctly
-		foreach(IEntity e : QueryEntitiesToRemove)
+		foreach (IEntity e : QueryEntitiesToRemove)
 		{
 			SCR_EntityHelper.DeleteEntityAndChildren(e);
 		}
@@ -70,8 +70,8 @@ class PK_EntityDeleter : GenericEntity
 		SetEventMask(EntityEvent.INIT);
 	}
 
-#ifdef WORKBENCH	
-	
+#ifdef WORKBENCH
+
 	override int _WB_GetAfterWorldUpdateSpecs(IEntitySource src)
 	{
 		return EEntityFrameUpdateSpecs.CALL_ALWAYS;

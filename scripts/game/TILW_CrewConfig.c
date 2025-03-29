@@ -165,12 +165,9 @@ class TILW_CrewStation
 		
 		// Maybe prevent dismount
 		if (ce && m_cg.m_cc.m_noTurretDismount && slot.GetType() == ECompartmentType.TURRET) {
-			Managed m = ce.FindComponent(SCR_AICombatComponent);
-			if (m)
-			{
-				SCR_AICombatComponent cc = SCR_AICombatComponent.Cast(m);
+			SCR_AICombatComponent cc = SCR_AICombatComponent.Cast(ce.FindComponent(SCR_AICombatComponent));
+			if (cc)
 				cc.m_neverDismountTurret = true;
-			}
 		}
 		
 		// Configure new group and save it for later

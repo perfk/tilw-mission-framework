@@ -289,6 +289,8 @@ class TILW_AOLimitComponent : ScriptComponent
 		}
 		
 		SCR_MapEntity mapEntity = SCR_MapEntity.GetMapInstance();
+		if (!mapEntity)
+			return;
 		MapItem lastItem;
 		MapItem firstItem;
 		

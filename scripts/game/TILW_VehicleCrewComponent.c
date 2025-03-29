@@ -62,10 +62,9 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		if (m_crewConfig)
 		{
-			Managed m = GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent);
-			if (!m)
+			SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent));
+			if (!cm)
 				return;
-			SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
 			GetGame().GetCallqueue().Call(m_crewConfig.SpawnCrew, cm);
 		}
 		else
@@ -74,10 +73,7 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	
 	protected void AddCrew()
 	{
-		Managed m = GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent);
-		if (!m)
-			return;
-		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
+		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(GetOwner().FindComponent(SCR_BaseCompartmentManagerComponent));
 		if (!cm)
 			return;
 		
@@ -91,6 +87,9 @@ class TILW_VehicleCrewComponent: ScriptComponent
 			cTypes.Insert(ECompartmentType.TURRET);
 		if (m_spawnCargo)
 			cTypes.Insert(ECompartmentType.CARGO);
+		
+		if (cTypes.IsEmpty())
+			cTypes = {ECompartmentType.PILOT, ECompartmentType.TURRET, ECompartmentType.CARGO};
 		
 		GetGame().GetCallqueue().Call(SpawnCrew, slots, cTypes, m_customCrew, null, null, m_waypointNames, m_waypointDelay, m_noTurretDismount, m_idleGroup);
 	}
@@ -124,11 +123,9 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		
 		// Prevent turret dismount
 		if (ce && noTurretDismount && slots[0].GetType() == ECompartmentType.TURRET) {
-			Managed m = ce.FindComponent(SCR_AICombatComponent);
-			if (m) {
-				SCR_AICombatComponent cc = SCR_AICombatComponent.Cast(m);
+			SCR_AICombatComponent cc = SCR_AICombatComponent.Cast(ce.FindComponent(SCR_AICombatComponent));
+			if (cc)
 				cc.m_neverDismountTurret = true;
-			}
 		}
 		
 		// Remove from spawn list
@@ -150,11 +147,9 @@ class TILW_VehicleCrewComponent: ScriptComponent
 		cm.GetOccupantsOfType(occupants, ECompartmentType.TURRET);
 		foreach(IEntity gunner : occupants)
 		{
-			Managed m = gunner.FindComponent(SCR_AICombatComponent);
-			if (!m)
-				continue;
-			SCR_AICombatComponent combComp = SCR_AICombatComponent.Cast(m);
-			combComp.m_neverDismountTurret = true;
+			SCR_AICombatComponent combComp = SCR_AICombatComponent.Cast(gunner.FindComponent(SCR_AICombatComponent));
+			if (combComp)
+				combComp.m_neverDismountTurret = true;
 		}
 	}
 }

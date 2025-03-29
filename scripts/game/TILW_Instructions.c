@@ -208,10 +208,9 @@ class TILW_SpawnVehicleInstruction : TILW_SpawnPrefabInstruction
 	{
 		if (!m_spawnedEntity)
 			return;
-		Managed m = m_spawnedEntity.FindComponent(SCR_BaseCompartmentManagerComponent);
-		if (!m)
+		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m_spawnedEntity.FindComponent(SCR_BaseCompartmentManagerComponent));
+		if (!cm)
 			return;
-		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
 		
 		if (m_crewConfig)
 		{

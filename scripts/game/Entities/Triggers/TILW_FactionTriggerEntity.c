@@ -72,13 +72,9 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 		if (!EntityUtils.IsPlayer(e)) {
 			if (m_playersOnly)
 				return false; // Only players allowed
-			Managed m = e.FindComponent(PS_PlayableComponent);
-			if (m_excludeUnusedPlayables && m) {
-				PS_PlayableComponent pc = PS_PlayableComponent.Cast(m);
-				if (pc.GetPlayable())
-					return false; // Not slotted
-				
-			}
+			PS_PlayableComponent pc = PS_PlayableComponent.Cast(e.FindComponent(PS_PlayableComponent));
+			if (m_excludeUnusedPlayables && pc && pc.GetPlayable())
+				return false; // Not slotted
 		}
 		
 		return true;

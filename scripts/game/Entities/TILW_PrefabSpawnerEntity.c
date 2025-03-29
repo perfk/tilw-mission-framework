@@ -133,10 +133,9 @@ class TILW_PrefabSpawnerEntity : GenericEntity
 			TILW_CrewGroup.AssignWaypoints(g, m_waypointNames, false);
 		
 		// If it has compartments, assign crew
-		Managed m = spawnedEntity.FindComponent(SCR_BaseCompartmentManagerComponent);
-		if (m_crewConfig && m)
+		SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(spawnedEntity.FindComponent(SCR_BaseCompartmentManagerComponent));
+		if (m_crewConfig && cm)
 		{
-			SCR_BaseCompartmentManagerComponent cm = SCR_BaseCompartmentManagerComponent.Cast(m);
 			GetGame().GetCallqueue().Call(m_crewConfig.SpawnCrew, cm);
 			return;
 		}

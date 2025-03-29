@@ -48,12 +48,11 @@ class TILW_Flag_EntityDamage : ScriptComponent
 	
 	protected SCR_HitZone GetTargetHitZone()
 	{
-		Managed m = GetOwner().FindComponent(SCR_DamageManagerComponent);
-		if (!m) {
+		SCR_DamageManagerComponent dmc = SCR_DamageManagerComponent.Cast(GetOwner().FindComponent(SCR_DamageManagerComponent));
+		if (!dmc) {
 			Print("TILW_Flag_EntityDamage | Failed to find SCR_DamageManagerComponent", LogLevel.ERROR);
 			return null;
 		}
-		SCR_DamageManagerComponent dmc = SCR_DamageManagerComponent.Cast(m);
 		
 		HitZone hitZone;
 		if (m_targetZone != "")

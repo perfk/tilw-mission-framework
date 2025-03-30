@@ -15,6 +15,9 @@ class TILW_PrefabSpawnerEntity : GenericEntity
 	[Attribute("", UIWidgets.Auto, desc: "Optionally, define when the prefab spawns (seconds after the condition is first met). Multiple entries will result in multiple spawns.", category: "Spawning")]
 	protected ref array<float> m_spawnTimings;
 	
+	[Attribute("", uiwidget: UIWidgets.Auto, desc: "If you need to reference the spawned entities later, you can give them UNIQUE names - otherwise, leave empty.", category: "Spawning")]
+	protected ref array<string> m_setEntityNames;
+	
 	[Attribute("0", UIWidgets.Auto, desc: "Already allow spawning before the briefing has ended.", category: "Spawning")]
 	protected bool m_pregameSpawn;
 	
@@ -126,6 +129,16 @@ class TILW_PrefabSpawnerEntity : GenericEntity
 		GetWorldTransform(mat);
 		spawnParams.Transform = mat;
 		IEntity spawnedEntity = GetGame().SpawnEntityPrefab(Resource.Load(m_prefab), GetGame().GetWorld(), spawnParams);
+		
+		if (!spawnedEntity)
+			return;
+		
+		// Set name
+		if (!m_setEntityNames.IsEmpty())
+		{
+			spawnedEntity.SetName(m_setEntityNames[0]);
+			m_setEntityNames.RemoveOrdered(0);
+		}
 		
 		// If it is group, assign waypoints
 		AIGroup g = AIGroup.Cast(spawnedEntity);

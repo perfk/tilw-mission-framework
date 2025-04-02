@@ -1,4 +1,4 @@
-[EntityEditorProps(category: "GameScripted/Triggers", description: "The ExtractionTriggerEntity is a custom trigger designed to be used with the TILW_MissionFrameworkEntity. \nIt compares the number of local faction players to the number of global alive faction players.")]
+[EntityEditorProps(category: "GameScripted/Triggers", description: "The ExtractionTriggerEntity is a custom trigger designed to be used with the TILW_MissionFrameworkEntity. \nIt Checks if an item with the specifide entity name is in a valid players inventory within the trigger radius")]
 class TILW_ItemExtractionTriggerEntityClass : TILW_BaseTriggerEntityClass
 {
 }

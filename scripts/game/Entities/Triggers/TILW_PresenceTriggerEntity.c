@@ -1,4 +1,4 @@
-[EntityEditorProps(category: "GameScripted/Triggers", description: "The TILW_PresenceTriggerEntity is a custom trigger designed to be used with the TILW_MissionFrameworkEntity. \nIt checks if there are more/less then m_countThreshold matching entities in the trigger.")]
+[EntityEditorProps(category: "GameScripted/Triggers", description: "The TILW_PresenceTriggerEntity is a custom trigger designed to be used with the TILW_MissionFrameworkEntity.")]
 class TILW_PresenceTriggerEntityClass : TILW_BaseTriggerEntityClass
 {
 }
@@ -8,7 +8,7 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 
 	// FILTER SETTINGS
 
-	[Attribute("", UIWidgets.Auto, "Names of the entities to look for.", category: "Trigger Filter")]
+	[Attribute("", UIWidgets.Auto, "Names of the entities to look for. Can also find inventory items.", category: "Trigger Filter")]
 	protected ref array<string> m_entityNames;
 
 	[Attribute("0", UIWidgets.Auto, "If false, prevent dead or destroyed entities from being counted.", category: "Trigger Filter")]
@@ -16,7 +16,7 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 
 	// CONDITION SETTINGS
 
-	[Attribute("1", UIWidgets.Auto, "What percentage of the specified items has to be present.", category: "Trigger Condition", params: "0 inf 1")]
+	[Attribute("1", UIWidgets.Auto, "What percentage of the specified entities has to be present.", category: "Trigger Condition", params: "0 inf 1")]
 	protected float m_ratioThreshold;
 
 
@@ -51,11 +51,11 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 				continue;
 			if (!m_allowDestroyed && IsEntityDestroyed(e))
 				continue;
+			if (!IsMatchingPrefab(e))
+				continue;
 			
 			m_specialCount += 1;
 		}
 	}
-
-	// Maybe get entity name for display
 
 }

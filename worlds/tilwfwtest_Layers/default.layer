@@ -39,6 +39,9 @@ TILW_PrefabSpawnerEntity : "{7F10372CF1CA1175}Prefabs/Utils/TILW_PrefabSpawner.e
  }
  m_pregameSpawn 1
 }
+TILW_PresenceTriggerEntity : "{826E6F2246328952}Prefabs/Logic/Triggers/TILW_PresenceTrigger.et" {
+ coords 86.406 1 68.23
+}
 SCR_ChimeraCharacter : "{84029128FA6F6BB9}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_GL.et" {
  components {
   ChimeraAIControlComponent "{520EA1D2DB109F34}" {

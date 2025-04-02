@@ -18,15 +18,14 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 
 	[Attribute("1", UIWidgets.Auto, "What percentage of the specified items has to be present.", category: "Trigger Condition", params: "0 inf 1")]
 	protected float m_ratioThreshold;
-	
-	[Attribute("0", UIWidgets.Auto, "Detete (collect) entities after they have contributed to the condition being met.", category: "Trigger Filter")]
-	protected bool m_deleteEntities;
 
 
 	// TRIGGER LOGIC
 
 	override bool EvaluateCondition()
 	{
+		m_totalCount = m_entityNames.Count();
+		
 		if (m_totalCount == 0)
 			return !m_comparisonMode;
 		
@@ -40,11 +39,7 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 	
 	override void RunQuery()
 	{
-		if (m_totalCount == 0)
-			m_totalCount = m_entityNames.Count();
-		
-		if (!m_deleteEntities)
-			m_specialCount = 0;
+		m_specialCount = 0;
 		
 		foreach (string name : m_entityNames)
 		{
@@ -58,12 +53,6 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 				continue;
 			
 			m_specialCount += 1;
-			
-			if (m_deleteEntities)
-			{
-				SCR_EntityHelper.DeleteEntityAndChildren(e);
-				m_entityNames.RemoveItem(name);
-			}
 		}
 	}
 

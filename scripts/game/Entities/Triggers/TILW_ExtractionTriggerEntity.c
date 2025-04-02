@@ -64,7 +64,7 @@ class TILW_ExtractionTriggerEntity : TILW_BaseTriggerEntity
 		if (!m_comparisonMode)
 			return (ratio <= m_ratioThreshold);
 		else
-			return (m_comparisonMode && ratio >= m_ratioThreshold);
+			return (ratio >= m_ratioThreshold);
 	}
 
 

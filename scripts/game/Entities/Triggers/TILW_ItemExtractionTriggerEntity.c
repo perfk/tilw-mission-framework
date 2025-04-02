@@ -9,13 +9,14 @@ class TILW_ItemNamePredicate : InventorySearchPredicate
 					
 	void TILW_ItemNamePredicate(string s_name)					
 	{						
-		m_name = s_name;				
+		m_name = s_name;			
 	}
 
 					
 	override protected bool IsMatch(BaseInventoryStorageComponent storage, IEntity item, array<GenericComponent> queriedComponents, array<BaseItemAttributeData> queriedAttributes)				
-	{					
-		return m_name == item.GetName();				
+	{
+							
+		return m_name == item.GetName();		
 	}
 	
 }
@@ -29,9 +30,12 @@ class TILW_ItemExtractionTriggerEntity : TILW_BaseTriggerEntity
 	
 	[Attribute("", UIWidgets.Auto, "Which faction is being examined?", category: "Trigger Condition")]
 	protected string m_factionKey;
+	
+	[Attribute("", UIWidgets.Auto, "Do all Items need to be in the trigger to activate it?", category: "Trigger Condition")]
+	protected bool m_andCondition;
 
 	[Attribute("", UIWidgets.Auto, "Which Item is being examined?", category: "Trigger Condition")]
-	protected string m_item;
+	protected ref array<string> m_item;
 
 	//[Attribute("", UIWidgets.Auto, "Item Target Entity", category: "Trigger Condition")]
 	//protected string m_itemTargetEntity;
@@ -78,13 +82,21 @@ class TILW_ItemExtractionTriggerEntity : TILW_BaseTriggerEntity
 			
 
 			InventoryStorageManagerComponent invManager = InventoryStorageManagerComponent.Cast(controlled.FindComponent(InventoryStorageManagerComponent));;
-			IEntity item = invManager.FindItem(new TILW_ItemNamePredicate(m_item), EStoragePurpose.PURPOSE_DEPOSIT);
 			
-			if(item != null)
-				b_itemPresent = true;
-			else
-				b_itemPresent = false;
-
+			foreach(string s : m_item)
+			{
+				IEntity item = invManager.FindItem(new TILW_ItemNamePredicate(s), EStoragePurpose.PURPOSE_DEPOSIT);
+				if(item != null)
+				{
+					b_itemPresent = true;
+					if(!m_andCondition)
+					{
+						break;
+					}
+				}
+				else
+				b_itemPresent = false;		
+			}
 		}
 	}
 

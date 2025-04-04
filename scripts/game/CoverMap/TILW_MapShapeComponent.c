@@ -1,15 +1,15 @@
-[ComponentEditorProps(category: "GameScripted/", description: "Cover Map component")]
-class TILW_CoverMapComponent2Class : ScriptComponentClass
+[ComponentEditorProps(category: "GameScripted/", description: "When added to a polyline, this component can draw various shapes onto the map.")]
+class TILW_MapShapeComponentClass : ScriptComponentClass
 {
 }
 
-class TILW_CoverMapComponent2 : ScriptComponent
+class TILW_MapShapeComponent : ScriptComponent
 {
 	
-	[Attribute("0 0 0 0.25", UIWidgets.ColorPicker, desc: "Color of the shape, you can also set transparency.", category: "Visualization")]
+	[Attribute("0 0 0 0.75", UIWidgets.ColorPicker, desc: "Color of the shape, you can also set transparency.", category: "Visualization")]
 	protected ref Color m_color;
 	
-	SCR_MapEntity m_MapEntity;
+	SCR_MapEntity m_mapEntity;
 	
 	[RplProp(onRplName: "OnPoints3DChange")]
 	protected ref array<vector> m_points3D = new array<vector>();
@@ -24,10 +24,8 @@ class TILW_CoverMapComponent2 : ScriptComponent
 	[Attribute("", UIWidgets.Auto, "If defined, only display for the given factions.", category: "Visualization")]
 	protected ref array<FactionKey> m_factionKeys;
 	
-	[Attribute("0", UIWidgets.Auto, "Is it visible before slotting or for spectators?", category: "Visualization")]
+	[Attribute("1", UIWidgets.Auto, "Is it visible before slotting or for spectators?", category: "Visualization")]
 	protected bool m_visibleForEmptyFaction;
-	
-	
 	
 	
 	protected bool IsVisible()
@@ -55,11 +53,12 @@ class TILW_CoverMapComponent2 : ScriptComponent
 		return (m_factionKeys.IsEmpty() || m_factionKeys.Contains(fkey));
 	}
 	
+	
 	override void OnPostInit(IEntity owner)
 	{
-		m_MapEntity = SCR_MapEntity.GetMapInstance();
-		ScriptInvokerBase<MapConfigurationInvoker> onMapOpen = m_MapEntity.GetOnMapOpen();
-		ScriptInvokerBase<MapConfigurationInvoker> onMapClose = m_MapEntity.GetOnMapClose();
+		m_mapEntity = SCR_MapEntity.GetMapInstance();
+		ScriptInvokerBase<MapConfigurationInvoker> onMapOpen = m_mapEntity.GetOnMapOpen();
+		ScriptInvokerBase<MapConfigurationInvoker> onMapClose = m_mapEntity.GetOnMapClose();
 		
 		onMapOpen.Insert(CreateMapWidget);
 		onMapClose.Insert(DeleteMapWidget);
@@ -67,19 +66,19 @@ class TILW_CoverMapComponent2 : ScriptComponent
 		GetGame().GetCallqueue().Call(InitPoints);
 	}
 	
+	
 	void SetPoints3D(array<vector> points3D)
 	{
 		if (points3D.Count() < 3)
 		{
-			Print("TILW_ | Not enough points!", LogLevel.ERROR);
+			Print("TILW_MapShapeComponent | SetPoints3D did not receive enough points!", LogLevel.ERROR);
 			return;
 		}
-
 		m_points3D = points3D;
 		Replication.BumpMe();
-
 		OnPoints3DChange();
 	}
+	
 	
 	protected void InitPoints()
 	{
@@ -87,11 +86,11 @@ class TILW_CoverMapComponent2 : ScriptComponent
 		
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(GetOwner());
 		if (!pse) {
-			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") is not a polyline!", LogLevel.WARNING);
+			Print("TILW_MapShapeComponent | Owner entity (" + GetOwner() + ") is not a polyline!", LogLevel.WARNING);
 			return;
 		}
 		if (pse.GetPointCount() < 3) {
-			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") does not have enough points!", LogLevel.WARNING);
+			Print("TILW_MapShapeComponent | Owner entity (" + GetOwner() + ") does not have enough points!", LogLevel.WARNING);
 			return;
 		}
 		pse.GetPointsPositions(m_points3D);
@@ -119,11 +118,14 @@ class TILW_CoverMapComponent2 : ScriptComponent
 	{
 		// don't ask what the fuck this is
 		
-		vector v_bl = Vector(0, 0, 0);
-		vector v_tr = Vector(4096, 0, 4096);
+		vector cMin = m_mapEntity.Offset();
+		vector cMax = m_mapEntity.Size() + m_mapEntity.Offset();
 		
-		vector v_tl = Vector(0, 0, 4096);
-		vector v_br = Vector(4096, 0, 0);
+		vector v_bl = Vector(cMin[0], 0, cMin[2]);
+		vector v_tr = Vector(cMax[0], 0, cMax[2]);
+		
+		vector v_tl = Vector(cMin[0], 0, cMax[2]);
+		vector v_br = Vector(cMax[0], 0, cMin[2]);
 		
 		float min_bl, min_tr;
 		int i_bl = -1;
@@ -218,9 +220,9 @@ class TILW_CoverMapComponent2 : ScriptComponent
 		if (!IsVisible())
 			return;
 		
-		Widget mapFrame = m_MapEntity.GetMapMenuRoot().FindAnyWidget(SCR_MapConstants.MAP_FRAME_NAME);
+		Widget mapFrame = m_mapEntity.GetMapMenuRoot().FindAnyWidget(SCR_MapConstants.MAP_FRAME_NAME);
 		if (!mapFrame)
-			mapFrame = m_MapEntity.GetMapMenuRoot();
+			mapFrame = m_mapEntity.GetMapMenuRoot();
 		if (!mapFrame)
 			 return;
 		
@@ -253,7 +255,7 @@ class TILW_CoverMapComponent2 : ScriptComponent
 		for (int i = 0; i < m_points2D_1.Count(); i += 2)
 		{
 			float screenX, screenY;
-			m_MapEntity.WorldToScreen(m_points2D_1[i], m_points2D_1[i+1], screenX, screenY, true);
+			m_mapEntity.WorldToScreen(m_points2D_1[i], m_points2D_1[i+1], screenX, screenY, true);
 			
 			m_drawPolygon1.m_Vertices.Insert(screenX);
 			m_drawPolygon1.m_Vertices.Insert(screenY);
@@ -265,7 +267,7 @@ class TILW_CoverMapComponent2 : ScriptComponent
 			for (int i = 0; i < m_points2D_2.Count(); i += 2)
 			{
 				float screenX, screenY;
-				m_MapEntity.WorldToScreen(m_points2D_2[i], m_points2D_2[i+1], screenX, screenY, true);
+				m_mapEntity.WorldToScreen(m_points2D_2[i], m_points2D_2[i+1], screenX, screenY, true);
 				
 				m_drawPolygon2.m_Vertices.Insert(screenX);
 				m_drawPolygon2.m_Vertices.Insert(screenY);

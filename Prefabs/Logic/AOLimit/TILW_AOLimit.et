@@ -6,6 +6,10 @@ PolylineShapeEntity {
   TILW_CoverMapComponent "{6473480FCAB7760B}" {
    Enabled 0
   }
+  TILW_MapShapeComponent "{6508F54F9B461198}" {
+   Enabled 0
+   m_invert 1
+  }
   RplComponent "{62176179E7F3AC4C}" {
    Streamable Disabled
   }

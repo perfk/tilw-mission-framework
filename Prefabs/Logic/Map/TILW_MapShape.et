@@ -1,0 +1,12 @@
+PolylineShapeEntity {
+ ID "6508F5526836BC7B"
+ components {
+  TILW_MapShapeComponent "{6508F5526836BC09}" {
+  }
+  RplComponent "{6508F5526836BC0A}" {
+   Streamable Disabled
+  }
+ }
+ IsClosed 1
+ LineColor 1 0 0 1
+}

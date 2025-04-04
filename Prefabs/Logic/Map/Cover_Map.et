@@ -3,6 +3,13 @@ PolylineShapeEntity {
  components {
   TILW_CoverMapComponent "{64734633ABA43B46}" {
   }
+  TILW_MapShapeComponent "{6508F5522A2E1971}" {
+   Enabled 0
+   m_invert 1
+  }
+  RplComponent "{6508F5520CEF8E6E}" {
+   Streamable Disabled
+  }
  }
  IsClosed 1
  LineColor 1 0 0 1

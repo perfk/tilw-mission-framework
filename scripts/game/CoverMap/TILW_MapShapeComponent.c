@@ -21,7 +21,7 @@ class TILW_MapShapeComponent : ScriptComponent
 	[Attribute("0", UIWidgets.Auto, "Invert the shape so it surrounds the polyline area.", category: "Visualization")]
 	protected bool m_invert;
 	
-	[Attribute("", UIWidgets.Auto, "If defined, only display for the given factions.", category: "Visualization")]
+	[RplProp(), Attribute("", UIWidgets.Auto, "If defined, only display for the given factions.", category: "Visualization")]
 	protected ref array<FactionKey> m_factionKeys;
 	
 	[Attribute("1", UIWidgets.Auto, "Is it visible before slotting or for spectators?", category: "Visualization")]
@@ -66,6 +66,11 @@ class TILW_MapShapeComponent : ScriptComponent
 		GetGame().GetCallqueue().Call(InitPoints);
 	}
 	
+	void SetFactions(array<FactionKey> factions)
+	{
+		m_factionKeys = factions;
+		Replication.BumpMe();
+	}
 	
 	void SetPoints3D(array<vector> points3D)
 	{

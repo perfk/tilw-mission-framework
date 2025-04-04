@@ -6,7 +6,7 @@ class TILW_CoverMapComponent2Class : ScriptComponentClass
 class TILW_CoverMapComponent2 : ScriptComponent
 {
 	
-	[Attribute("0 0 0 0.25", UIWidgets.ColorPicker, desc: "Color of the shape, you can also set transparency.")]
+	[Attribute("0 0 0 0.25", UIWidgets.ColorPicker, desc: "Color of the shape, you can also set transparency.", category: "Visualization")]
 	protected ref Color m_color;
 	
 	SCR_MapEntity m_MapEntity;
@@ -18,24 +18,20 @@ class TILW_CoverMapComponent2 : ScriptComponent
 	protected ref array<float> m_points2D_2 = new array<float>();
 	
 	
-	[Attribute("0", UIWidgets.Auto, "Invert the shape so it surrounds the polyline area.")]
+	[Attribute("0", UIWidgets.Auto, "Invert the shape so it surrounds the polyline area.", category: "Visualization")]
 	protected bool m_invert;
 	
-	[Attribute("", UIWidgets.Auto, "If defined, only display for the given factions.")]
+	[Attribute("", UIWidgets.Auto, "If defined, only display for the given factions.", category: "Visualization")]
 	protected ref array<FactionKey> m_factionKeys;
+	
+	[Attribute("0", UIWidgets.Auto, "Is it visible before slotting or for spectators?", category: "Visualization")]
+	protected bool m_visibleForEmptyFaction;
 	
 	
 	
 	
 	protected bool IsVisible()
 	{
-		if (m_factionKeys.IsEmpty())
-			return true;
-		
-		SCR_BaseGameMode gameMode = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
-		if (!gameMode)
-			return true;
-		
 		SCR_FactionManager factionManager = SCR_FactionManager.Cast(GetGame().GetFactionManager());
 		if (!factionManager)
 			return true;
@@ -53,7 +49,10 @@ class TILW_CoverMapComponent2 : ScriptComponent
 		if (faction)
 			fkey = faction.GetFactionKey();
 		
-		return m_factionKeys.Contains(fkey);
+		if (fkey == "")
+			return m_visibleForEmptyFaction;
+		
+		return (m_factionKeys.IsEmpty() || m_factionKeys.Contains(fkey));
 	}
 	
 	override void OnPostInit(IEntity owner)
@@ -118,6 +117,8 @@ class TILW_CoverMapComponent2 : ScriptComponent
 	
 	protected void InvertPolygon()
 	{
+		// don't ask what the fuck this is
+		
 		vector v_bl = Vector(0, 0, 0);
 		vector v_tr = Vector(4096, 0, 4096);
 		
@@ -210,6 +211,7 @@ class TILW_CoverMapComponent2 : ScriptComponent
 
 	protected ref PolygonDrawCommand m_drawPolygon1 = new PolygonDrawCommand();
 	protected ref PolygonDrawCommand m_drawPolygon2 = new PolygonDrawCommand();
+	protected ref array<ref CanvasWidgetCommand> m_drawCommands = null;
 	
 	void CreateMapWidget(MapConfiguration mapConfig)
 	{
@@ -227,10 +229,15 @@ class TILW_CoverMapComponent2 : ScriptComponent
 		m_drawPolygon1.m_iColor = m_color.PackToInt();
 		m_drawPolygon2.m_iColor = m_color.PackToInt();
 		
-		if (m_invert)
-			m_wCanvasWidget.SetDrawCommands({m_drawPolygon1, m_drawPolygon2});
-		else
-			m_wCanvasWidget.SetDrawCommands({m_drawPolygon1});
+		if (!m_drawCommands)
+		{
+			if (m_invert)
+				m_drawCommands = { m_drawPolygon1, m_drawPolygon2 };
+			else
+				m_drawCommands = { m_drawPolygon1 };
+		}
+		
+		m_wCanvasWidget.SetDrawCommands(m_drawCommands);
 		
 		SetEventMask(GetOwner(), EntityEvent.POSTFRAME);
 	}

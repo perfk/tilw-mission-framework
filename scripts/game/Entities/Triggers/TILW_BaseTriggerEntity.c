@@ -255,6 +255,11 @@ class TILW_BaseTriggerEntity : GenericEntity
 		mfe.ShowGlobalHint("Objective Status", message, 5, fkeys);
 	}
 
+	void SetRadius(float radius)
+	{
+		m_queryRadius = radius;
+	}
+	
 	// DEBUG
 
 	[Attribute("1", UIWidgets.Auto, "Draw faces of debug sphere", category: "Debug")]
@@ -297,12 +302,6 @@ class TILW_BaseTriggerEntity : GenericEntity
 
 		dbgShape = Shape.CreateSphere(c.PackToInt(), flags, GetOrigin(), m_queryRadius);
 	}
-
-	void SetRadius(float radius)
-	{
-		m_queryRadius = radius;
-	}
-
 #endif
 }
 

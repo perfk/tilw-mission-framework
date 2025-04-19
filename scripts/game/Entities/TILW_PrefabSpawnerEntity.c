@@ -59,7 +59,7 @@ class TILW_PrefabSpawnerEntity : GenericEntity
 	
 	protected void FlagChange(string flag, bool value)
 	{
-		if (flag == m_conditionFlag)
+		if (flag == m_conditionFlag && value)
 			CheckConditions();
 	}
 	

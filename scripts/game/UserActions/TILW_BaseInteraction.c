@@ -14,8 +14,19 @@ class TILW_BaseInteraction : ScriptedUserAction
 
 	[Attribute("", uiwidget: UIWidgets.Auto, desc: "If defined, name of mission flag to set after interaction")]
 	protected string m_flagName;
+	
+	[Attribute("", uiwidget: UIWidgets.Auto, desc: "If defined, the interaction is only available if this flag is set.\nYou can define more complex conditions using meta flags.", category: "Spawning")]
+	protected string m_conditionFlag;
 
 	protected bool m_completed = false;
+	
+	protected bool IsAvailable()
+	{
+		if (m_conditionFlag == "")
+			return !m_completed;
+		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
+		return (!m_completed && fw && fw.IsMissionFlag(m_conditionFlag));
+	}
 
 	//------------------------------------------------------------------------------------------------
 	override void PerformAction(IEntity pOwnerEntity, IEntity pUserEntity)
@@ -39,7 +50,7 @@ class TILW_BaseInteraction : ScriptedUserAction
 	//------------------------------------------------------------------------------------------------
 	override bool CanBePerformedScript(IEntity user)
 	{
-		return !m_completed;
+		return IsAvailable();
 	}
 	//------------------------------------------------------------------------------------------------
 	override bool CanBeShownScript(IEntity user)
@@ -49,7 +60,7 @@ class TILW_BaseInteraction : ScriptedUserAction
 			if (!cc || !m_factionKeys.Contains(cc.GetFactionKey()))
 				return false;
 		}
-		return !m_completed;
+		return IsAvailable();
 	}
 	//------------------------------------------------------------------------------------------------
 	override bool HasLocalEffectOnlyScript()

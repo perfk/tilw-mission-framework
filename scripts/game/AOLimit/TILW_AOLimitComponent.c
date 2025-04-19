@@ -13,8 +13,11 @@ class TILW_AOLimitComponent : ScriptComponent
 	[RplProp(onRplName: "DrawAO"), Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)", category: "Logic")]
 	protected ref array<string> m_factionKeys;
 
-	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NEVER affected by the AO limit", category: "Logic")]
+	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NOT affected by the AO limit", category: "Logic")]
 	protected ref array<ResourceName> m_ignoredVehicles;
+	
+	//[Attribute("", UIWidgets.Auto, desc: "Members of these groups (referenced by name) are not affected by the AO limit", category: "Logic")]
+	protected ref array<string> m_ignoredGroups;
 
 	protected float m_checkFrequency = 0.5;
 
@@ -108,15 +111,22 @@ class TILW_AOLimitComponent : ScriptComponent
 		m_checkDelta = m_checkFrequency;
 
 		bool outsideAO = IsOutsideAO();
-
-		if (m_wasOutsideAO && !outsideAO) // re-enters ao
-			PlayerEntersAO();
-
-		else if (!m_wasOutsideAO && outsideAO) // leaves ao
-			PlayerLeavesAO();
-
+		if (!m_wasEverInsideAO && !outsideAO)
+			m_wasEverInsideAO = true;
+		
+		if (m_wasOutsideAO == outsideAO || !m_wasEverInsideAO && outsideAO) // nothing changes, or nothing should happen
+			return;
+		
+		if (outsideAO)
+			PlayerLeavesAO(); // leaves ao
+		else
+			PlayerEntersAO(); // re-enters ao
+		
 		m_wasOutsideAO = outsideAO;
 	}
+	
+	protected IEntity m_controlledEntity;
+	protected bool m_wasEverInsideAO = false;
 
 	protected bool IsOutsideAO()
 	{
@@ -128,6 +138,13 @@ class TILW_AOLimitComponent : ScriptComponent
 			return false;
 
 		IEntity ce = GetGame().GetPlayerController().GetControlledEntity();
+		if (ce != m_controlledEntity)
+		{
+			PlayerEntersAO();
+			m_wasOutsideAO = false;
+			m_wasEverInsideAO = false;
+			m_controlledEntity = ce;
+		}
 		vector playerPos = ce.GetOrigin();
 		bool inPolygon = Math2D.IsPointInPolygon(m_points2D, playerPos[0], playerPos[2]);
 		if (inPolygon)
@@ -166,7 +183,42 @@ class TILW_AOLimitComponent : ScriptComponent
 
 		if (!m_factionKeys.IsEmpty() && !m_factionKeys.Contains(faction.GetFactionKey()))
 			return false;
+		
+		if (IsGroupIgnored(player))
+			return false;
 
+		return true;
+	}
+	
+	protected bool IsGroupIgnored(SCR_ChimeraCharacter cc)
+	{
+		
+		return false;
+		
+		if (m_ignoredGroups.IsEmpty())
+			return false;
+		Print("adsdas");
+		ChimeraAIControlComponent aicc = ChimeraAIControlComponent.Cast(cc.FindComponent(ChimeraAIControlComponent));
+		if (!aicc)
+			return false;
+		Print("adsdas2");
+		AIAgent a = aicc.GetControlAIAgent();
+		if (!a)
+			return false;
+		Print("adsdas3");
+		SCR_AIGroup g = SCR_AIGroup.Cast(a.GetParentGroup());
+		Print(g);
+		if (!g)
+			return false;
+		Print(g.GetName());
+		return false;
+		if (!g)
+			return false;
+		if (!g.m_BotsGroup)
+			return false;
+		Print(g.m_BotsGroup);
+		if (!m_ignoredGroups.Contains(g.m_BotsGroup.GetName()))
+			return false;
 		return true;
 	}
 
@@ -183,8 +235,9 @@ class TILW_AOLimitComponent : ScriptComponent
 		BaseContainer bc = epd.GetPrefab();
 		if (!bc)
 			return false;
-		foreach (ResourceName rn : m_ignoredVehicles) if (SCR_BaseContainerTools.IsKindOf(bc, rn))
-			return true;
+		foreach (ResourceName rn : m_ignoredVehicles)
+			if (SCR_BaseContainerTools.IsKindOf(bc, rn))
+				return true;
 
 		return false;
 	}
@@ -221,7 +274,8 @@ class TILW_AOLimitComponent : ScriptComponent
 	protected void PlayerEntersAO()
 	{
 		m_timeLeft = m_killTimer;
-		m_aoLimitDisplay.Show(false, UIConstants.FADE_RATE_INSTANT);
+		if (m_aoLimitDisplay)
+			m_aoLimitDisplay.Show(false, UIConstants.FADE_RATE_INSTANT);
 	}
 
 	void SetFactions(array<string> factions)

@@ -34,7 +34,7 @@ class PK_EntityDeleter : GenericEntity
 
 
 	//------------------------------------------------------------------------------------------------
-	override void EOnInit(IEntity owner)
+	override void EOnActivate(IEntity owner)
 	{
 		QueryEntitiesToRemove = {};
 		// server only

@@ -37,7 +37,7 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 			return (ratio >= m_ratioThreshold);
 	}
 	
-	override void RunQuery()
+	override void CustomQuery()
 	{
 		m_specialCount = 0;
 		
@@ -50,8 +50,6 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 			if (distance > m_queryRadius)
 				continue;
 			if (!m_allowDestroyed && IsEntityDestroyed(e))
-				continue;
-			if (!IsMatchingPrefab(e))
 				continue;
 			
 			m_specialCount += 1;

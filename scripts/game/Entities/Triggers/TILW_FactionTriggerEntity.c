@@ -35,20 +35,6 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 		else
 			return (m_comparisonMode && ratio >= m_ratioThreshold);
 	}
-
-
-	// HELPER METHODS
-	
-	override string GetStatusMessage(int status)
-	{
-		string factionName = GetGame().GetFactionManager().GetFactionByKey(m_ownerFactionKey).GetFactionName();
-		return string.Format(super.GetStatusMessage(status), factionName);
-	}
-
-	void SetOwnerFaction(string key)
-	{
-		m_ownerFactionKey = key;
-	}
 	
 	override bool TotalFilter(SCR_ChimeraCharacter cc)
 	{
@@ -76,6 +62,19 @@ class TILW_FactionTriggerEntity : TILW_BaseTriggerEntity
 		if (GetFactionKey(cc) == m_ownerFactionKey)
 			return true;
 		return false;
+	}
+	
+	override string GetStatusMessage(int status)
+	{
+		string factionName = GetGame().GetFactionManager().GetFactionByKey(m_ownerFactionKey).GetFactionName();
+		return string.Format(super.GetStatusMessage(status), factionName);
+	}
+	
+	// ACCESS POINTS
+
+	void SetOwnerFaction(string key)
+	{
+		m_ownerFactionKey = key;
 	}
 	
 }

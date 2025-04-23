@@ -55,6 +55,7 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 
 	//! How many matching entities are currently in the trigger
 	protected int m_totalCount;
+	
 	//! How many matching entities are currently in the trigger, which also fulfill a special condition (faction etc.)
 	protected int m_specialCount;
 
@@ -66,9 +67,18 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 
 	//! Current status of the trigger, used for status updates
 	protected int m_currentStatus = -1;
+	
+	//! Is the trigger currently active?
+	protected bool m_isActive = true;
+	
+	//! Is the trigger currently waiting for activation?
+	protected bool m_isActivating = true;
+	
+	//! Copy of the polyline points
+	protected ref array<vector> m_points3D = {};
 
 
-	// EVENTS
+	// ACCESS POINTS
 
 	//! Event: Result changed - Occurs when the trigger condition was checked after a query, and the result is different from the last run \nTo be used by entity scripts
 	event void OnResultChanged(bool result);
@@ -89,6 +99,21 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 		m_queryRadius = radius;
 	}
 	
+	//! Reload polyline points, this should be called if ShapeEntity::SetPoints was used.
+	void UpdatePoints()
+	{
+		GetPointsPositions(m_points3D);
+	}
+	
+	//! Enable / disable the trigger. Activation does not take effect immediately.
+	void SetActive(bool active)
+	{
+		if (!m_isActive && active)
+			m_isActivating = true;
+		else if (m_isActive && !active)
+			m_isActive = false;
+	}
+	
 	
 	// INIT
 	
@@ -96,6 +121,11 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	{
 		super.EOnInit(owner);
 		if (!Replication.IsServer())
+			return;
+		
+		UpdatePoints();
+		
+		if (!GetGame().InPlayMode())
 			return;
 		
 		if (m_skipFirstQuery)
@@ -106,6 +136,9 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	
 	void ~TILW_BaseTriggerEntity()
 	{
+		if (!GetGame().InPlayMode())
+			return;
+		
 		TILW_TriggerSystem.GetInstance().RemoveTrigger(this);
 	}
 
@@ -115,7 +148,13 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	//! Eval starts an evaluation round and resets counts
 	void Eval()
 	{
-		EvaluateState();
+		if (m_isActive)
+			EvaluateState();
+		else if (m_isActivating)
+		{
+			m_isActive = true;
+			m_isActivating = false;
+		}
 		m_totalCount = 0;
 		m_specialCount = 0;
 	}
@@ -127,8 +166,7 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	//! EvaluateState is responsible for updating the state of the trigger
 	protected void EvaluateState()
 	{
-		// Perform custom query if there is one
-		CustomQuery();
+		CustomQuery(); // Perform custom query if there is one
 		
 		int currentTime = System.GetTickCount();
 		int deltaTime = currentTime - m_lastEvaluation;
@@ -137,20 +175,16 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 		bool condition = EvaluateCondition();
 
 		bool isDifferent = (condition != m_lastResult);
-		bool shouldChange = isDifferent && (m_changeProgress * 1000 >= m_changeTime) && !m_firstQuery; // changed
-
-		// changed - when shouldChange is true, old is not new, and it's not the first query
-		// changing - when old is not new, but shouldChange is false
-		// no longer changing - happens when old status was changing, but now old is new again
+		bool shouldChange = isDifferent && ((m_changeProgress + deltaTime) * 1000 >= m_changeTime) && !m_firstQuery;
 
 		if (shouldChange) {
 			// Result is changing now
 			UpdateProgressStatus(0 + 3 * (int) ((m_lastResult && m_comparisonMode == 1) || (!m_lastResult && m_comparisonMode == 0)));
-			m_changeProgress = 0; // maybe don't put this all the way to 0?
+			m_changeProgress = 0;
 		} else if (isDifferent && !m_firstQuery) {
 			// Result is not yet changing, but eventually will if nothing changes
 			UpdateProgressStatus(1 + 3 * (int) ((m_lastResult && m_comparisonMode == 1) || (!m_lastResult && m_comparisonMode == 0)));
-			m_changeProgress += deltaTime;
+			m_changeProgress += deltaTime; // Move towards change
 		}
 		if ((m_currentStatus == 1 || m_currentStatus == 4) && !isDifferent) {
 			// Result is no longer projected to change
@@ -173,18 +207,21 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 			if (m_OnResultChanged)
 				m_OnResultChanged.Invoke(condition); // Invoke ScriptInvoker
 			if (m_stopAfterFirstChange)
-				return; // Perhaps stop doing queries
+				SetActive(false); // Perhaps stop doing queries
 		}
 
 		if (m_firstQuery)
 			m_firstQuery = false;
 	}
+	
+	// Could turn some of these into entity script events
 
 	//! EvaluateCondition determines if the trigger condition is met. It should be overridden with some count comparison.
 	protected bool EvaluateCondition();
 	
 	//! TotalFilter checks if the character is relevant to the trigger, e. g. being alive or inside of it
 	protected bool TotalFilter(SCR_ChimeraCharacter cc);
+	
 	//! SpecialFilter checks if the character also fulfills a special condition, e. g. having some faction
 	protected bool SpecialFilter(SCR_ChimeraCharacter cc);
 	
@@ -194,6 +231,8 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	//! ProcessCharacter passes the trigger characters, which are counted according to the filters
 	void ProcessCharacter(SCR_ChimeraCharacter cc)
 	{
+		if (!m_isActive)
+			return;
 		if (!TotalFilter(cc))
 			return;
 		m_totalCount += 1;
@@ -240,16 +279,17 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	
 	// HELPERS
 	
+	//! Should the trigger operate in polyline mode?
 	protected bool IsPolylineTrigger()
 	{
-		return false;
+		return (m_points3D.Count() >= 3);
 	}
 	
 	protected bool IsWithinShape(vector pos)
 	{
-		if (vector.Distance(GetOrigin(), pos) <= m_queryRadius)
-			return true;
-		return false;
+		if (!IsPolylineTrigger())
+			return (vector.Distance(GetOrigin(), pos) <= m_queryRadius);
+		return Math2D.IsPointInPolygonXZ(m_points3D, pos);
 	}
 	
 	//! GetFactionKey gets a characters faction key. If it has no faction, "" is returned.

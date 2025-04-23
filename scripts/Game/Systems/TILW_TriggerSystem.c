@@ -3,13 +3,23 @@ class TILW_TriggerSystem : GameSystem
 	static TILW_TriggerSystem GetInstance()
 	{
 		World world = GetGame().GetWorld();
+		if (!world)
+			return null;
 		return TILW_TriggerSystem.Cast(world.FindSystem(TILW_TriggerSystem));
+	}
+	
+	override void OnInit()
+	{
+		super.OnInit();
+		if (m_triggers.IsEmpty())
+			Enable(false);
 	}
 	
 	override static void InitInfo(WorldSystemInfo outInfo)
 	{
 		super.InitInfo(outInfo);
-		outInfo.SetAbstract(false)
+		outInfo
+			.SetAbstract(false)
 			.SetUnique(true)
 			.SetLocation(ESystemLocation.Server)
 			.AddPoint(ESystemPoint.Frame);
@@ -25,10 +35,16 @@ class TILW_TriggerSystem : GameSystem
 		if (!trigger)
 			return;
 		m_triggers.Insert(trigger);
+		
+		if (!IsEnabled())
+			Enable(true);
 	}
 	void RemoveTrigger(TILW_BaseTriggerEntity trigger)
 	{
 		m_triggers.RemoveItem(trigger);
+		
+		if (m_triggers.IsEmpty())
+			Enable(false);
 	}
 	
 	void InsertCharacter(SCR_ChimeraCharacter character)
@@ -75,7 +91,6 @@ class TILW_TriggerSystem : GameSystem
 			// Make sure to not process too much this frame
 			if (processedThisFrame >= m_maxCharactersPerFrame)
 				return;
-			
 			ProcessCharacter(m_characters[m_currentIndex]);
 			
 			m_currentIndex += 1;

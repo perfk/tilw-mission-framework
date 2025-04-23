@@ -55,5 +55,12 @@ class TILW_PresenceTriggerEntity : TILW_BaseTriggerEntity
 			m_specialCount += 1;
 		}
 	}
+	
+	// ACCESS POINTS
+	
+	void SetEntityNames(array<string> entityNames)
+	{
+		m_entityNames = entityNames;
+	}
 
 }

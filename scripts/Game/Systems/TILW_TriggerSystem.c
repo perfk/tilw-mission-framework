@@ -27,8 +27,8 @@ class TILW_TriggerSystem : GameSystem
 	
 	// Triggers and characters
 	
-	protected ref array<TILW_BaseTriggerEntity> m_triggers;
-	protected ref array<SCR_ChimeraCharacter> m_characters;
+	protected ref array<TILW_BaseTriggerEntity> m_triggers = {};
+	protected ref array<SCR_ChimeraCharacter> m_characters = {};
 	
 	void InsertTrigger(TILW_BaseTriggerEntity trigger)
 	{
@@ -73,7 +73,6 @@ class TILW_TriggerSystem : GameSystem
 	override protected void OnUpdate(ESystemPoint point)
 	{
 		super.OnUpdate(point);
-		
 		if (m_currentIndex > 0 || System.GetTickCount() - m_lastUpdate >= m_updateFrequency)
 			ProcessCharacters();
 	}
@@ -113,5 +112,10 @@ class TILW_TriggerSystem : GameSystem
 		m_lastUpdate = System.GetTickCount();
 		m_currentIndex = 0;
 	}
+	
+	// Polyline trigger not working correctly
+	// Polyline WB visualiuation
+	// Finalize capture time implementation
+	// Polyline editing issue (workaround, do parent or sth)
 	
 }

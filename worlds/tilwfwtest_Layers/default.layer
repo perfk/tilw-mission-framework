@@ -11,6 +11,27 @@ $grp GenericEntity {
   coords 116.546 1 139.412
  }
 }
+PolylineShapeEntity {
+ coords 65.582 1 209.805
+ angleY 49.909
+ Points {
+  ShapePoint "{652E26427B4F9FF6}" {
+   Position -2.964 -0 3.539
+  }
+  ShapePoint "{652E26427B068173}" {
+   Position 1.836 0 17.312
+  }
+  ShapePoint "{652E26427BFC5146}" {
+   Position 17.327 0 3.191
+  }
+  ShapePoint "{652E26427BB6F4B7}" {
+   Position 3.819 0 -9.466
+  }
+  ShapePoint "{652E26427C4E28CF}" {
+   Position 12.694 -0 -10.316
+  }
+ }
+}
 Vehicle M1025_armed_M2HB1 : "{3EA6F47D95867114}Prefabs/Vehicles/Wheeled/M998/M1025_armed_M2HB.et" {
  components {
   SCR_BaseLockComponent "{54D6FBC0EA806FE5}" {
@@ -63,6 +84,20 @@ SCR_ChimeraCharacter : "{84029128FA6F6BB9}Prefabs/Characters/Factions/BLUFOR/US_
 }
 TILW_FactionTriggerEntity sdas : "{8C576D46F6579229}Prefabs/Logic/Triggers/TILW_FactionTrigger.et" {
  coords 9.784 1 244.278
+ Points {
+  ShapePoint "{652E264215DDC923}" {
+   Position 15.687 0 3.642
+  }
+  ShapePoint "{652E26421A48AF9D}" {
+   Position 12.917 0 -9.858
+  }
+  ShapePoint "{652E26421A1F054E}" {
+   Position -4.387 0 -16.086
+  }
+  ShapePoint "{652E26421AA7683F}" {
+   Position 9.343 0 -1.585
+  }
+ }
  m_queryRadius 10
  m_sendStatusMessages 1
  m_flagName "OBJ_B"

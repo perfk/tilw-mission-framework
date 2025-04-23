@@ -332,11 +332,12 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	override void _WB_AfterWorldUpdate(float timeSlice)
 	{
 		super._WB_AfterWorldUpdate(timeSlice);
-		DrawDebugShape();
+		if (!IsPolylineTrigger())
+			DrawDebugSphere();
 	}
 
 	//! DrawDebugShape() draws a debug sphere, useful for previeving the query radius.
-	protected void DrawDebugShape()
+	protected void DrawDebugSphere()
 	{
 		Shape dbgShape = null;
 

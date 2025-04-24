@@ -1,72 +1,21 @@
-$grp TILW_FactionTriggerEntity : "{8C576D46F6579229}Prefabs/Logic/Triggers/TILW_FactionTrigger.et" {
- sdas1 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
+TILW_FactionTriggerEntity sdas1 : "{8C576D46F6579229}Prefabs/Logic/Triggers/TILW_FactionTrigger.et" {
+ coords 51.319 1 58.964
+ m_queryRadius 10
+ m_sendStatusMessages 1
+ m_flagName "OBJ_B"
+ m_ownerFactionKey "US"
+}
+$grp SCR_IndestructibleEnvironmentalEntity : "{F281250F8F8E3755}Prefabs/Structures/Infrastructure/Naval/Breakwater/BreakwaterStone_01_stack_wall.et" {
+ {
+  coords 106.845 0 138.75
+  angleY -86.447
  }
- sdas2 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
+ {
+  coords 114.243 0 110.881
+  angleY -127.406
  }
- sdas3 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
- }
- sdas4 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
- }
- sdas5 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
- }
- sdas6 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
- }
- sdas7 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
- }
- sdas8 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
- }
- sdas9 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
- }
- sdas10 {
-  coords 51.319 1 58.964
-  m_queryRadius 10
-  m_sendStatusMessages 1
-  m_flagName "OBJ_B"
-  m_ownerFactionKey "US"
+ {
+  coords 120.954 0 161.275
+  angleY -43.38
  }
 }

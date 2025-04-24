@@ -1,5 +1,15 @@
 class TILW_TriggerSystem : GameSystem
 {
+	
+	// Attributes ------------------------------------------------
+	
+	[Attribute(defvalue: "1000", desc: "Idle time between counts, in milliseconds")]
+    private int m_updateFrequency;
+	
+	[Attribute(defvalue: "50", desc: "How many characters are allowed to be processed per tick")]
+    private int m_batchSize;
+	
+	//! Provides instance of the trigger system
 	static TILW_TriggerSystem GetInstance()
 	{
 		World world = GetGame().GetWorld();
@@ -8,6 +18,7 @@ class TILW_TriggerSystem : GameSystem
 		return TILW_TriggerSystem.Cast(world.FindSystem(TILW_TriggerSystem));
 	}
 	
+	//! Initializes system
 	override void OnInit()
 	{
 		super.OnInit();
@@ -15,6 +26,7 @@ class TILW_TriggerSystem : GameSystem
 			Enable(false);
 	}
 	
+	//! Initializes system information
 	override static void InitInfo(WorldSystemInfo outInfo)
 	{
 		super.InitInfo(outInfo);
@@ -25,20 +37,26 @@ class TILW_TriggerSystem : GameSystem
 			.AddPoint(ESystemPoint.Frame);
 	}
 	
-	// Triggers and characters
+	// Triggers and characters ------------------------------------------------
 	
+	//! Holds all triggers registered with the system
 	protected ref array<TILW_BaseTriggerEntity> m_triggers = {};
+	
+	//! Holds all characters registered with the system
 	protected ref array<SCR_ChimeraCharacter> m_characters = {};
 	
+	//! Inserts a trigger into the system
 	void InsertTrigger(TILW_BaseTriggerEntity trigger)
 	{
-		if (!trigger)
+		if (!trigger || m_triggers.Contains(trigger))
 			return;
 		m_triggers.Insert(trigger);
 		
 		if (!IsEnabled())
 			Enable(true);
 	}
+	
+	//! Removes a trigger from the system
 	void RemoveTrigger(TILW_BaseTriggerEntity trigger)
 	{
 		m_triggers.RemoveItem(trigger);
@@ -47,12 +65,15 @@ class TILW_TriggerSystem : GameSystem
 			Enable(false);
 	}
 	
+	//! Inserts a character into the system
 	void InsertCharacter(SCR_ChimeraCharacter character)
 	{
-		if (!character)
+		if (!character || m_characters.Contains(character))
 			return;
 		m_characters.Insert(character);
 	}
+	
+	//! Removes a character from the system
 	void RemoveCharacter(SCR_ChimeraCharacter character)
 	{
 		int index = m_characters.Find(character);
@@ -65,13 +86,15 @@ class TILW_TriggerSystem : GameSystem
 			ProcessCharacter(m_characters[index]); // Process swapback character
 	}
 	
-	// OnUpdate
+	// OnUpdate ------------------------------------------------
 	
+	//! Keeps track of when we last counted
 	protected int m_lastUpdate = 0;
-	protected int m_updateFrequency = 3000;
 	
-	protected int m_debugTime = 0;
+	//! Keeps track of how far we have counted
+	protected int m_currentIndex = 0;
 	
+	//! Initiates character processing
 	override protected void OnUpdate(ESystemPoint point)
 	{
 		super.OnUpdate(point);
@@ -79,56 +102,43 @@ class TILW_TriggerSystem : GameSystem
 			ProcessCharacters();
 	}
 	
-	protected int m_currentIndex = 0;
-	protected int m_maxCharactersPerFrame = 450;
-	
-	// Why is this being done here and not directly on the triggers?
+	//! Processes batches of characters
 	protected void ProcessCharacters()
 	{
 		int count = m_characters.Count();
 		int processedThisFrame = 0;
 		
-		int t = System.GetTickCount();
-		
-		Debug.BeginTimeMeasure();
-		
 		while (m_currentIndex < count)
 		{
-			// Make sure to not process too much this frame
-			if (processedThisFrame >= m_maxCharactersPerFrame)
-			{
-				m_debugTime += System.GetTickCount() - t;
-				Debug.EndTimeMeasure("z32 ");
+			if (processedThisFrame >= m_batchSize)
 				return;
-			}
+			
 			ProcessCharacter(m_characters[m_currentIndex]);
 			
 			m_currentIndex += 1;
 			processedThisFrame += 1;
 		}
 		
-		Debug.EndTimeMeasure("z32 ");
-		m_debugTime += System.GetTickCount() - t;
-		
 		PostCharacterProcessing();
 	}
 	
+	//! Hands a character to all triggers for counting
 	protected void ProcessCharacter(SCR_ChimeraCharacter cc)
 	{
 		foreach (TILW_BaseTriggerEntity t : m_triggers)
-			t.ProcessCharacter(m_characters[m_currentIndex]);
+			t.ProcessCharacter(cc);
 	}
 	
+	//! Instructs all triggers to evaluate, and prepares system for next round
 	protected void PostCharacterProcessing()
 	{
-		Print("z32 ");
-		m_debugTime = 0;
 		foreach (TILW_BaseTriggerEntity t : m_triggers)
 			t.Eval();
 		m_lastUpdate = System.GetTickCount();
 		m_currentIndex = 0;
 	}
 	
+	// Unfinished:
 	// Polyline WB visualiuation
 	
 }

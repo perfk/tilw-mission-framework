@@ -80,6 +80,7 @@ class TILW_TriggerSystem : GameSystem
 	protected int m_currentIndex = 0;
 	protected int m_maxCharactersPerFrame = 50;
 	
+	// Why is this being done here and not directly on the triggers?
 	protected void ProcessCharacters()
 	{
 		int count = m_characters.Count();
@@ -113,9 +114,6 @@ class TILW_TriggerSystem : GameSystem
 		m_currentIndex = 0;
 	}
 	
-	// Polyline trigger not working correctly
 	// Polyline WB visualiuation
-	// Finalize capture time implementation
-	// Polyline editing issue (workaround, do parent or sth)
 	
 }

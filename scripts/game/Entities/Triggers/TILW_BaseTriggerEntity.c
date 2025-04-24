@@ -1,18 +1,18 @@
 [EntityEditorProps(category: "GameScripted/Triggers", description: "The TILW_BaseTriggerEntity is a custom trigger designed to be used with the TILW_MissionFrameworkEntity. \nDo not use the base version directly..")]
-class TILW_BaseTriggerEntityClass : PolylineShapeEntityClass
+class TILW_BaseTriggerEntityClass : GenericEntityClass
 {
 }
 
-class TILW_BaseTriggerEntity : PolylineShapeEntity
+class TILW_BaseTriggerEntity : GenericEntity
 {
 
 	// QUERY SETTINGS
 
-	[Attribute("25", UIWidgets.Auto, "Radius of sphere query", category: "Trigger Query")]
+	[Attribute("25", UIWidgets.Auto, "Radius of sphere trigger. If the parent entity is a polyline with 3+ points, the radius ignored and the trigger operates in polyline mode.", category: "Trigger Query")]
 	protected float m_queryRadius;
 
-	[Attribute("10", UIWidgets.Auto, "Period of query in seconds", category: "Trigger Query", params: "0.25 inf 0.25")]
-	protected float m_queryPeriod;
+	[Attribute("10", UIWidgets.Auto, "Period of query in seconds. OBSOLETE, WILL BE REMOVED SOON.", category: "Deprecated", params: "0.25 inf 0.25")]
+	protected float m_queryPeriod; // delete soon
 
 	[Attribute("0", UIWidgets.Auto, "Skip the discovery query (which otherwise determines the initial state immediately, skipping capture iterations)", category: "Trigger Query")]
 	protected bool m_skipFirstQuery;
@@ -26,8 +26,11 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 
 	// STATUS SETTINGS
 
-	[Attribute("1", UIWidgets.Auto, "For how many query periods the condition has to be different from the current result, in order for the result to change. \nCan be used for capture timers (time = Capture Iterations * Query Period). \nWhile not different, any change progress slowly returns to 0. \nIf 1, the trigger is captured instantly once the condition is met.", category: "Trigger Status", params: "1 inf")]
-	protected int m_captureIterations;
+	[Attribute("1", UIWidgets.Auto, "OBSOLETE, WILL BE REMOVED SOON. Use capture time instead.", category: "Deprecated", params: "1 inf")]
+	protected int m_captureIterations; // delete soon
+	
+	[Attribute("0", UIWidgets.Auto, "How many seconds it takes for the trigger state to change. \nWhen progress is interrupted, it starts ticking back down towards zero. \nIf 0, the trigger is captured instantly once the condition is met.", category: "Trigger Status", params: "0 inf")]
+	protected float m_captureTime;
 
 	[Attribute("0", UIWidgets.Auto, "Whether to display a message whenever the triggers capture status changes.", category: "Trigger Status")]
 	protected bool m_sendStatusMessages;
@@ -76,6 +79,7 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	
 	//! Copy of the polyline points
 	protected ref array<vector> m_points3D = {};
+	protected ref array<vector> m_pointsOverride = {};
 
 
 	// ACCESS POINTS
@@ -99,10 +103,10 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 		m_queryRadius = radius;
 	}
 	
-	//! Reload polyline points, this should be called if ShapeEntity::SetPoints was used.
-	void UpdatePoints()
+	//! Allows overriding the triggers polyline points via script
+	void SetPoints(array<vector> points3D)
 	{
-		GetPointsPositions(m_points3D);
+		m_pointsOverride = m_points3D;
 	}
 	
 	//! Enable / disable the trigger. Activation does not take effect immediately.
@@ -123,7 +127,7 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 		if (!Replication.IsServer())
 			return;
 		
-		UpdatePoints();
+		GetPolylinePoints();
 		
 		if (!GetGame().InPlayMode())
 			return;
@@ -148,6 +152,7 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	//! Eval starts an evaluation round and resets counts
 	void Eval()
 	{
+		// Activation and evaluation
 		if (m_isActive)
 			EvaluateState();
 		else if (m_isActivating)
@@ -155,12 +160,17 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 			m_isActive = true;
 			m_isActivating = false;
 		}
+		// Update polyline
+		if (!m_pointsOverride.IsEmpty())
+			m_points3D = m_pointsOverride;
+		else
+			GetPolylinePoints();
+		// Reset count
 		m_totalCount = 0;
 		m_specialCount = 0;
 	}
 	
 	protected int m_lastEvaluation = 0;
-	protected float m_changeTime = 30.0;
 	protected int m_changeProgress = 0;
 
 	//! EvaluateState is responsible for updating the state of the trigger
@@ -172,10 +182,16 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 		int deltaTime = currentTime - m_lastEvaluation;
 		m_lastEvaluation = currentTime;
 		
+		float changeTime;
+		if (m_captureTime > 0)
+			changeTime = m_captureTime;
+		else	
+			changeTime = m_captureIterations * m_queryPeriod;
+		
 		bool condition = EvaluateCondition();
 
 		bool isDifferent = (condition != m_lastResult);
-		bool shouldChange = isDifferent && ((m_changeProgress + deltaTime) * 1000 >= m_changeTime) && !m_firstQuery;
+		bool shouldChange = isDifferent && ((m_changeProgress + deltaTime) >= changeTime * 1000) && !m_firstQuery;
 
 		if (shouldChange) {
 			// Result is changing now
@@ -279,12 +295,25 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	
 	// HELPERS
 	
+	//! Load points from the parent polyline, if one exists
+	protected void GetPolylinePoints()
+	{
+		PolylineShapeEntity pse = PolylineShapeEntity.Cast(GetParent());
+		if (!pse)
+			return;
+		m_points3D = {};
+		pse.GetPointsPositions(m_points3D);
+		for (int i = 0; i < m_points3D.Count(); i++)
+			m_points3D[i] = pse.CoordToParent(m_points3D[i]);
+	}
+	
 	//! Should the trigger operate in polyline mode?
 	protected bool IsPolylineTrigger()
 	{
 		return (m_points3D.Count() >= 3);
 	}
 	
+	//! Checks if a position is within the trigger shape
 	protected bool IsWithinShape(vector pos)
 	{
 		if (!IsPolylineTrigger())
@@ -332,12 +361,14 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 	override void _WB_AfterWorldUpdate(float timeSlice)
 	{
 		super._WB_AfterWorldUpdate(timeSlice);
+		GetPolylinePoints();
 		if (!IsPolylineTrigger())
-			DrawDebugSphere();
+			DrawDebugShape();
+		// GenerateAreaMesh
 	}
 
 	//! DrawDebugShape() draws a debug sphere, useful for previeving the query radius.
-	protected void DrawDebugSphere()
+	protected void DrawDebugShape(bool polyline = false)
 	{
 		Shape dbgShape = null;
 
@@ -354,6 +385,7 @@ class TILW_BaseTriggerEntity : PolylineShapeEntity
 
 		dbgShape = Shape.CreateSphere(c.PackToInt(), flags, GetOrigin(), m_queryRadius);
 	}
+	
 #endif
 	
 }

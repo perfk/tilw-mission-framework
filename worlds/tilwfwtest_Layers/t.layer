@@ -1,0 +1,72 @@
+$grp TILW_FactionTriggerEntity : "{8C576D46F6579229}Prefabs/Logic/Triggers/TILW_FactionTrigger.et" {
+ sdas1 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas2 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas3 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas4 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas5 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas6 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas7 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas8 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas9 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+ sdas10 {
+  coords 51.319 1 58.964
+  m_queryRadius 10
+  m_sendStatusMessages 1
+  m_flagName "OBJ_B"
+  m_ownerFactionKey "US"
+ }
+}

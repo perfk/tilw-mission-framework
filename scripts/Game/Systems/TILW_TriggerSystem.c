@@ -68,7 +68,9 @@ class TILW_TriggerSystem : GameSystem
 	// OnUpdate
 	
 	protected int m_lastUpdate = 0;
-	protected int m_updateFrequency = 1000;
+	protected int m_updateFrequency = 3000;
+	
+	protected int m_debugTime = 0;
 	
 	override protected void OnUpdate(ESystemPoint point)
 	{
@@ -78,7 +80,7 @@ class TILW_TriggerSystem : GameSystem
 	}
 	
 	protected int m_currentIndex = 0;
-	protected int m_maxCharactersPerFrame = 50;
+	protected int m_maxCharactersPerFrame = 450;
 	
 	// Why is this being done here and not directly on the triggers?
 	protected void ProcessCharacters()
@@ -86,16 +88,27 @@ class TILW_TriggerSystem : GameSystem
 		int count = m_characters.Count();
 		int processedThisFrame = 0;
 		
+		int t = System.GetTickCount();
+		
+		Debug.BeginTimeMeasure();
+		
 		while (m_currentIndex < count)
 		{
 			// Make sure to not process too much this frame
 			if (processedThisFrame >= m_maxCharactersPerFrame)
+			{
+				m_debugTime += System.GetTickCount() - t;
+				Debug.EndTimeMeasure("z32 ");
 				return;
+			}
 			ProcessCharacter(m_characters[m_currentIndex]);
 			
 			m_currentIndex += 1;
 			processedThisFrame += 1;
 		}
+		
+		Debug.EndTimeMeasure("z32 ");
+		m_debugTime += System.GetTickCount() - t;
 		
 		PostCharacterProcessing();
 	}
@@ -108,6 +121,8 @@ class TILW_TriggerSystem : GameSystem
 	
 	protected void PostCharacterProcessing()
 	{
+		Print("z32 ");
+		m_debugTime = 0;
 		foreach (TILW_BaseTriggerEntity t : m_triggers)
 			t.Eval();
 		m_lastUpdate = System.GetTickCount();

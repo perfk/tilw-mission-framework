@@ -242,6 +242,12 @@ class TILW_AOLimitComponent : ScriptComponent
 		if (m_aoLimitDisplay)
 			m_aoLimitDisplay.Show(false, UIConstants.FADE_RATE_INSTANT);
 	}
+	
+	override void OnDelete(IEntity owner)
+	{
+		PlayerEntersAO();
+		super.OnDelete(owner);
+	}
 
 	void SetFactions(array<string> factions)
 	{

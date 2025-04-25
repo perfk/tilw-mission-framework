@@ -183,10 +183,10 @@ class TILW_BaseTriggerEntity : GenericEntity
 		m_lastEvaluation = currentTime;
 		
 		float changeTime;
-		if (m_captureTime > 0)
-			changeTime = m_captureTime;
+		if (m_captureTime == 0 && m_captureIterations > 1)
+			changeTime = m_captureIterations * m_queryPeriod; // Still using the old parameters
 		else	
-			changeTime = m_captureIterations * m_queryPeriod;
+			changeTime = m_captureTime;
 		
 		bool condition = EvaluateCondition();
 

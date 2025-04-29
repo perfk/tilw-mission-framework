@@ -143,7 +143,9 @@ class TILW_BaseTriggerEntity : GenericEntity
 		if (!GetGame().InPlayMode())
 			return;
 		
-		TILW_TriggerSystem.GetInstance().RemoveTrigger(this);
+		TILW_TriggerSystem ts = TILW_TriggerSystem.GetInstance();
+		if (ts)
+			ts.RemoveTrigger(this);
 	}
 
 

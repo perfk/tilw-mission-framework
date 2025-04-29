@@ -10,7 +10,7 @@ class TILW_ExtractionTriggerEntity : TILW_BaseTriggerEntity
 
 	// CONDITION SETTINGS
 	
-	[Attribute("0", UIWidgets.Auto, "If true, only the ratio between players should matter. AI characters are ignored completely.", category: "Trigger Filter")]
+	[Attribute("1", UIWidgets.Auto, "If true, only the ratio between players should matter. AI characters are ignored completely.", category: "Trigger Filter")]
 	protected bool m_playersOnly;
 
 	[Attribute("", UIWidgets.Auto, "Which faction is being examined?", category: "Trigger Condition")]

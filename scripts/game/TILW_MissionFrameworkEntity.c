@@ -178,7 +178,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	// DEBUG
 	
-	[Attribute("0", UIWidgets.Auto, desc: "Should TILW_EndGameInstructions be prevented from actually ending the game?", category: "Debug")]
+	[Attribute("0", UIWidgets.Auto, desc: "Prevent the TILW_EndGameInstructions from actually ending the game, and display a hint message instead.", category: "Debug")]
 	bool m_suppressGameEnd;
 	
 

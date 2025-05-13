@@ -45,12 +45,19 @@ class TILW_TriggerSystem : GameSystem
 	//! Holds all characters registered with the system
 	protected ref array<SCR_ChimeraCharacter> m_characters = {};
 	
+	//! Holds triggers that should be registered with the system
+	protected ref array<TILW_BaseTriggerEntity> m_triggersToInsert = {};
+	
 	//! Inserts a trigger into the system
 	void InsertTrigger(TILW_BaseTriggerEntity trigger)
 	{
-		if (!trigger || m_triggers.Contains(trigger))
+		if (!trigger || m_triggers.Contains(trigger) || m_triggersToInsert.Contains(trigger))
 			return;
-		m_triggers.Insert(trigger);
+		
+		if (m_currentIndex == 0)
+			m_triggers.Insert(trigger);
+		else
+			m_triggersToInsert.Insert(trigger);
 		
 		if (!IsEnabled())
 			Enable(true);
@@ -59,7 +66,8 @@ class TILW_TriggerSystem : GameSystem
 	//! Removes a trigger from the system
 	void RemoveTrigger(TILW_BaseTriggerEntity trigger)
 	{
-		m_triggers.RemoveItem(trigger);
+		if (!m_triggers.RemoveItem(trigger))
+			m_triggersToInsert.RemoveItem(trigger);
 		
 		if (m_triggers.IsEmpty())
 			Enable(false);
@@ -136,6 +144,11 @@ class TILW_TriggerSystem : GameSystem
 			t.Eval();
 		m_lastUpdate = System.GetTickCount();
 		m_currentIndex = 0;
+		
+		// Register any new triggers
+		foreach (TILW_BaseTriggerEntity t: m_triggersToInsert)
+			m_triggers.Insert(t);
+		m_triggersToInsert.Clear();
 	}
 	
 	// Unfinished:

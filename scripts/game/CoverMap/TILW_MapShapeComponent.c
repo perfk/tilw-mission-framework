@@ -58,12 +58,12 @@ class TILW_MapShapeComponent : ScriptComponent
 	override void OnPostInit(IEntity owner)
 	{
 		super.OnPostInit(owner);
+		m_mapEntity = SCR_MapEntity.GetMapInstance();
 		GetGame().GetCallqueue().Call(Init);
 	}
 	
 	protected void Init()
 	{
-		m_mapEntity = SCR_MapEntity.GetMapInstance();
 		ScriptInvokerBase<MapConfigurationInvoker> onMapOpen = m_mapEntity.GetOnMapOpen();
 		ScriptInvokerBase<MapConfigurationInvoker> onMapClose = m_mapEntity.GetOnMapClose();
 		
@@ -118,6 +118,9 @@ class TILW_MapShapeComponent : ScriptComponent
 		
 	protected void OnPoints3DChange()
 	{
+		if (!m_mapEntity)
+			m_mapEntity = SCR_MapEntity.GetMapInstance();
+		
 		m_points2D_1 = {};
 		m_points2D_2 = {};
 		

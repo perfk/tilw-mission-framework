@@ -14,6 +14,7 @@ class TILW_AreaSpawningComponent : ScriptComponent
 	
 	override void OnPostInit(IEntity owner)
 	{
+		super.OnPostInit(owner);
 		if (Replication.IsServer())
 			GetGame().GetCallqueue().Call(SpawnPrefabs, owner);
 	}

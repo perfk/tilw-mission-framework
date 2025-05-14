@@ -59,6 +59,12 @@ class TILW_AOLimitComponent : ScriptComponent
 
 	protected override void EOnInit(IEntity owner)
 	{
+		super.EOnInit(owner);
+		GetGame().GetCallqueue().Call(Init);
+	}
+	
+	protected void Init()	
+	{
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(GetOwner());
 		if (!pse) {
 			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") is not a polyline!", LogLevel.WARNING);

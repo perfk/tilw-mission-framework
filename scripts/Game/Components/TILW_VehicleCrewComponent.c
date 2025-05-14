@@ -39,10 +39,12 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	override void OnPostInit(IEntity owner)
 	{
 		super.OnPostInit(owner);
-		
-		if (!Replication.IsServer() || !GetGame().InPlayMode())
-			return;
-		
+		if (Replication.IsServer() && GetGame().InPlayMode())
+			GetGame().GetCallqueue().Call(Init);
+	}
+	
+	protected void Init()
+	{
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
 		if (!gm)
 			return;

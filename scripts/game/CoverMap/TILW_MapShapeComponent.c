@@ -57,6 +57,12 @@ class TILW_MapShapeComponent : ScriptComponent
 	
 	override void OnPostInit(IEntity owner)
 	{
+		super.OnPostInit(owner);
+		GetGame().GetCallqueue().Call(Init);
+	}
+	
+	protected void Init()
+	{
 		m_mapEntity = SCR_MapEntity.GetMapInstance();
 		ScriptInvokerBase<MapConfigurationInvoker> onMapOpen = m_mapEntity.GetOnMapOpen();
 		ScriptInvokerBase<MapConfigurationInvoker> onMapClose = m_mapEntity.GetOnMapClose();

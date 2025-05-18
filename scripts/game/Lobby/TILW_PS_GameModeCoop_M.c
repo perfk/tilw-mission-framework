@@ -1,5 +1,12 @@
 modded class PS_GameModeCoop : SCR_BaseGameMode
 {
+	
+	// OPTIONS
+	
+	[Attribute("30", UIWidgets.Object, desc: "How many seconds should safe start last?", category: "Reforger Lobby", params: "0 inf 0")]
+	int m_safeStartTime;
+	
+	
 	override void TryRespawn(RplId playableId, int playerId)
 	{
 		super.TryRespawn(playableId, playerId);

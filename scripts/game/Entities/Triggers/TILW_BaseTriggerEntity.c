@@ -72,7 +72,7 @@ class TILW_BaseTriggerEntity : GenericEntity
 	protected int m_currentStatus = -1;
 	
 	//! Is the trigger currently active?
-	protected bool m_isActive = true;
+	protected bool m_isActive = false;
 	
 	//! Is the trigger currently waiting for activation?
 	protected bool m_isActivating = true;

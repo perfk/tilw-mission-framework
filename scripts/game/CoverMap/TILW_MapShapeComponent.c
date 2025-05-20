@@ -11,22 +11,41 @@ class TILW_MapShapeComponent : ScriptComponent
 	[RplProp(onRplName: "OnPoints3DChange")]
 	protected ref array<vector> m_points3D = new array<vector>();
 	
+	protected ref array<float> m_points2D = new array<float>();
 	protected ref array<float> m_points2D_1 = new array<float>();
 	protected ref array<float> m_points2D_2 = new array<float>();
 	
-	// Parameters
+	protected bool m_isClosed = true;
 	
-	[Attribute("0 0 0 0.75", UIWidgets.ColorPicker, desc: "Color of the shape, you can also set transparency.", category: "Visualization")]
-	protected ref Color m_color;
+	// Visibility
 	
-	[Attribute("0", UIWidgets.Auto, "Invert the shape so it surrounds the polyline area.", category: "Visualization")]
-	protected bool m_invert;
-	
-	[RplProp(), Attribute("", UIWidgets.Auto, "If defined, only display for the given factions.", category: "Visualization")]
+	[RplProp(), Attribute("", UIWidgets.Auto, "If defined, only display the shape to given factions.", category: "Visibility")]
 	protected ref array<FactionKey> m_factionKeys;
 	
-	[Attribute("1", UIWidgets.Auto, "Is it visible before slotting or for spectators?", category: "Visualization")]
+	[Attribute("1", UIWidgets.Auto, "Is the shape visible before slotting or for spectators?", category: "Visibility")]
 	protected bool m_visibleForEmptyFaction;
+	
+	// Area
+	
+	[Attribute("1", UIWidgets.Auto, "Fill the area", category: "Area")]
+	protected bool m_drawArea;
+	
+	[Attribute("0 0 0 0.75", UIWidgets.ColorPicker, desc: "Color of the shape, you can also set transparency.", category: "Area")]
+	protected ref Color m_color;
+	
+	[Attribute("0", UIWidgets.Auto, "Invert the area so it encompasses the polyline.", category: "Area")]
+	protected bool m_invert;
+	
+	// Line
+	
+	[Attribute("0", UIWidgets.Auto, "Draw a line following the polyline", category: "Line")]
+	protected bool m_drawLine;
+
+	[Attribute("0 0 0 1", UIWidgets.ColorPicker, "Color of the line.", category: "Line")]
+	protected ref Color m_lineColor;
+
+	[Attribute("3", UIWidgets.Auto, "Width of the line.", params: "1 inf 0", category: "Line")]
+	protected int m_lineWidth;
 	
 	
 	protected bool IsVisible()
@@ -81,7 +100,7 @@ class TILW_MapShapeComponent : ScriptComponent
 		Replication.BumpMe();
 	}
 	
-	void SetPoints3D(array<vector> points3D)
+	void SetPoints3D(array<vector> points3D, bool closed = true)
 	{
 		if (points3D.Count() < 3)
 		{
@@ -89,6 +108,7 @@ class TILW_MapShapeComponent : ScriptComponent
 			return;
 		}
 		m_points3D = points3D;
+		m_isClosed = closed;
 		Replication.BumpMe();
 		OnPoints3DChange();
 	}
@@ -112,6 +132,8 @@ class TILW_MapShapeComponent : ScriptComponent
 		for (int i = 0; i < m_points3D.Count(); i++)
 			m_points3D[i] = pse.CoordToParent(m_points3D[i]);
 		
+		m_isClosed = pse.IsClosed();
+		
 		OnPoints3DChange();
 	}
 		
@@ -121,13 +143,16 @@ class TILW_MapShapeComponent : ScriptComponent
 		if (!m_mapEntity)
 			m_mapEntity = SCR_MapEntity.GetMapInstance();
 		
+		m_points2D = {};
 		m_points2D_1 = {};
 		m_points2D_2 = {};
+		
+		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
 		
 		if (m_invert)
 			InvertPolygon();
 		else
-			SCR_Math2D.Get2DPolygon(m_points3D, m_points2D_1);
+			m_points2D_1 = m_points2D;
 		
 	}
 	
@@ -230,6 +255,7 @@ class TILW_MapShapeComponent : ScriptComponent
 
 	protected ref PolygonDrawCommand m_drawPolygon1 = new PolygonDrawCommand();
 	protected ref PolygonDrawCommand m_drawPolygon2 = new PolygonDrawCommand();
+	protected ref LineDrawCommand m_drawLineCommand = new LineDrawCommand();
 	protected ref array<ref CanvasWidgetCommand> m_drawCommands = null;
 	
 	protected vector m_previousPan;
@@ -250,13 +276,22 @@ class TILW_MapShapeComponent : ScriptComponent
 		
 		m_drawPolygon1.m_iColor = m_color.PackToInt();
 		m_drawPolygon2.m_iColor = m_color.PackToInt();
+		m_drawLineCommand.m_iColor = m_lineColor.PackToInt();
+		m_drawLineCommand.m_fWidth = m_lineWidth;
 		
 		if (!m_drawCommands)
 		{
-			if (m_invert)
-				m_drawCommands = { m_drawPolygon1, m_drawPolygon2 };
-			else
-				m_drawCommands = { m_drawPolygon1 };
+			m_drawCommands = {};
+			
+			if (m_drawArea)
+			{
+				m_drawCommands.Insert(m_drawPolygon1);
+				if (m_invert)
+					m_drawCommands.Insert(m_drawPolygon2);
+			}
+			
+			if (m_drawLine)
+				m_drawCommands.Insert(m_drawLineCommand);
 		}
 		
 		m_wCanvasWidget.SetDrawCommands(m_drawCommands);
@@ -276,6 +311,29 @@ class TILW_MapShapeComponent : ScriptComponent
 			return;
 		m_previousPan = m_mapEntity.GetCurrentPan();
 		m_previousZoom = m_mapEntity.GetCurrentZoom();
+		
+		if (m_drawLine)
+		{
+			m_drawLineCommand.m_Vertices = new array<float>();
+			for (int i = 0; i < m_points2D.Count(); i += 2)
+			{
+				float screenX, screenY;
+				m_mapEntity.WorldToScreen(m_points2D[i], m_points2D[i+1], screenX, screenY, true);
+				
+				m_drawLineCommand.m_Vertices.Insert(screenX);
+				m_drawLineCommand.m_Vertices.Insert(screenY);
+			}
+			if (m_isClosed)
+			{
+				float screenX, screenY;
+				m_mapEntity.WorldToScreen(m_points2D[0], m_points2D[1], screenX, screenY, true);
+				m_drawLineCommand.m_Vertices.Insert(screenX);
+				m_drawLineCommand.m_Vertices.Insert(screenY);
+			}
+		}
+		
+		if (!m_drawArea)
+			return;
 		
 		// Update polygon 1
 		m_drawPolygon1.m_Vertices = new array<float>();

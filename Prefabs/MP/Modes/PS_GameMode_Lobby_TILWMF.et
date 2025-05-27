@@ -10,4 +10,5 @@ PS_GameModeCoop : "{9C2001FE7A2F2281}Prefabs/MP/Modes/PS_GameMode_Lobby.et" {
  m_bPublicCommandBriefing 1
  m_bRemoveSquadMarkers 1
  m_iFreezeTime 0
+ m_bEnableSpectatorLocalVoice 1
 }

@@ -323,7 +323,7 @@ class TILW_MapShapeComponent : ScriptComponent
 				m_drawLineCommand.m_Vertices.Insert(screenX);
 				m_drawLineCommand.m_Vertices.Insert(screenY);
 			}
-			if (m_isClosed)
+			if (m_isClosed && m_points2D.Count() > 1)
 			{
 				float screenX, screenY;
 				m_mapEntity.WorldToScreen(m_points2D[0], m_points2D[1], screenX, screenY, true);

@@ -14,6 +14,10 @@ modded class SCR_CharacterControllerComponent
 	{
 		super.OnPrepareControls(owner, am, dt, player);
 		
+		#ifdef WORKBENCH
+			m_safestartActive = false;
+		#endif
+		
 		if (m_safestartActive)
 			HandleSafestart(am);
 	}

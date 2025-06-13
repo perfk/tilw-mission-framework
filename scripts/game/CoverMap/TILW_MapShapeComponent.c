@@ -44,7 +44,7 @@ class TILW_MapShapeComponent : ScriptComponent
 	[Attribute("0 0 0 1", UIWidgets.ColorPicker, "Color of the line.", category: "Line")]
 	protected ref Color m_lineColor;
 
-	[Attribute("3", UIWidgets.Auto, "Width of the line.", params: "1 inf 0", category: "Line")]
+	[Attribute("5", UIWidgets.Auto, "Width of the line in meters, on-screen width depends on zoom level.", params: "1 inf 0", category: "Line")]
 	protected int m_lineWidth;
 	
 	
@@ -154,6 +154,12 @@ class TILW_MapShapeComponent : ScriptComponent
 		else
 			m_points2D_1 = m_points2D;
 		
+	}
+	
+	protected void UpdateLineWidth()
+	{
+		float zoom = m_mapEntity.GetCurrentZoom();
+		m_drawLineCommand.m_fWidth = Math.Max(1, m_lineWidth * zoom);
 	}
 	
 	protected void InvertPolygon()
@@ -277,7 +283,7 @@ class TILW_MapShapeComponent : ScriptComponent
 		m_drawPolygon1.m_iColor = m_color.PackToInt();
 		m_drawPolygon2.m_iColor = m_color.PackToInt();
 		m_drawLineCommand.m_iColor = m_lineColor.PackToInt();
-		m_drawLineCommand.m_fWidth = m_lineWidth;
+		UpdateLineWidth();
 		
 		if (!m_drawCommands)
 		{
@@ -306,11 +312,15 @@ class TILW_MapShapeComponent : ScriptComponent
 	
 	override void EOnPostFrame(IEntity owner, float timeSlice)
 	{
-		// Optimization: Return if the map did not move
-		if (m_previousPan == m_mapEntity.GetCurrentPan() && m_previousZoom == m_mapEntity.GetCurrentZoom())
+		if (m_previousZoom != m_mapEntity.GetCurrentZoom())
+		{
+			UpdateLineWidth();
+			m_previousZoom = m_mapEntity.GetCurrentZoom();
+		}
+		else if (m_previousPan == m_mapEntity.GetCurrentPan()) // Optimization: Return if the map did not change
 			return;
+		
 		m_previousPan = m_mapEntity.GetCurrentPan();
-		m_previousZoom = m_mapEntity.GetCurrentZoom();
 		
 		if (m_drawLine)
 		{

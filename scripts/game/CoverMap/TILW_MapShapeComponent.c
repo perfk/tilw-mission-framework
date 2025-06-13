@@ -102,7 +102,7 @@ class TILW_MapShapeComponent : ScriptComponent
 	
 	void SetPoints3D(array<vector> points3D, bool closed = true)
 	{
-		if (points3D.Count() < 3)
+		if (points3D.Count() < 2 + m_drawArea)
 		{
 			Print("TILW_MapShapeComponent | SetPoints3D did not receive enough points!", LogLevel.ERROR);
 			return;
@@ -123,7 +123,7 @@ class TILW_MapShapeComponent : ScriptComponent
 			Print("TILW_MapShapeComponent | Owner entity (" + GetOwner() + ") is not a polyline!", LogLevel.WARNING);
 			return;
 		}
-		if (pse.GetPointCount() < 3) {
+		if (pse.GetPointCount() < 2 + m_drawArea) {
 			Print("TILW_MapShapeComponent | Owner entity (" + GetOwner() + ") does not have enough points!", LogLevel.WARNING);
 			return;
 		}
@@ -333,7 +333,7 @@ class TILW_MapShapeComponent : ScriptComponent
 				m_drawLineCommand.m_Vertices.Insert(screenX);
 				m_drawLineCommand.m_Vertices.Insert(screenY);
 			}
-			if (m_isClosed && m_points2D.Count() > 1)
+			if (m_isClosed && m_points2D.Count() > 4)
 			{
 				float screenX, screenY;
 				m_mapEntity.WorldToScreen(m_points2D[0], m_points2D[1], screenX, screenY, true);

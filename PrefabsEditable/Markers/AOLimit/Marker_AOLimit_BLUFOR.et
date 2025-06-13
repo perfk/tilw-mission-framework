@@ -1,5 +1,0 @@
-PS_ManualMarker : "{93C2F8BDFF146CB8}PrefabsEditable/Markers/Marker_AOLimit_Base.et" {
- ID "5EDF4803173675DF"
- m_MarkerColor 0 0.125 0.502 1
- m_sDescription "AO Limit (BLUFOR)"
-}

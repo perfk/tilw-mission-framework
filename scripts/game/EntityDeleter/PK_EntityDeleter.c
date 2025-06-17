@@ -1,4 +1,7 @@
-[EntityEditorProps(category: "GameScripted/", description: "Deletes entities in certain radius.")]
+[EntityEditorProps(
+    category: "GameScripted/",
+    description: "Deletes entities in a certain radius. \n- Use the Prefab Filter Picker tool to build a filter list.\n- Right-click the filter list to copy/paste between entities.\n- Ctrl+Click prefabs in the picker tool to add/remove from the filter list."
+)]
 class PK_EntityDeleterClass : GenericEntityClass
 {
 }
@@ -11,9 +14,20 @@ class PK_EntityDeleterClass : GenericEntityClass
 //------------------------------------------------------------------------------------------------
 class PK_EntityDeleter : GenericEntity
 {
-	[Attribute(defvalue: "20", uiwidget: UIWidgets.Slider, desc: "Radius in which entities are deleted.\nEntities with the EntityProtectorComponent are ignored, so are entities with hierarchy parents that have it.", "0 1000 1")]
+	[Attribute("www.youtube.com/watch?v=D-Bb66hJnqE", UIWidgets.Object, 
+	desc: "INSTRUCTIONS:\n\n- Use the Prefab Picker tool to build a prefab list.\n- Right-click the prefab list to copy/paste between entities.\n- Ctrl+Click prefabs in the picker tool to add/remove from the filter list.", 
+	category: "Entity Deleter")]
+	string m_HowToUsePrefabPickerTool;
+	
+	[Attribute(defvalue: "20", uiwidget: UIWidgets.Slider, desc: "Radius in which entities are deleted.\nEntities with the EntityProtectorComponent are ignored, so are entities with hierarchy parents that have it.", "0 1000 1", category: "Entity Deleter")]
 	protected float m_fRadius;
 
+	[Attribute("", UIWidgets.ResourceAssignArray, desc: "List of prefab resources used to filter which entities are deleted. If empty, all entities in the area are deleted", category: "Entity Deleter", params: "et")]
+	protected ref array<ResourceName> m_prefabFilterList ;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "If enabled, entities whose prefabs are NOT in the list will be deleted. If disabled, only entities whose prefabs are in the list will be deleted.", category: "Entity Deleter")]
+	bool m_excludePrefabsInList;
+	
 	private ref array<IEntity> QueryEntitiesToRemove;
 
 	//------------------------------------------------------------------------------------------------
@@ -46,6 +60,32 @@ class PK_EntityDeleter : GenericEntity
 
 		world.QueryEntitiesBySphere(owner.GetOrigin(), m_fRadius, QueryEntities);
 
+		if(m_prefabFilterList .Count() > 0) {
+			array<IEntity> filteredEntities = {};
+		    foreach (IEntity e : QueryEntitiesToRemove)
+		    {
+		        ResourceName prefabName = e.GetPrefabData().GetPrefab().GetName();
+		        bool found = false;
+		        foreach (ResourceName allowedPrefab : m_prefabFilterList )
+		        {
+		            if (prefabName == allowedPrefab.GetPath())
+		            {
+		                found = true;
+		                break;
+		            }
+		        }
+		        if (found && !m_excludePrefabsInList)
+		        {
+		            filteredEntities.Insert(e);
+		        }
+				if (!found && m_excludePrefabsInList)
+		        {
+		            filteredEntities.Insert(e);
+		        }
+		    }
+		    QueryEntitiesToRemove = filteredEntities;
+		}
+		
 		// Removes all entities. This is a hack, until the original SCR_PrefabDeleter works correctly
 		foreach (IEntity e : QueryEntitiesToRemove)
 		{
@@ -55,7 +95,6 @@ class PK_EntityDeleter : GenericEntity
 		// destroy self
 		delete owner;
 	}
-
 
 
 	//------------------------------------------------------------------------------------------------
@@ -69,6 +108,9 @@ class PK_EntityDeleter : GenericEntity
 
 		SetEventMask(EntityEvent.INIT);
 	}
+	
+
+	
 
 #ifdef WORKBENCH
 
@@ -85,8 +127,10 @@ class PK_EntityDeleter : GenericEntity
 		auto radiusShape = Shape.CreateSphere(COLOR_YELLOW, ShapeFlags.WIREFRAME | ShapeFlags.ONCE, origin, m_fRadius);
 
 		super._WB_AfterWorldUpdate(timeSlice);
-
 	}
+	
+	
+	
 
 #endif
 

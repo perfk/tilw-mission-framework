@@ -12,9 +12,14 @@ class TILW_AreaSpawningComponent : ScriptComponent
 	protected ref array<float> m_points2D = new array<float>();
 	protected ref array<vector> m_points3D = new array<vector>();
 	
-	override void OnPostInit(IEntity owner)
+	void TILW_AreaSpawningComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
-		super.OnPostInit(owner);
+		SetEventMask(ent, EntityEvent.INIT);
+	}
+
+	protected override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
 		if (Replication.IsServer())
 			GetGame().GetCallqueue().Call(SpawnPrefabs, owner);
 	}

@@ -5,17 +5,15 @@ class TILW_NavmeshRegenComponentClass: ScriptComponentClass
 
 class TILW_NavmeshRegenComponent: ScriptComponent
 {
-	override void OnPostInit(IEntity owner)
+	void TILW_NavmeshRegenComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
+		SetEventMask(ent, EntityEvent.INIT);
+	}
+
+	protected override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
 		GetGame().GetCallqueue().Call(RegenEntity, owner);
-		
-		return;
-		
-		VolumeEntity ve = VolumeEntity.Cast(owner);
-		if (!ve)
-			GetGame().GetCallqueue().Call(RegenEntity, owner);
-		else
-			GetGame().GetCallqueue().Call(RegenVolume, ve);
 	}
 	
 	protected static void RegenEntity(IEntity owner)

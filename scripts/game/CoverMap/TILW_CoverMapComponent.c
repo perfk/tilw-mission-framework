@@ -18,6 +18,10 @@ class TILW_CoverMapComponent : ScriptComponent
 
 	protected override void EOnInit(IEntity owner)
 	{
+		super.EOnInit();
+		if (!GetGame().InPlayMode())
+			return;
+		
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(owner);
 		if (!pse) {
 			Print("TILW_CoverMapComponent | Owner entity (" + owner + ") is not a polyline!", LogLevel.ERROR);

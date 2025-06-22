@@ -13,8 +13,14 @@ class TILW_ControlModeFlag : ScriptComponent
 	[Attribute(defvalue: "0", uiwidget: UIWidgets.Auto, desc: "After the target mode has been reached, keep listening for further changes and potentially remove the flag again.\nNote that every group starts at NONE (pre initialization), then goes to IDLE before doing anything else happens.")]
 	protected bool m_continuous;
 	
-	override void OnPostInit(IEntity owner)
+	void TILW_ControlModeFlag(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
+		SetEventMask(ent, EntityEvent.INIT);
+	}
+
+	protected override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
 		if (!Replication.IsServer())
 			return;
 		GetGame().GetCallqueue().Call(InitFlag);

@@ -24,8 +24,14 @@ class PK_EntityModifierComponent : ScriptComponent
 	[Attribute("", UIWidgets.Auto, "", desc: "List of lights to enable", category: "Light Manager")]
 	protected ref array<ref PK_LightData> m_aLightsData;
 
-	override void OnPostInit(IEntity owner)
+	void PK_EntityModifierComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
+		SetEventMask(ent, EntityEvent.INIT);
+	}
+
+	protected override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
 		if (!Replication.IsServer())
 			return;
 		if(m_bDamageManagerEnabled)

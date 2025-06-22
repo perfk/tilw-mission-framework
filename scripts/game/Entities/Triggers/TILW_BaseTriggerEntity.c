@@ -129,13 +129,10 @@ class TILW_BaseTriggerEntity : GenericEntity
 	override void EOnInit(IEntity owner)
 	{
 		super.EOnInit(owner);
-		if (!Replication.IsServer())
+		if (!Replication.IsServer() || !GetGame().InPlayMode())
 			return;
 		
 		GetPolylinePoints();
-		
-		if (!GetGame().InPlayMode())
-			return;
 		
 		if (m_skipFirstQuery)
 			m_firstQuery = false;
@@ -145,7 +142,7 @@ class TILW_BaseTriggerEntity : GenericEntity
 	
 	void ~TILW_BaseTriggerEntity()
 	{
-		if (!GetGame().InPlayMode())
+		if (!Replication.IsServer() || !GetGame().InPlayMode())
 			return;
 		
 		TILW_TriggerSystem ts = TILW_TriggerSystem.GetInstance();

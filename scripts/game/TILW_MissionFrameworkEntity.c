@@ -188,10 +188,11 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	override void EOnInit(IEntity owner)
 	{
 		super.EOnInit(owner);
-		Print("TILWMF | Framework EOnInit()");
 		
 		if (!GetGame().InPlayMode())
 			return;
+		
+		Print("TILWMF | Framework EOnInit()");
 		
 		m_rplComp = RplComponent.Cast(FindComponent(RplComponent));
 		GetGame().GetCallqueue().CallLater(InitFlagReplication, 1000, false);

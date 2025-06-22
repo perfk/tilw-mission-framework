@@ -19,8 +19,14 @@ class TILW_Flag_EntityDamage : ScriptComponent
 	[Attribute(defvalue: "1", uiwidget: UIWidgets.Auto, desc: "What the initial health of the hit zone should be.", params: "0 1 0.01")]
 	float m_initialHealth;
 	
-	override void OnPostInit(IEntity owner)
+	void TILW_Flag_EntityDamage(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
+		SetEventMask(ent, EntityEvent.INIT);
+	}
+
+	protected override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
 		if (!Replication.IsServer())
 			return;
 		GetGame().GetCallqueue().Call(InitDamageFlag);

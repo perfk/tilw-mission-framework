@@ -35,10 +35,14 @@ class TILW_VehicleCrewComponent: ScriptComponent
 	[Attribute("0", UIWidgets.Auto, desc: "Put all gunners into a separate group, so that they remain idle (and can engage targets), while only driver + passengers follow a higher priority waypoint.", category: "Deprecated")]
 	protected bool m_idleGroup;
 	
-	
-	override void OnPostInit(IEntity owner)
+	void TILW_VehicleCrewComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
-		super.OnPostInit(owner);
+		SetEventMask(ent, EntityEvent.INIT);
+	}
+
+	protected override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
 		if (Replication.IsServer() && GetGame().InPlayMode())
 			GetGame().GetCallqueue().Call(Init);
 	}

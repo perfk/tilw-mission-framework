@@ -73,10 +73,16 @@ class TILW_MapShapeComponent : ScriptComponent
 		return (m_factionKeys.IsEmpty() || m_factionKeys.Contains(fkey));
 	}
 	
-	
-	override void OnPostInit(IEntity owner)
+	void TILW_MapShapeComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
-		super.OnPostInit(owner);
+		SetEventMask(ent, EntityEvent.INIT);
+	}
+	
+	override void EOnInit(IEntity owner)
+	{
+		super.EOnInit(owner);
+		if (!GetGame().InPlayMode())
+			return;
 		m_mapEntity = SCR_MapEntity.GetMapInstance();
 		GetGame().GetCallqueue().Call(Init);
 	}

@@ -66,12 +66,14 @@ class TILW_AOLimitComponent : ScriptComponent
 	protected void Init()	
 	{
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(GetOwner());
-		if (!pse) {
-			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") is not a polyline!", LogLevel.WARNING);
+		if (!pse)
+		{
+			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") is not a polyline!", LogLevel.ERROR);
 			return;
 		}
-		if (pse.GetPointCount() < 3) {
-			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") does not have enough points!", LogLevel.WARNING);
+		if (pse.GetPointCount() < 3)
+		{
+			Print("TILW_AOLimitComponent | Owner entity (" + GetOwner() + ") does not have enough points!", LogLevel.ERROR);
 			return;
 		}
 

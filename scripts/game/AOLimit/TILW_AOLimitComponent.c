@@ -10,7 +10,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("20", UIWidgets.Auto, "After how many seconds outside of AO players are killed", params: "0 inf 0", category: "Logic")]
 	protected float m_killTimer;
 
-	[RplProp(onRplName: "DrawAO"), Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)", category: "Logic")]
+	[Attribute("", UIWidgets.Auto, desc: "Factions affected by the AO limit (if empty, all factions)", category: "Logic")]
 	protected ref array<string> m_factionKeys;
 
 	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NOT affected by the AO limit", category: "Logic")]
@@ -20,7 +20,6 @@ class TILW_AOLimitComponent : ScriptComponent
 	protected ref array<string> m_ignoredGroups;
 
 	protected float m_checkFrequency = 0.5;
-
 
 	// Visualization
 
@@ -36,9 +35,6 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("3", UIWidgets.Auto, "Width of the AO limit line.", params: "1 inf 0", category: "Visualization")]
 	protected int m_lineWidth;
 
-
-
-	[RplProp(onRplName: "OnPoints3DChange")]
 	protected ref array<vector> m_points3D = new array<vector>();
 
 	protected ref array<float> m_points2D = new array<float>();
@@ -58,12 +54,6 @@ class TILW_AOLimitComponent : ScriptComponent
 	}
 
 	protected override void EOnInit(IEntity owner)
-	{
-		super.EOnInit(owner);
-		GetGame().GetCallqueue().Call(Init);
-	}
-	
-	protected void Init()	
 	{
 		PolylineShapeEntity pse = PolylineShapeEntity.Cast(GetOwner());
 		if (!pse)
@@ -259,11 +249,23 @@ class TILW_AOLimitComponent : ScriptComponent
 
 	void SetFactions(array<string> factions)
 	{
+		if(SCR_ArrayHelperT<string>.AreEqual(factions, m_factionKeys))
+			return;
+		
 		m_factionKeys = factions;
-		Replication.BumpMe();
 
+		Rpc(RpcDo_SetFactions, factions);
+		
 		if (RplSession.Mode() != RplMode.Dedicated)
-			DrawAO();
+			 RpcDo_SetFactions(factions)
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	protected void RpcDo_SetFactions(array<string> factions)
+	{
+		m_factionKeys = factions;
+
+		DrawAO();
 	}
 
 	void SetPoints(array<vector> points)
@@ -273,15 +275,23 @@ class TILW_AOLimitComponent : ScriptComponent
 			return;
 		}
 
+		if(SCR_ArrayHelperT<vector>.AreEqual(points, m_points3D))
+			return;
+		
 		m_points3D = points;
-		Replication.BumpMe();
 
+		Rpc(RpcDo_SetPoints, points);
 		if (RplSession.Mode() != RplMode.Dedicated)
-			OnPoints3DChange();
+			RpcDo_SetPoints(points);
 	}
+	
 
-	protected void OnPoints3DChange()
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	protected void RpcDo_SetPoints(array<vector> points)
 	{
+		if(SCR_ArrayHelperT<vector>.AreEqual(points, m_points3D))
+			return;
+		
 		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
 
 		EntityEvent mask = GetEventMask();
@@ -361,6 +371,58 @@ class TILW_AOLimitComponent : ScriptComponent
 
 		linkProps.SetLineColor(c);
 		linkProps.SetLineWidth(m_lineWidth);
+	}
+	
+	override bool RplSave(ScriptBitWriter writer)
+	{
+		int factionKeysCount = m_factionKeys.Count();
+		writer.WriteInt(factionKeysCount);
+		for (int i = 0; i < factionKeysCount; i++)
+		{
+			writer.WriteString(m_factionKeys[i]);
+		}
+		
+		int pointsCount = m_points3D.Count();
+		writer.WriteInt(pointsCount);
+		for (int i = 0; i < pointsCount; i++)
+		{
+			writer.WriteVector(m_points3D[i]);
+		}
+		
+		return true;
+	}
+	
+	override bool RplLoad(ScriptBitReader reader)
+	{
+		array<string> factionKeys = {};
+		int factionKeysCount;
+		reader.ReadInt(factionKeysCount);
+		for (int i = 0; i < factionKeysCount; i++)
+		{
+			string factionKey;
+			reader.ReadString(factionKey);
+			factionKeys.Insert(factionKey);
+		}
+		
+		array<vector> points = {};
+		int pointsCount;
+		reader.ReadInt(pointsCount);
+		for (int i = 0; i < pointsCount; i++)
+		{
+			vector point;
+			reader.ReadVector(point);
+			points.Insert(point);
+		}
+		
+		if(!SCR_ArrayHelperT<vector>.AreEqual(points, m_points3D) ||
+		   !SCR_ArrayHelperT<string>.AreEqual(factionKeys, m_factionKeys))
+		{
+			m_factionKeys = factionKeys;
+			m_points3D = points;
+			DrawAO();
+		}
+		
+		return true;
 	}
 }
 

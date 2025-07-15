@@ -37,8 +37,6 @@ class TILW_AOLimitComponent : ScriptComponent
 
 	protected ref array<vector> m_points3D = new array<vector>();
 
-	protected ref array<float> m_points2D = new array<float>();
-
 	protected ref array<MapItem> m_markers = new array<MapItem>();
 
 	protected float m_timeLeft = 0;
@@ -70,8 +68,6 @@ class TILW_AOLimitComponent : ScriptComponent
 		pse.GetPointsPositions(m_points3D);
 		for (int i = 0; i < m_points3D.Count(); i++)
 			m_points3D[i] = pse.CoordToParent(m_points3D[i]);
-
-		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
 
 		if (RplSession.Mode() == RplMode.Dedicated)
 			return;
@@ -144,7 +140,7 @@ class TILW_AOLimitComponent : ScriptComponent
 			m_controlledEntity = ce;
 		}
 		vector playerPos = ce.GetOrigin();
-		bool inPolygon = Math2D.IsPointInPolygon(m_points2D, playerPos[0], playerPos[2]);
+		bool inPolygon = Math2D.IsPointInPolygonXZ(m_points3D, playerPos);
 		if (inPolygon)
 			return false;
 
@@ -249,15 +245,11 @@ class TILW_AOLimitComponent : ScriptComponent
 
 	void SetFactions(array<string> factions)
 	{
-		if(SCR_ArrayHelperT<string>.AreEqual(factions, m_factionKeys))
+		if (SCR_ArrayHelperT<string>.AreEqual(factions, m_factionKeys))
 			return;
 		
-		m_factionKeys = factions;
-
 		Rpc(RpcDo_SetFactions, factions);
-		
-		if (RplSession.Mode() != RplMode.Dedicated)
-			 RpcDo_SetFactions(factions)
+		RpcDo_SetFactions(factions)
 	}
 	
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
@@ -265,6 +257,9 @@ class TILW_AOLimitComponent : ScriptComponent
 	{
 		m_factionKeys = factions;
 
+		if (RplSession.Mode() == RplMode.Dedicated)
+			return;
+		
 		DrawAO();
 	}
 
@@ -275,25 +270,22 @@ class TILW_AOLimitComponent : ScriptComponent
 			return;
 		}
 
-		if(SCR_ArrayHelperT<vector>.AreEqual(points, m_points3D))
-			return;
-		
-		m_points3D = points;
-
 		Rpc(RpcDo_SetPoints, points);
-		if (RplSession.Mode() != RplMode.Dedicated)
-			RpcDo_SetPoints(points);
+		RpcDo_SetPoints(points);
 	}
 	
 
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
 	protected void RpcDo_SetPoints(array<vector> points)
 	{
-		if(SCR_ArrayHelperT<vector>.AreEqual(points, m_points3D))
+		if (SCR_ArrayHelperT<vector>.AreEqual(points, m_points3D))
 			return;
 		
-		SCR_Math2D.Get2DPolygon(m_points3D, m_points2D);
+		m_points3D = points;
 
+		if (RplSession.Mode() == RplMode.Dedicated)
+			return;
+		
 		EntityEvent mask = GetEventMask();
 		if (mask != EntityEvent.FIXEDFRAME)
 			SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);

@@ -8,7 +8,6 @@ class TILW_MapShapeComponent : ScriptComponent
 	
 	protected SCR_MapEntity m_mapEntity;
 	
-	[RplProp(onRplName: "OnPoints3DChange")]
 	protected ref array<vector> m_points3D = new array<vector>();
 	
 	protected ref array<float> m_points2D = new array<float>();
@@ -19,7 +18,7 @@ class TILW_MapShapeComponent : ScriptComponent
 	
 	// Visibility
 	
-	[RplProp(), Attribute("", UIWidgets.Auto, "If defined, only display the shape to given factions.", category: "Visibility")]
+	[Attribute("", UIWidgets.Auto, "If defined, only display the shape to given factions.", category: "Visibility")]
 	protected ref array<FactionKey> m_factionKeys;
 	
 	[Attribute("1", UIWidgets.Auto, "Is the shape visible before slotting or for spectators?", category: "Visibility")]
@@ -95,15 +94,28 @@ class TILW_MapShapeComponent : ScriptComponent
 		onMapOpen.Insert(CreateMapWidget);
 		onMapClose.Insert(DeleteMapWidget);
 		
-		GetGame().GetCallqueue().Call(InitPoints);
+		InitPoints();
 	}
 	
 	
 	
 	void SetFactions(array<FactionKey> factions)
 	{
+		if (SCR_ArrayHelperT<FactionKey>.AreEqual(factions, m_factionKeys))
+			return;
 		m_factionKeys = factions;
-		Replication.BumpMe();
+		
+		Rpc(RpcDo_SetFactions, factions);
+		
+		if (RplSession.Mode() != RplMode.Dedicated)
+			Recompute();
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	protected void RpcDo_SetFactions(array<FactionKey> factions)
+	{
+		m_factionKeys = factions;
+		Recompute();
 	}
 	
 	void SetPoints3D(array<vector> points3D, bool closed = true)
@@ -113,9 +125,21 @@ class TILW_MapShapeComponent : ScriptComponent
 			Print("TILW_MapShapeComponent | SetPoints3D did not receive enough points!", LogLevel.ERROR);
 			return;
 		}
+		
+		Rpc(RpcDo_SetPoints3D, points3D, closed);
+		
 		m_points3D = points3D;
 		m_isClosed = closed;
-		Replication.BumpMe();
+		
+		if (RplSession.Mode() != RplMode.Dedicated)
+			OnPoints3DChange();
+	}
+	
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	protected void RpcDo_SetPoints3D(array<vector> points3D, bool closed)
+	{
+		m_points3D = points3D;
+		m_isClosed = closed;
 		OnPoints3DChange();
 	}
 	
@@ -140,11 +164,11 @@ class TILW_MapShapeComponent : ScriptComponent
 		
 		m_isClosed = pse.IsClosed();
 		
-		OnPoints3DChange();
+		OnPoints3DChange(false);
 	}
 		
 		
-	protected void OnPoints3DChange()
+	protected void OnPoints3DChange(bool show = true)
 	{
 		if (!m_mapEntity)
 			m_mapEntity = SCR_MapEntity.GetMapInstance();
@@ -160,6 +184,8 @@ class TILW_MapShapeComponent : ScriptComponent
 		else
 			m_points2D_1 = m_points2D;
 		
+		if (RplSession.Mode() != RplMode.Dedicated && show)
+			Recompute();
 	}
 	
 	protected void UpdateLineWidth()
@@ -325,9 +351,14 @@ class TILW_MapShapeComponent : ScriptComponent
 		}
 		else if (m_previousPan == m_mapEntity.GetCurrentPan()) // Optimization: Return if the map did not change
 			return;
-		
+	
 		m_previousPan = m_mapEntity.GetCurrentPan();
-		
+	
+		Recompute();
+	}
+	
+	protected void Recompute()
+	{		
 		if (m_drawLine)
 		{
 			m_drawLineCommand.m_Vertices = new array<float>();
@@ -375,5 +406,58 @@ class TILW_MapShapeComponent : ScriptComponent
 			m_drawPolygon2.m_Vertices.Insert(screenX);
 			m_drawPolygon2.m_Vertices.Insert(screenY);
 		}
+	}
+	
+	
+	override bool RplSave(ScriptBitWriter writer)
+	{
+		int factionKeysCount = m_factionKeys.Count();
+		writer.WriteInt(factionKeysCount);
+		for (int i = 0; i < factionKeysCount; i++)
+		{
+			writer.WriteString(m_factionKeys[i]);
+		}
+		
+		int pointsCount = m_points3D.Count();
+		writer.WriteInt(pointsCount);
+		for (int i = 0; i < pointsCount; i++)
+		{
+			writer.WriteVector(m_points3D[i]);
+		}
+		
+		writer.WriteBool(m_isClosed);
+		
+		return true;
+	}
+	
+	override bool RplLoad(ScriptBitReader reader)
+	{
+		array<FactionKey> factionKeys = {};
+		int factionKeysCount;
+		reader.ReadInt(factionKeysCount);
+		for (int i = 0; i < factionKeysCount; i++)
+		{
+			string factionKey;
+			reader.ReadString(factionKey);
+			factionKeys.Insert(factionKey);
+		}
+		
+		array<vector> points = {};
+		int pointsCount;
+		reader.ReadInt(pointsCount);
+		for (int i = 0; i < pointsCount; i++)
+		{
+			vector point;
+			reader.ReadVector(point);
+			points.Insert(point);
+		}
+		
+		reader.ReadBool(m_isClosed);
+		
+		m_factionKeys = factionKeys;
+		m_points3D = points;
+		Recompute();
+		
+		return true;
 	}
 }

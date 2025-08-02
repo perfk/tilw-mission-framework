@@ -99,6 +99,16 @@ TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramewor
    }
   }
  }
+ m_randomFlags {
+  TILW_RandomFlag "{6604CCD6B58ADB44}" {
+   m_flagName "rtest"
+   m_chance 1
+  }
+  TILW_RandomFlag "{6604CCD6BE9161EF}" {
+   m_flagName "rtest2"
+   m_chance 1
+  }
+ }
 }
 GenericEntity sd : "{C3F1FA1E2EC2B345}Prefabs/Items/Medicine/FieldDressing_01/FieldDressing_USSR_01.et" {
  coords 105.02 1 109.647

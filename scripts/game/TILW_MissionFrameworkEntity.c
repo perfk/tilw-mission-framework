@@ -104,25 +104,37 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	protected RplComponent m_rplComp;
 	
-	protected void InitFlagReplication()
-	{
-		if (m_rplComp.IsProxy())
-		{
-			SCR_PlayerController pc = SCR_PlayerController.Cast(GetGame().GetPlayerController());
-			if (!pc)
-			{
-				GetGame().GetCallqueue().CallLater(InitFlagReplication, 1000, false); // Wait for player controller
-				return;
-			}
-			pc.RequestMissionFlags();
-		}
-	}
-	
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
 	protected void RpcDo_BroadcastFlagChange(string name, bool value, bool recheck)
 	{
 		AdjustMissionFlag(name, value, recheck, true);
 	};
+	
+	override bool RplSave(ScriptBitWriter writer)
+	{
+		int flagsCount = m_flagSet.Count();
+		writer.Write(flagsCount, 32);
+		
+		for (int i = 0; i < flagsCount; i++)
+			writer.WriteString(m_flagSet[i]);
+		
+		return true;
+	}
+	
+	override bool RplLoad(ScriptBitReader reader)
+	{
+		int flagsCount;
+		reader.Read(flagsCount, 32);
+		
+		for (int i = 0; i < flagsCount; i++)
+		{
+			string flag;
+			reader.ReadString(flag);
+			AdjustMissionFlag(flag, true, false, true);
+		}
+		
+		return true;
+	}
 	
 	
 	// ----- SCRIPTING SUPPORT -----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -195,7 +207,6 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		Print("TILWMF | Framework EOnInit()");
 		
 		m_rplComp = RplComponent.Cast(FindComponent(RplComponent));
-		GetGame().GetCallqueue().CallLater(InitFlagReplication, 1000, false);
 		
 		if (m_rplComp.IsProxy())
 			return;

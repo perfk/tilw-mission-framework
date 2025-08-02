@@ -6,31 +6,6 @@ modded class SCR_PlayerController : PlayerController
 		return SCR_PlayerController.Cast(GetGame().GetPlayerManager().GetPlayerController(playerId));
 	}
 	
-	// ----- FLAG REPLICATION -----------------------------------------------------------------------------------------------------------------------------------------------------------
-	
-	// JIP client requests all current flags from server
-	void RequestMissionFlags()
-	{
-		Rpc(RpcAsk_RequestMissionFlags);
-	}
-	
-	[RplRpc(RplChannel.Reliable, RplRcver.Server)]
-	protected void RpcAsk_RequestMissionFlags()
-	{
-		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if (fw)
-			foreach (string name : fw.GetFlagSetCopy())
-				Rpc(RpcDo_SetMissionFlag, name);
-	};
-	
-	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
-	protected void RpcDo_SetMissionFlag(string name)
-	{
-		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
-		if (fw)
-			fw.AdjustMissionFlag(name, true, true, true);
-	}
-	
 	// ----- HINT MESSAGES -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	void TILW_SendHintToPlayer(string hl, string msg, int dur)

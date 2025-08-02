@@ -61,8 +61,12 @@ SCR_ChimeraCharacter : "{84029128FA6F6BB9}Prefabs/Characters/Factions/BLUFOR/US_
  }
  coords 113.331 1 104.555
 }
-TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramework.et" {
+TILW_MissionFrameworkEntity fw : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramework.et" {
  coords 69.217 1 186.542
+ FrameworkScript1 ""\
+ "		/* code here */"\
+ "		Print(\"FW Script test\");"\
+ "	"
  m_missionEvents {
   TILW_MissionEvent "{61F534F42172FE83}" {
    m_instructions {
@@ -80,6 +84,16 @@ TILW_MissionFrameworkEntity : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFramewor
       m_flagName "OBJ_B"
      }
     }
+   }
+  }
+  TILW_MissionEvent "{6604CCDF50E57F19}" {
+   m_instructions {
+    TILW_RunScriptInstruction "{6604CCDFA3E80232}" {
+     m_bClientScript 1
+    }
+   }
+   m_condition TILW_LiteralTerm "{6604CCDF5F4BB5D5}" {
+    m_flagName "OBJ_B"
    }
   }
  }

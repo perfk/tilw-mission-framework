@@ -167,6 +167,68 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	bool mvar_boolean = false;
 	string mvar_string = "";
 	
+	//! Event: Framework script 1 is called by TILW_RunScriptInstruction. This method can be overridden using entity scripts.
+	event void FrameworkScript1();
+	protected bool m_bRanScript1 = false;
+	//! Event: Framework script 2 is called by TILW_RunScriptInstruction. This method can be overridden using entity scripts.
+	event void FrameworkScript2();
+	protected bool m_bRanScript2 = false;
+	//! Event: Framework script 3 is called by TILW_RunScriptInstruction. This method can be overridden using entity scripts.
+	event void FrameworkScript3();
+	protected bool m_bRanScript3 = false;
+	//! Event: Framework script 4 is called by TILW_RunScriptInstruction. This method can be overridden using entity scripts.
+	event void FrameworkScript4();
+	protected bool m_bRanScript4 = false;
+	//! Event: Framework script 5 is called by TILW_RunScriptInstruction. This method can be overridden using entity scripts.
+	event void FrameworkScript5();
+	protected bool m_bRanScript5 = false;
+	
+	//! Locally runs a framework script
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	protected void RpcDo_BroadcastScript(int scriptNum)
+	{
+		if (scriptNum == 1)
+			FrameworkScript1();
+		else if (scriptNum == 2)
+			FrameworkScript2();
+		else if (scriptNum == 3)
+			FrameworkScript3();
+		else if (scriptNum == 4)
+			FrameworkScript4();
+		else if (scriptNum == 5)
+			FrameworkScript5();
+	}
+	
+	//! Request to run a framework script, returns false if the script was not called
+	bool RequestRunScript(int scriptNum, bool clientScript, bool allowRerun)
+	{
+		if (!allowRerun && ( (scriptNum == 1 && m_bRanScript1 ) || (scriptNum == 2 && m_bRanScript2 ) ||
+			(scriptNum == 3 && m_bRanScript3 ) || (scriptNum == 4 && m_bRanScript4 ) || (scriptNum == 5 && m_bRanScript5 ) ) )
+			return false;
+		
+		if (scriptNum == 1)
+			m_bRanScript1 = true;
+		else if (scriptNum == 2)
+			m_bRanScript2 = true;
+		else if (scriptNum == 3)
+			m_bRanScript3 = true;
+		else if (scriptNum == 4)
+			m_bRanScript4 = true;
+		else if (scriptNum == 5)
+			m_bRanScript5 = true;
+		
+		if (clientScript)
+		{
+			Rpc(RpcDo_BroadcastScript, scriptNum);
+			if (RplSession.Mode() != RplMode.Dedicated)
+				RpcDo_BroadcastScript(scriptNum);
+		}
+		else
+			RpcDo_BroadcastScript(scriptNum);
+		
+		return true;
+	}
+	
 	
 	// ----- ATTRIBUTES -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	

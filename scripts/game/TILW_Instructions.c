@@ -515,3 +515,24 @@ class TILW_RunEventsInstruction : TILW_BaseInstruction
 				me.EvalExpression(true, m_allowRerun);
 	}
 }
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Run Framework Script")]
+class TILW_RunScriptInstruction : TILW_BaseInstruction
+{
+	[Attribute("1", UIWidgets.Auto, desc: "Whether to run FrameworkScript1, FrameworkScript2 etc.\nFramework scripts are entity script methods on the framework entity which can be overridden.", params: "1 5")]
+	protected int m_iScriptNumber;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "If true, execute the script on connected players instead of the dedicated server (in SP/listen mode, it runs either way).")]
+	protected bool m_bClientScript;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "If true, allow the script to run even if it was already executed previously. Checked on server.")]
+	protected bool m_bAllowRerun;
+	
+	override void Execute()
+	{
+		TILW_MissionFrameworkEntity fw = TILW_MissionFrameworkEntity.GetInstance();
+		if (!fw)
+			return;
+		fw.RequestRunScript(m_iScriptNumber, m_bClientScript, m_bAllowRerun);
+	}
+}

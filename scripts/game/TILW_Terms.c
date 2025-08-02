@@ -84,6 +84,20 @@ class TILW_MinjunctionTerm : TILW_OperationTerm
 	}
 }
 
+//! TILW_EquivalenceTerm returns true if operands are either all true or all false
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Equivalence (all the same)")]
+class TILW_EquivalenceTerm : TILW_OperationTerm
+{
+	override bool Calc()
+	{	
+		bool expected = m_operands[0].Eval();
+		for (int i = 1; i < m_operands.Count(); i++)
+			if (m_operands[i].Eval() != expected)
+				return false;
+		return true;
+	}
+}
+
 //! TILW_MaxjunctionTerm returns true if no more than m_maxTrue operands are true
 [BaseContainerProps(), BaseContainerCustomStringTitleField("Maxjunction (At most k)")]
 class TILW_MaxjunctionTerm : TILW_OperationTerm

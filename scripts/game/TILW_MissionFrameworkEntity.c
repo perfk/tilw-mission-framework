@@ -428,7 +428,7 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		SCR_HintUIInfo customHint = SCR_HintUIInfo.CreateInfo(description, name, duration, type, fieldManualEntry, isTimerVisible);
 		SCR_HintManagerComponent hintManager = SCR_HintManagerComponent.GetInstance();
 		if (hintManager)
-			return hintManager.Show(customHint, isSilent, ignoreShown);
+			return hintManager.Show(customHint, isSilent, false);
 		return false;
 	}
 	

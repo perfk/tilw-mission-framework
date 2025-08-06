@@ -96,6 +96,17 @@ TILW_MissionFrameworkEntity fw : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrame
     m_flagName "OBJ_B"
    }
   }
+  TILW_MissionEvent "{660B50AE0DC4F5DD}" {
+   m_instructions {
+    TILW_SendMessageInstruction "{660B50AE1AE7AB6E}" {
+     m_messageTitle "always runs"
+     m_messageBody "test"
+    }
+   }
+   m_condition TILW_LiteralTerm "{660B50AE118E5448}" {
+    m_invertTerm 1
+   }
+  }
  }
  m_casualtyFlags {
   TILW_FactionAIKilledFlag "{6486F7A16F442DD0}" {

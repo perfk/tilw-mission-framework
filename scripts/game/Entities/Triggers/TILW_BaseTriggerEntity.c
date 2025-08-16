@@ -40,6 +40,9 @@ class TILW_BaseTriggerEntity : GenericEntity
 
 	[Attribute("the location", UIWidgets.Auto, "Name of the location/objective/etc. This will replace %2 in the status messages above.", category: "Trigger Status")]
 	protected string m_locationName;
+	
+	[Attribute("", UIWidgets.Auto, "If set, only display status messages to these factions. Otherwise, if enabled, they are displayed to everyone.", category: "Trigger Status")]
+	protected ref array<string> m_displayTo;
 
 
 	// EFFECT SETTINGS
@@ -292,8 +295,7 @@ class TILW_BaseTriggerEntity : GenericEntity
 	{
 		Print("TILWMF | Sending trigger status message: " + message);
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
-		array<string> fkeys = new array<string>;
-		mfe.ShowGlobalHint("Objective Status", message, 5, fkeys);
+		mfe.ShowGlobalHint("Objective Status", message, 5, m_displayTo);
 	}
 	
 	

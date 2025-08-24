@@ -412,6 +412,7 @@ class TILW_AOLimitComponent : ScriptComponent
 			m_factionKeys = factionKeys;
 			m_points3D = points;
 			DrawAO();
+			SetEventMask(GetOwner(), EntityEvent.FIXEDFRAME);
 		}
 		
 		return true;

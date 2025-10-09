@@ -537,116 +537,60 @@ class TILW_RunScriptInstruction : TILW_BaseInstruction
 	}
 }
 
-//! HotMic_SetEntityFuelInstruction sets the fuel percentage of named Entity
-[BaseContainerProps(), BaseContainerCustomStringTitleField("Set Entity's Fuel")]
-class HotMic_SetEntityFuelInstruction : TILW_BaseInstruction
-{	
-	[Attribute("", UIWidgets.Auto, desc: "Name of entity")]
-	protected string m_entityName;
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Service Vehicles")]
+class TILW_ServiceVehiclesInstruction : TILW_BaseInstruction
+{
+	[Attribute("", UIWidgets.Auto, desc: "Names of vehicles to be serviced.")]
+	protected ref array<string> m_aVehicleNames;
 	
-	[Attribute("", UIWidgets.Auto, desc: "Set the Fuel Percentage of the named entity")]
-	protected float m_fuelPercent;
-		
-	override void Execute()
-	{
-		IEntity e = GetGame().GetWorld().FindEntityByName(m_entityName);
-		if (!e) return;
-		SCR_FuelManagerComponent efmc;
-		array<SCR_FuelManagerComponent> fuelManagers = {};
-		
-		efmc.GetAllFuelManagers(e, fuelManagers);
-		efmc.SetTotalFuelPercentageOfFuelManagers(fuelManagers, m_fuelPercent);
-	}
-}
-
-//! HotMic_SetEntitySuppliesInstruction sets the Supplies amount of named Entity
-[BaseContainerProps(), BaseContainerCustomStringTitleField("Set Entity's Supplies")]
-class HotMic_SetEntitySuppliesInstruction : TILW_BaseInstruction
-{	
-	[Attribute("", UIWidgets.Auto, desc: "Name of entity")]
-	protected string m_entityName;
+	[Attribute("0", UIWidgets.Auto, desc: "Whether to adjust the amount of fuel.")]
+	protected bool m_bAdjustFuel;
 	
-	[Attribute("", UIWidgets.Auto, desc: "Set the Supplies Amount of the named entity")]
-	protected int m_suppliesAmount;
+	[Attribute("1", UIWidgets.Auto, desc: "How much fuel the vehicles should have.", params: "0 1.0 0.01")]
+	protected float m_fFuelRatio;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Whether to adjust the amount of fuel.")]
+	protected bool m_bAdjustSupplies;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "How many supplies the vehicles should carry.")]
+	protected int m_iAmountSupplies;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Whether to fully heal the vehicles, also works for some other entity types.")]
+	protected bool m_bRepair;
 	
 	override void Execute()
 	{
-		IEntity e = GetGame().GetWorld().FindEntityByName(m_entityName);
-	
-		if (!e) return;
-		SCR_ResourceComponent resourceComponent = SCR_ResourceComponent.FindResourceComponent(e, true);
-		SCR_ResourceContainer container;
-		
-		if (resourceComponent && resourceComponent.GetContainer(EResourceType.SUPPLIES, container))
-			container.SetResourceValue(m_suppliesAmount);
-		else 
-			PrintFormat("%1 did not have either a resource component or resource container", e.GetName());
-	}
-}
-
-//! HotMic_SpawnMapMarkerInstruction spawns the map marker on the named location
-[BaseContainerProps(), BaseContainerCustomStringTitleField("Spawn Map Marker")]
-class HotMic_SpawnMapMarkerInstruction : TILW_BaseInstruction
-{	
-	[Attribute("", UIWidgets.ResourceNamePicker, "ImageSet")]
-	ResourceName m_imageSet;
-	
-	[Attribute("", UIWidgets.ResourceNamePicker, "ImageSetGlow")]
-	ResourceName m_imageSetGlow;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Name of the Quad in the Image set")]
-	protected string m_imageQuadName;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Image Description")]
-	protected string m_imageDescription;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Image Size")]
-	protected int m_imageSize = 50;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Image Use World Scale")]
-	protected bool m_imageUseWorldScale;
-		
-	[Attribute("", UIWidgets.Auto, desc: "Name of existing entity at which the prefab should be spawned")]
-	protected string m_locationName;
-	
-	[Attribute("", UIWidgets.Auto, desc: "If you need to reference the spawned entity later, you can give it a UNIQUE name - otherwise, leave empty.")]
-	protected string m_setEntityName;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Factions that receive the message (if empty, everyone)")]
-	protected ref array<string> m_factionKeys;
-	
-	[Attribute("", UIWidgets.Auto, desc: "Color of existing entity at which the prefab should be spawned")]
-	protected Color m_setEntityColor;
-	
-	protected IEntity m_spawnedEntity;
-	
-	override void Execute()
-	{
-		EntitySpawnParams spawnParams = new EntitySpawnParams();
-		vector mat[4];
-		spawnParams.Transform = mat;
-		
-		IEntity spawnMarker = GetGame().GetWorld().FindEntityByName(m_locationName);
-		spawnMarker.GetWorldTransform(mat);
-		spawnParams.Transform = mat;
-		IEntity marker = GetGame().SpawnEntityPrefab(Resource.Load("{CD85ADE9E0F54679}PrefabsEditable/Markers/EditableMarker.et"), GetGame().GetWorld(), spawnParams);
-		
-		if (marker) {
-			PS_EditableMarkerComponent markerComponent = PS_EditableMarkerComponent.Cast(marker.FindComponent(PS_EditableMarkerComponent));
-			string image = m_imageSet + "|" + m_imageSetGlow + "|" + m_imageQuadName;
-			markerComponent.SetMarkerImage(image);
-			markerComponent.SetMarkerSize(m_imageSize);
-			markerComponent.SetMarkerDescription(m_imageDescription);
-			markerComponent.SetMarkerUseWorldScale(m_imageUseWorldScale);
+		foreach (string s : m_aVehicleNames)
+		{
+			IEntity v = GetGame().GetWorld().FindEntityByName(s);
+			if (!v)
+				continue;
 			
-			foreach (string factionString : m_factionKeys) 
+			if (m_bAdjustFuel)
 			{
-				Faction faction = GetGame().GetFactionManager().GetFactionByKey(factionString);
-				markerComponent.SetMarkerVisibleForFaction(faction, true);
+				SCR_FuelManagerComponent fmc = SCR_FuelManagerComponent.Cast(v.FindComponent(SCR_FuelManagerComponent));
+				array<SCR_FuelManagerComponent> fuelManagers = {};
+				if (fmc)
+				{
+					fmc.GetAllFuelManagers(v, fuelManagers);
+					fmc.SetTotalFuelPercentageOfFuelManagers(fuelManagers, m_fFuelRatio);
+				}
 			}
 			
-			string colorString = m_setEntityColor.ToString();
-			markerComponent.SetMarkerColor(colorString);
+			if (m_bAdjustSupplies)
+			{
+				SCR_ResourceComponent resourceComponent = SCR_ResourceComponent.FindResourceComponent(v, true);
+				SCR_ResourceContainer container;
+				if (resourceComponent && resourceComponent.GetContainer(EResourceType.SUPPLIES, container))
+					container.SetResourceValue(m_iAmountSupplies);
+			}
+			
+			if (m_bRepair)
+			{
+				SCR_DamageManagerComponent dmc = SCR_DamageManagerComponent.Cast(v.FindComponent(SCR_DamageManagerComponent));
+				if (dmc)
+					dmc.FullHeal();
+			}
 		}
-	} 
+	}
 }

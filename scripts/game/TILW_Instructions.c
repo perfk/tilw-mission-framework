@@ -536,3 +536,61 @@ class TILW_RunScriptInstruction : TILW_BaseInstruction
 		fw.RequestRunScript(m_iScriptNumber, m_bClientScript, m_bAllowRerun);
 	}
 }
+
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Service Vehicles")]
+class TILW_ServiceVehiclesInstruction : TILW_BaseInstruction
+{
+	[Attribute("", UIWidgets.Auto, desc: "Names of vehicles to be serviced.")]
+	protected ref array<string> m_aVehicleNames;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Whether to adjust the amount of fuel.")]
+	protected bool m_bAdjustFuel;
+	
+	[Attribute("1", UIWidgets.Auto, desc: "How much fuel the vehicles should have.", params: "0 1.0 0.01")]
+	protected float m_fFuelRatio;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Whether to adjust the amount of fuel.")]
+	protected bool m_bAdjustSupplies;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "How many supplies the vehicles should carry.")]
+	protected int m_iAmountSupplies;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Whether to fully heal the vehicles, also works for some other entity types.")]
+	protected bool m_bRepair;
+	
+	override void Execute()
+	{
+		foreach (string s : m_aVehicleNames)
+		{
+			IEntity v = GetGame().GetWorld().FindEntityByName(s);
+			if (!v)
+				continue;
+			
+			if (m_bAdjustFuel)
+			{
+				SCR_FuelManagerComponent fmc = SCR_FuelManagerComponent.Cast(v.FindComponent(SCR_FuelManagerComponent));
+				array<SCR_FuelManagerComponent> fuelManagers = {};
+				if (fmc)
+				{
+					fmc.GetAllFuelManagers(v, fuelManagers);
+					fmc.SetTotalFuelPercentageOfFuelManagers(fuelManagers, m_fFuelRatio);
+				}
+			}
+			
+			if (m_bAdjustSupplies)
+			{
+				SCR_ResourceComponent resourceComponent = SCR_ResourceComponent.FindResourceComponent(v, true);
+				SCR_ResourceContainer container;
+				if (resourceComponent && resourceComponent.GetContainer(EResourceType.SUPPLIES, container))
+					container.SetResourceValue(m_iAmountSupplies);
+			}
+			
+			if (m_bRepair)
+			{
+				SCR_DamageManagerComponent dmc = SCR_DamageManagerComponent.Cast(v.FindComponent(SCR_DamageManagerComponent));
+				if (dmc)
+					dmc.FullHeal();
+			}
+		}
+	}
+}

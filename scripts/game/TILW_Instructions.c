@@ -579,7 +579,7 @@ class TILW_ServiceVehiclesInstruction : TILW_BaseInstruction
 			
 			if (m_bAdjustSupplies)
 			{
-				SCR_ResourceComponent resourceComponent = SCR_ResourceComponent.FindResourceComponent(v, true);
+				SCR_ResourceComponent resourceComponent = SCR_ResourceComponent.FindResourceComponent(v, false);
 				SCR_ResourceContainer container;
 				if (resourceComponent && resourceComponent.GetContainer(EResourceType.SUPPLIES, container))
 					container.SetResourceValue(m_iAmountSupplies);

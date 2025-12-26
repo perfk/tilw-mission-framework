@@ -594,3 +594,50 @@ class TILW_ServiceVehiclesInstruction : TILW_BaseInstruction
 		}
 	}
 }
+
+//! TILW_ChangeTimeInstruction changes the current day time
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Change time")]
+class TILW_ChangeTimeInstruction : TILW_BaseInstruction
+{
+	
+	[Attribute("8", UIWidgets.Auto, desc: "Hours\nIf this runs during the briefing, make sure to disable 'Reset Time On Game Start' in the TimeAndWeatherHandlerComponent.")]
+	protected int m_iHours;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Minutes\nIf this runs during the briefing, make sure to disable 'Reset Time On Game Start' in the TimeAndWeatherHandlerComponent.")]
+	protected int m_iMinutes;
+	
+	[Attribute("0", UIWidgets.Auto, desc: "Seconds\nIf this runs during the briefing, make sure to disable 'Reset Time On Game Start' in the TimeAndWeatherHandlerComponent.")]
+	protected int m_iSeconds;
+	
+	override void Execute()
+	{	
+		ChimeraWorld world = ChimeraWorld.CastFrom(GetGame().GetWorld());
+		TimeAndWeatherManagerEntity twm = world.GetTimeAndWeatherManager();
+		
+		twm.SetHoursMinutesSeconds(m_iHours, m_iMinutes, m_iSeconds);
+	}
+}
+
+//! TILW_ChangeWeatherInstruction changes the current weather
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Change weather")]
+class TILW_ChangeWeatherInstruction : TILW_BaseInstruction
+{
+	
+	[Attribute("", desc: "The name of the weather state as it can be found in weatherStates.conf.")]
+	protected string m_sWeatherPresetName;
+	
+	// [Attribute("5", UIWidgets.Auto, desc: "How many minutes the weather transition will take (0=instant).")]
+	// protected float m_fTransitionDuration;
+
+	[Attribute("0", UIWidgets.Auto, desc: "Whether the weather can randomly transition away from the state.")]
+	protected bool m_bAllowRandomChanges;
+	
+	override void Execute()
+	{	
+		ChimeraWorld world = ChimeraWorld.CastFrom(GetGame().GetWorld());
+		TimeAndWeatherManagerEntity twm = world.GetTimeAndWeatherManager();
+		BaseWeatherStateTransitionManager transitionManager = twm.GetTransitionManager();	
+		
+		twm.ForceWeatherTo(!m_bAllowRandomChanges, m_sWeatherPresetName); // , m_fTransitionDuration / 60);
+	}
+}

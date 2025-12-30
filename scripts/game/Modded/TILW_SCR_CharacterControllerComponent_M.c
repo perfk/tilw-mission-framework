@@ -49,13 +49,8 @@ modded class SCR_CharacterControllerComponent
 		if (!gm || gm.m_safeStartTime <= 0)
 			return true;
 		
-		if (!gm.m_startTime)
-			return false;
-		
-		ChimeraWorld world = GetGame().GetWorld();
-		WorldTimestamp currentTime = world.GetServerTimestamp();
-		
-		if (currentTime.Greater(gm.m_startTime.PlusSeconds(gm.m_safeStartTime)))
+		float timeSeconds = gm.GetElapsedTime() - gm.GetGameStartElapsedTime();
+		if (timeSeconds < gm.m_safeStartTime)
 			return true;
 
 		return false;

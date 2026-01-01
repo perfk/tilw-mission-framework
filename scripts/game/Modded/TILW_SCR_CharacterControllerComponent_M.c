@@ -24,7 +24,7 @@ modded class SCR_CharacterControllerComponent
 	
 	protected void HandleSafestart(ActionManager am)
 	{
-		if (ShouldSafestartBeActive())
+		if (!ShouldSafestartBeActive())
 		{
 			m_safestartActive = false;
 			return;
@@ -47,13 +47,13 @@ modded class SCR_CharacterControllerComponent
 	{
 		PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
 		if (!gm || gm.m_safeStartTime <= 0)
-			return true;
+			return false;
 		
 		float timeSeconds = gm.GetElapsedTime() - gm.GetGameStartElapsedTime();
-		if (timeSeconds < gm.m_safeStartTime)
-			return true;
+		if (timeSeconds >= gm.m_safeStartTime)
+			return false;
 
-		return false;
+		return true;
 	}
 	
 	protected void NotifyPlayer()

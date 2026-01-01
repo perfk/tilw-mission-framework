@@ -43,7 +43,7 @@ modded class SCR_PlayerController : PlayerController
 	{
 		super.OnControlledEntityChanged(from, to);
 		
-		if(to.GetPrefabData().GetPrefab() != "{ADDE38E4119816AB}Prefabs/InitialPlayer_Version2.et")
+		if(to.GetPrefabData().GetPrefabName() != "{ADDE38E4119816AB}Prefabs/InitialPlayer_Version2.et")
 			CheckJIP();
 	}
 	

@@ -18,8 +18,8 @@ modded class SCR_CharacterControllerComponent
 			m_safestartActive = false;
 		#endif
 		
-		if (m_safestartActive)
-			HandleSafestart(am);
+		//if (m_safestartActive)
+		//	HandleSafestart(am);
 	}
 	
 	protected void HandleSafestart(ActionManager am)

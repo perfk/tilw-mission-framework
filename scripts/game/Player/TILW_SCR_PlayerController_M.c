@@ -143,7 +143,7 @@ modded class SCR_PlayerController : PlayerController
 				SetJIP(true);
 				break;
 			case EJIPResponse.Sucess:
-				SetJIP(false);
+				SetJIP(false, true);
 				break;
 			default:
 				SetJIP(false);
@@ -168,12 +168,18 @@ modded class SCR_PlayerController : PlayerController
 		TILW_ShowHint(msg, title, 15);
 	}
 	
-	protected void SetJIP(bool enabled)
+	protected void SetJIP(bool enabled, bool deactivate = false)
 	{
 		GetGame().GetCallqueue().Remove(SetJIP);
 		
 		if(enabled)
 			GetGame().GetCallqueue().CallLater(SetJIP, MAX_JIP_TIME * 1000, false, false);
+		
+		if(deactivate)
+		{
+			PS_GameModeCoop gm = PS_GameModeCoop.Cast(GetGame().GetGameMode());
+			gm.m_eJIPState = EJIPState.Deny;
+		}
 		
 		m_isJIPAvailable = enabled;
 	}

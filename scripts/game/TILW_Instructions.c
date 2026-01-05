@@ -126,6 +126,16 @@ class TILW_SendMessageInstruction : TILW_BaseInstruction
 	{
 		TILW_MissionFrameworkEntity.GetInstance().ShowGlobalHint(m_messageTitle, m_messageBody, 10, m_factionKeys);
 	}
+	
+	void SetTitle(string title)
+	{
+		m_messageTitle = title;
+	}
+	
+	void SetBody(string body)
+	{
+		m_messageBody = body;
+	}
 }
 
 

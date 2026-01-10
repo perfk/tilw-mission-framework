@@ -239,8 +239,16 @@ class TILW_AOLimitComponent : ScriptComponent
 	
 	override void OnDelete(IEntity owner)
 	{
-		PlayerEntersAO();
 		super.OnDelete(owner);
+		
+		PlayerEntersAO();
+		
+		foreach (MapItem marker : m_markers)
+		{
+			marker.SetVisible(false);
+			marker.Recycle();
+		}
+		m_markers.Clear();
 	}
 
 	void SetFactions(array<string> factions)

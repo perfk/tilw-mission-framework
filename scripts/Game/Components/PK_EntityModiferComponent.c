@@ -24,15 +24,6 @@ class PK_EntityModifierComponent : ScriptComponent
 	[Attribute("", UIWidgets.Auto, "", desc: "List of lights to enable", category: "Light Manager")]
 	protected ref array<ref PK_LightData> m_aLightsData;
 
-	[Attribute("0", UIWidgets.CheckBox, "Character Manager enabled/disabled", category: "Character Manager")]
-	protected bool m_bCharacterEnabled;
-
-	[Attribute("0", UIWidgets.CheckBox, "Set character as captive (ACE Captives system)", category: "Character Manager")]
-	protected bool m_bSetCaptive;
-
-	[Attribute("0", UIWidgets.CheckBox, "Set character as surrendered (ACE Captives system)", category: "Character Manager")]
-	protected bool m_bSetSurrender;
-
 	void PK_EntityModifierComponent(IEntityComponentSource src, IEntity ent, IEntity parent)
 	{
 		SetEventMask(ent, EntityEvent.INIT);
@@ -49,8 +40,6 @@ class PK_EntityModifierComponent : ScriptComponent
 			GetGame().GetCallqueue().Call(SetInitialEngineState);
 		if(m_bLightEnabled)
 			GetGame().GetCallqueue().Call(SetInitialLightStates);
-		if(m_bCharacterEnabled)
-			GetGame().GetCallqueue().Call(SetInitialCharacterState);
 		if(m_bDebugPrintAllHitZones)
 			GetGame().GetCallqueue().Call(DebugPrintAllHitZones);
 	}
@@ -74,7 +63,7 @@ class PK_EntityModifierComponent : ScriptComponent
 			Print("PK_EntityDamage | Failed to find BaseLightManagerComponent", LogLevel.ERROR);
 			return;
 		}
-
+		
 		foreach (PK_LightData lightData : m_aLightsData)
 		{
 			if(!lightData.m_bLightEnabled)
@@ -82,39 +71,7 @@ class PK_EntityModifierComponent : ScriptComponent
 			lightManager.SetLightsState(lightData.m_eLightType, true, lightData.m_iLightSide);
 		}
 	}
-
-	protected void SetInitialCharacterState()
-	{
-		// Try to get the character
-		SCR_ChimeraCharacter character = SCR_ChimeraCharacter.Cast(GetOwner());
-		if (!character)
-		{
-			Print("PK_EntityModifier | Failed to find SCR_ChimeraCharacter - Character Manager only works on characters", LogLevel.ERROR);
-			return;
-		}
-
-		// Get the character controller component
-		SCR_CharacterControllerComponent controller = SCR_CharacterControllerComponent.Cast(character.GetCharacterController());
-		if (!controller)
-		{
-			Print("PK_EntityModifier | Failed to find SCR_CharacterControllerComponent", LogLevel.ERROR);
-			return;
-		}
-
-		// Set captive and surrender status using ACE Captives system
-		if (m_bSetCaptive)
-		{
-			controller.ACE_Captives_SetCaptive(true);
-			Print(string.Format("PK_EntityModifier | Set character as captive: %1", GetOwner().GetName()));
-		}
-
-		if (m_bSetSurrender)
-		{
-			controller.ACE_Captives_SetSurrender(true);
-			Print(string.Format("PK_EntityModifier | Set character as surrendered: %1", GetOwner().GetName()));
-		}
-	}
-
+	
 	protected void SetInitialHitZoneHealth()
 	{
 		SCR_DamageManagerComponent damageManager = SCR_DamageManagerComponent.Cast(GetOwner().FindComponent(SCR_DamageManagerComponent));

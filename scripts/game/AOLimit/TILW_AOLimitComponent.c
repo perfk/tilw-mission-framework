@@ -238,9 +238,7 @@ class TILW_AOLimitComponent : ScriptComponent
 	}
 	
 	override void OnDelete(IEntity owner)
-	{
-		super.OnDelete(owner);
-		
+	{	
 		PlayerEntersAO();
 		
 		foreach (MapItem marker : m_markers)
@@ -249,6 +247,8 @@ class TILW_AOLimitComponent : ScriptComponent
 			marker.Recycle();
 		}
 		m_markers.Clear();
+		
+		super.OnDelete(owner);
 	}
 
 	void SetFactions(array<string> factions)

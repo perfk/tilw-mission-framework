@@ -11,6 +11,41 @@ $grp GenericEntity {
   coords 116.546 1 139.412
  }
 }
+SCR_ChimeraCharacter : "{284E735C6C70DAD2}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_BaseLoadout.et" {
+ components {
+  PS_PlayableComponent "{5EFCC1946F475F15}" {
+   m_bIsPlayable 1
+  }
+  BaseLoadoutManagerComponent "{520EA1D2DB11821E}" {
+   Slots {
+    LoadoutSlotInfo Hat {
+     Prefab ""
+    }
+    LoadoutSlotInfo Jacket {
+     Prefab ""
+    }
+    LoadoutSlotInfo Pants {
+     Prefab ""
+    }
+    LoadoutSlotInfo Boots {
+     Prefab ""
+    }
+   }
+  }
+  ActionsManagerComponent "{520EA1D2F659CE02}" {
+   additionalActions {
+    PK_PasteGearAction "{66B0E7D18C14E795}" {
+     ParentContextList {
+      "LowerTorso"
+     }
+     ActionTitle "Paste Gear"
+     VisibilityRange 5
+    }
+   }
+  }
+ }
+ coords 14.965 1 207.588
+}
 Vehicle M1025_armed_M2HB1 : "{3EA6F47D95867114}Prefabs/Vehicles/Wheeled/M998/M1025_armed_M2HB.et" {
  components {
   SCR_BaseLockComponent "{54D6FBC0EA806FE5}" {
@@ -137,4 +172,23 @@ TILW_MissionFrameworkEntity fw : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrame
 }
 GenericEntity sd : "{C3F1FA1E2EC2B345}Prefabs/Items/Medicine/FieldDressing_01/FieldDressing_USSR_01.et" {
  coords 105.02 1 109.647
+}
+SCR_ChimeraCharacter : "{E45F1E163F5CA080}Prefabs/Characters/Factions/BLUFOR/US_Army/Character_US_SL.et" {
+ components {
+  PS_PlayableComponent "{5EFCC1946F475F15}" {
+   m_bIsPlayable 1
+  }
+  ActionsManagerComponent "{520EA1D2F659CE02}" {
+   additionalActions {
+    PK_CopyGearAction "{66B0E7D1C4B4E1D7}" {
+     ParentContextList {
+      "LowerTorso"
+     }
+     ActionTitle "Copy Gear"
+     VisibilityRange 5
+    }
+   }
+  }
+ }
+ coords 17.169 1 207.589
 }

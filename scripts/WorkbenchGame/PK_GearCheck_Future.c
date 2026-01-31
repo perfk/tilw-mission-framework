@@ -1,17 +1,19 @@
 /*
 ===========================================
-FUNCTIONAL SCRIPT - 21/01/2026
+FUNCTIONAL SCRIPT (SINGLE PREFAB ONLY)
 ===========================================
 This script performs a "Before/After" inventory analysis on a character prefab.
 It reads the intended inventory directly from the prefab data and compares it
 to the inventory of a temporarily spawned entity to identify items that are
 discarded due to inventory overflow or other issues.
 
+NOTE: This script CANNOT read items from inherited parent prefabs due to API limitations.
+
 The key was discovering that the 'PrefabsToSpawn' property had to be read
 as an 'array<ResourceName>' type using the .Get() method.
 */
 
-[WorkbenchPluginAttribute(name: "Check Gear", description: "Compares a prefab's intended inventory with its spawned state to find discarded items.", shortcut: "Ctrl+Shift+L", wbModules: {"WorldEditor"})]
+[WorkbenchPluginAttribute(name: "Check Gear (Single Prefab)", description: "Compares a single prefab's intended inventory with its spawned state.", shortcut: "Ctrl+Shift+L", wbModules: {"WorldEditor"})]
 class PK_GearCheck_Future : WorldEditorPlugin
 {
 	override void Run()
@@ -42,30 +44,17 @@ class PK_GearCheck_Future : WorldEditorPlugin
 		}
 		else
 		{
-			Print("[DEBUG] Found SCR_InventoryStorageManagerComponent source.", LogLevel.NORMAL);
 			BaseContainerList initialItemsList = invManagerSource.GetObjectArray("InitialInventoryItems");
-			if (!initialItemsList)
+			if (initialItemsList)
 			{
-				Print("[DEBUG] Failed to get 'InitialInventoryItems' object array.", LogLevel.WARNING);
-			}
-			else
-			{
-				Print(string.Format("[DEBUG] Found 'InitialInventoryItems' list with %1 entries.", initialItemsList.Count()), LogLevel.NORMAL);
-				
-				
 				for (int i = 0; i < initialItemsList.Count(); i++)
 				{
 					BaseContainer itemConfig = initialItemsList.Get(i);
-					
 					if (!itemConfig) continue;
 
-					// GetObjectBaseClass returned empty, suggesting a primitive array type.
-					// Our final attempt is to get it as an array of ResourceName.
 					array<ResourceName> prefabsToSpawnArray;
 					if (itemConfig.Get("PrefabsToSpawn", prefabsToSpawnArray) && prefabsToSpawnArray)
 					{
-						// Successfully retrieved the list of prefabs.
-
 						for (int j = 0; j < prefabsToSpawnArray.Count(); j++)
 						{
 							ResourceName resName = prefabsToSpawnArray.Get(j);
@@ -77,10 +66,6 @@ class PK_GearCheck_Future : WorldEditorPlugin
 									beforeItems.Insert(resName, 1);
 							}
 						}
-					}
-					else
-					{
-						Print("[DEBUG] Failed to get 'PrefabsToSpawn' as array<ResourceName>.", LogLevel.WARNING);
 					}
 				}
 			}
@@ -126,9 +111,13 @@ class PK_GearCheck_Future : WorldEditorPlugin
 		}
 
 		// Print the "After" list
-		for (int i = 0; i < afterItems.Count(); i++)
+		if (!afterItems.IsEmpty())
 		{
-			Print(string.Format("  - (Actually Spawned) %1x %2", afterItems.GetElement(i), afterItems.GetKey(i)), LogLevel.NORMAL);
+			Print(string.Format("--- 'After' list contains %1 unique items: ---", afterItems.Count()), LogLevel.NORMAL);
+			for (int i = 0; i < afterItems.Count(); i++)
+			{
+				Print(string.Format("  - (Actually Spawned) %1x %2", afterItems.GetElement(i), afterItems.GetKey(i)), LogLevel.NORMAL);
+			}
 		}
 
 
@@ -153,9 +142,9 @@ class PK_GearCheck_Future : WorldEditorPlugin
 			}
 		}
 
-		if (discardedCount == 0)
+		if (discardCount == 0)
 		{
-			Print("No items were discarded. 'Before' and 'After' lists match.", LogLevel.NORMAL);
+			Print("No items were discarded from this specific prefab. (NOTE: Inherited items are not included in this check).", LogLevel.NORMAL);
 		}
 		else
 		{

@@ -44,19 +44,64 @@ modded class SCR_TimeAndWeatherHandlerComponent : SCR_BaseGameModeComponent
 	{
 		super.OnWorldPostProcess(world);
 
-		if (!Replication.IsServer() || !GetGame().InPlayMode())
+		if (!GetGame().InPlayMode() || s_Instance != this)
 			return;
 
-		if (s_Instance != this)
+		// Resolve which fog/wind values to use.
+		// TILW "Override Environment" takes priority over base class "Fog"/"Wind" categories.
+		float fogDensity, fogHeight, rain, wind;
+		bool hasOverrides;
+
+		if (m_bOverrideEnvironment)
 		{
-			Print("Multiple instances of SCR_TimeAndWeatherHandlerComponent detected.", LogLevel.WARNING);
-			return;
+			fogDensity = m_fFogDensity;
+			fogHeight = m_fFogHeight;
+			rain = m_fRain;
+			wind = m_fWind;
+			hasOverrides = true;
 		}
-		
+		else if (m_bFogOverride || m_bWindOverride)
+		{
+			if (m_bFogOverride)
+			{
+				fogDensity = m_fFogAmount;
+				fogHeight = m_fFogHeightDensity;
+			}
+			if (m_bWindOverride)
+				wind = m_fWindSpeed;
+
+			hasOverrides = true;
+		}
+
+		// Fog, rain, and wind overrides are LOCAL-ONLY and do NOT replicate.
+		// Apply on ALL machines (server + clients) and reapply every 5 seconds
+		// because the weather system (and mods like NVC_Fog) continuously reset
+		// fog values from the active weather state's FogPattern.
+		if (hasOverrides)
+		{
+			string machine = "CLIENT";
+			if (Replication.IsServer())
+				machine = "SERVER";
+
+			Print("TILWMF | Starting periodic environment overrides on " + machine + " (fog=" + fogDensity + " fogH=" + fogHeight + " rain=" + rain + " wind=" + wind + ")");
+
+			m_fPeriodicFog = fogDensity;
+			m_fPeriodicFogH = fogHeight;
+			m_fPeriodicRain = rain;
+			m_fPeriodicWind = wind;
+			m_bPeriodicOverridesActive = true;
+
+			TILW_ApplyEnvironmentOverridesPeriodic();
+			GetGame().GetCallqueue().CallLater(TILW_ApplyEnvironmentOverridesPeriodic, 5000, true);
+		}
+
+		if (!Replication.IsServer())
+			return;
+
 		ChimeraWorld chw = ChimeraWorld.CastFrom(GetOwner().GetWorld());
 		if (!chw)
 			return;
-		
+
 		TimeAndWeatherManagerEntity manager = chw.GetTimeAndWeatherManager();
 
 		if (m_bUseSpecifiedDate)
@@ -74,13 +119,33 @@ modded class SCR_TimeAndWeatherHandlerComponent : SCR_BaseGameModeComponent
 			manager.SetDSTOffset(m_fDSTOffsetHours);
 			manager.SetDSTEnabled(m_fDSTEnabled)
 		}
-		if (m_bOverrideEnvironment)
-		{
-			manager.SetFogAmountOverride(true, m_fFogDensity);
-			manager.SetFogHeightDensityOverride(true, m_fFogHeight);
-			manager.SetRainIntensityOverride(true, m_fRain);
-			manager.SetWindSpeedOverride(true, m_fWind);
-		}
+	}
+
+	// Stored values for periodic reapplication
+	protected float m_fPeriodicFog;
+	protected float m_fPeriodicFogH;
+	protected float m_fPeriodicRain;
+	protected float m_fPeriodicWind;
+	protected bool m_bPeriodicOverridesActive;
+
+	//------------------------------------------------------------------------------------------------
+	protected void TILW_ApplyEnvironmentOverridesPeriodic()
+	{
+		if (!m_bPeriodicOverridesActive)
+			return;
+
+		ChimeraWorld chw = ChimeraWorld.CastFrom(GetOwner().GetWorld());
+		if (!chw)
+			return;
+
+		TimeAndWeatherManagerEntity manager = chw.GetTimeAndWeatherManager();
+		if (!manager)
+			return;
+
+		manager.SetFogAmountOverride(true, m_fPeriodicFog);
+		manager.SetFogHeightDensityOverride(true, m_fPeriodicFogH);
+		manager.SetRainIntensityOverride(true, m_fPeriodicRain);
+		manager.SetWindSpeedOverride(true, m_fPeriodicWind);
 	}
 	
 	// save time

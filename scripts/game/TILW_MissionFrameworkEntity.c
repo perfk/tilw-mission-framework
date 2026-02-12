@@ -401,15 +401,17 @@ class TILW_MissionFrameworkEntity: GenericEntity
 	
 	// ----- UTILS -----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	void ShowGlobalHint(string hl, string msg, int dur, array<string> fkeys)
+	void ShowGlobalHint(string hl, string msg, int dur, array<string> fkeys, bool adminOnly = false)
 	{
-		Rpc(RpcDo_ShowHint, hl, msg, dur, fkeys); // broadcast to clients
-		RpcDo_ShowHint(hl, msg, dur, fkeys); // try to show on authority
+		Rpc(RpcDo_ShowHint, hl, msg, dur, fkeys, adminOnly); // broadcast to clients
+		RpcDo_ShowHint(hl, msg, dur, fkeys, adminOnly); // try to show on authority
 	}
-	
+
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
-	protected void RpcDo_ShowHint(string hl, string msg, int dur, array<string> fkeys)
+	protected void RpcDo_ShowHint(string hl, string msg, int dur, array<string> fkeys, bool adminOnly)
 	{
+		if (adminOnly && !SCR_Global.IsAdmin())
+			return;
 		if (fkeys && !fkeys.IsEmpty()) {
 			SCR_FactionManager fm = SCR_FactionManager.Cast(GetGame().GetFactionManager());
 			if (!fm)
@@ -431,7 +433,27 @@ class TILW_MissionFrameworkEntity: GenericEntity
 			return hintManager.Show(customHint, isSilent, false);
 		return false;
 	}
-	
+
+	void ShowGlobalChatInfo(string msg, bool adminOnly = true)
+	{
+		Rpc(TILW_RpcDo_ShowChatInfo, msg, adminOnly);
+		TILW_RpcDo_ShowChatInfo(msg, adminOnly);
+	}
+
+	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
+	protected void TILW_RpcDo_ShowChatInfo(string msg, bool adminOnly)
+	{
+		if (adminOnly && !SCR_Global.IsAdmin())
+			return;
+		PlayerController pc = GetGame().GetPlayerController();
+		if (!pc)
+			return;
+		SCR_ChatComponent cc = SCR_ChatComponent.Cast(pc.FindComponent(SCR_ChatComponent));
+		if (!cc)
+			return;
+		cc.ShowMessage(msg);
+	}
+
 }
 
 

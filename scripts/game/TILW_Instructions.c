@@ -142,24 +142,24 @@ class TILW_SendMessageInstruction : TILW_BaseInstruction
 }
 
 
-//! TILW_SendChatMessageInstruction sends a message to the text chat, optionally only to admins
-[BaseContainerProps(), BaseContainerCustomStringTitleField("Send Chat Message")]
-class TILW_SendChatMessageInstruction : TILW_BaseInstruction
+//! TILW_DisplayChatInfoInstruction displays an info message the text chat, optionally only to admins
+[BaseContainerProps(), BaseContainerCustomStringTitleField("Display Info Message")]
+class TILW_DisplayChatInfoInstruction : TILW_BaseInstruction
 {
-	[Attribute("", UIWidgets.EditBoxMultiline, desc: "Message to display in text chat")]
-	protected string m_messageBody;
+	[Attribute("", UIWidgets.EditBox, desc: "Info message to display in text chat")]
+	protected string m_sInfoText;
 
 	[Attribute("1", UIWidgets.CheckBox, desc: "If enabled, only admins (Game Masters) will see the message.")]
-	protected bool m_adminOnly;
+	protected bool m_bAdminOnly;
 
 	override void Execute()
 	{
-		TILW_MissionFrameworkEntity.GetInstance().ShowGlobalChatMessage(m_messageBody, m_adminOnly);
+		TILW_MissionFrameworkEntity.GetInstance().ShowGlobalChatInfo(m_sInfoText, m_bAdminOnly);
 	}
 
-	void SetBody(string body)
+	void SetText(string text)
 	{
-		m_messageBody = body;
+		m_sInfoText = text;
 	}
 }
 

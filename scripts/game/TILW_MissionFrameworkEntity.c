@@ -434,14 +434,14 @@ class TILW_MissionFrameworkEntity: GenericEntity
 		return false;
 	}
 
-	void ShowGlobalChatMessage(string msg, bool adminOnly = true)
+	void ShowGlobalChatInfo(string msg, bool adminOnly = true)
 	{
-		Rpc(TILW_RpcDo_ShowChatMsg, msg, adminOnly);
-		TILW_RpcDo_ShowChatMsg(msg, adminOnly);
+		Rpc(TILW_RpcDo_ShowChatInfo, msg, adminOnly);
+		TILW_RpcDo_ShowChatInfo(msg, adminOnly);
 	}
 
 	[RplRpc(RplChannel.Reliable, RplRcver.Broadcast)]
-	protected void TILW_RpcDo_ShowChatMsg(string msg, bool adminOnly)
+	protected void TILW_RpcDo_ShowChatInfo(string msg, bool adminOnly)
 	{
 		if (adminOnly && !SCR_Global.IsAdmin())
 			return;

@@ -3,7 +3,8 @@
     name: "Prefab Picker",
     wbModules: { "WorldEditor" },
     awesomeFontCode: 0xF002,
-    description: "- Ctrl+Click prefab to add to prefab list\n- Ctrl+Shift+Click to remove\n- right click prefab list and select copy. This can now be pasted into other prefab arrays"
+    description: "- Ctrl+Click prefab to add to prefab list\n- Ctrl+Shift+Click to remove\n- right click prefab list and select copy. This can now be pasted into other prefab arrays",
+    category: "PK_EntityDeleter"
 )]
 class PK_PrefabPickerTool : WorldEditorTool
 {

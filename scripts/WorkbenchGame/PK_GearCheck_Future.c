@@ -1,18 +1,3 @@
-/*
-===========================================
-FUNCTIONAL SCRIPT (SINGLE PREFAB ONLY)
-===========================================
-This script performs a "Before/After" inventory analysis on a character prefab.
-It reads the intended inventory directly from the prefab data and compares it
-to the inventory of a temporarily spawned entity to identify items that are
-discarded due to inventory overflow or other issues.
-
-NOTE: This script CANNOT read items from inherited parent prefabs due to API limitations.
-
-The key was discovering that the 'PrefabsToSpawn' property had to be read
-as an 'array<ResourceName>' type using the .Get() method.
-*/
-
 [WorkbenchPluginAttribute(name: "Check Gear (Single Prefab)", description: "Compares a single prefab's intended inventory with its spawned state.", shortcut: "Ctrl+Shift+L", wbModules: {"WorldEditor"})]
 class PK_GearCheck_Future : WorldEditorPlugin
 {
@@ -142,7 +127,7 @@ class PK_GearCheck_Future : WorldEditorPlugin
 			}
 		}
 
-		if (discardCount == 0)
+		if (discardedCount == 0)
 		{
 			Print("No items were discarded from this specific prefab. (NOTE: Inherited items are not included in this check).", LogLevel.NORMAL);
 		}

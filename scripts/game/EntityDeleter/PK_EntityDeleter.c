@@ -9,7 +9,7 @@ class PK_EntityDeleterClass : GenericEntityClass
 class PK_EntityDeleter : GenericEntity
 {
 	// Modified version of SCR_PrefabDeleter
-	// Adds support for prefab filtering and fixes the self deletion and query deletion bugs
+	// Adds support for prefab filtering and fixes the self deletion and mid-query deletion bugs
 	
 	[Attribute("www.youtube.com/watch?v=D-Bb66hJnqE", UIWidgets.Object, 
 	desc: "INSTRUCTIONS:\n\n- Use the Prefab Picker tool to build a prefab list.\n- Right-click the prefab list to copy/paste between entities.\n- Ctrl+Click prefabs in the picker tool to add/remove from the filter list.", 
@@ -27,6 +27,9 @@ class PK_EntityDeleter : GenericEntity
 	
 	[Attribute("0", UIWidgets.Auto, desc: "If enabled, only entities with VObjects (e. g. mesh or particle) are deleted, not purely logical entities.", category: "Entity Deleter")]
 	protected bool m_bVObjectsOnly;
+	
+	[Attribute("1", UIWidgets.Auto, desc: "Whether to show a preview of the deletion radius in the World Editor.", category: "Entity Deleter")]
+	protected bool m_bPreviewShape;
 	
 	protected ref array<IEntity> m_aEntitiesToDelete = {};
 
@@ -57,7 +60,7 @@ class PK_EntityDeleter : GenericEntity
 		foreach (IEntity e : m_aEntitiesToDelete)
 			SCR_EntityHelper.DeleteEntityAndChildren(e);
 		
-		delete this;
+		SCR_EntityHelper.DeleteEntityAndChildren(this);
 	}
 	
 	private bool AddEntity(IEntity e)
@@ -97,10 +100,10 @@ class PK_EntityDeleter : GenericEntity
 	//------------------------------------------------------------------------------------------------
 	override void _WB_AfterWorldUpdate(float timeSlice)
 	{
-		vector origin = GetOrigin();
-		Shape radiusShape = Shape.CreateSphere(COLOR_YELLOW, ShapeFlags.WIREFRAME | ShapeFlags.ONCE, origin, m_fRadius);
-
 		super._WB_AfterWorldUpdate(timeSlice);
+		Shape debugShape = null;
+		if (m_bPreviewShape)
+			Shape radiusShape = Shape.CreateSphere(COLOR_YELLOW, ShapeFlags.WIREFRAME | ShapeFlags.ONCE, GetOrigin(), m_fRadius);
 	}
 
 #endif

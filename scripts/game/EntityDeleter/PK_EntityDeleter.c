@@ -45,7 +45,8 @@ class PK_EntityDeleter : GenericEntity
 	override void EOnInit(IEntity owner)
 	{
 		super.EOnInit(owner);
-		if (!Replication.IsServer())
+		
+		if (!Replication.IsServer() && false) // temporarily allow re-deletion on clients. not a good approach but it won't work otherwise. https://feedback.bistudio.com/T197778#2922325
 			return;
 		
 		for (int i = 0; i < m_prefabFilterList.Count(); i++)
@@ -55,12 +56,17 @@ class PK_EntityDeleter : GenericEntity
 		
 		SCR_BaseGameMode gm = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
 		if (gm)
-			gm.GetOnWorldPostProcess().Insert(PerformDeletion);
+			gm.GetOnWorldPostProcess().Insert(RunNextFrame);
 		else
-			GetGame().GetCallqueue().Call(PerformDeletion);
+			RunNextFrame();
 	}
 	
-	protected void PerformDeletion()
+	protected void RunNextFrame()
+	{
+		GetGame().GetCallqueue().Call(Run);
+	}
+	
+	protected void Run()
 	{
 		EQueryEntitiesFlags flags = EQueryEntitiesFlags.ALL;
 		if (m_bVObjectsOnly)
@@ -68,9 +74,7 @@ class PK_EntityDeleter : GenericEntity
 		GetWorld().QueryEntitiesBySphere(GetOrigin(), m_fRadius, AddEntity, null, flags);
 		
 		foreach (IEntity e : m_aEntitiesToDelete)
-		{
 			SCR_EntityHelper.DeleteEntityAndChildren(e);
-		}
 		
 		SCR_EntityHelper.DeleteEntityAndChildren(this);
 	}

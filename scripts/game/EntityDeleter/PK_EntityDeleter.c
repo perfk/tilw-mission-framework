@@ -102,11 +102,11 @@ class PK_EntityDeleter : GenericEntity
 		while (container)
 		{
 			ResourceName rn = container.GetResourceName();
-			if (rn.IsEmpty()) // fix for empty resource name
+			container = container.GetAncestor();
+			if (rn.IsEmpty())
 				continue;
 			if (m_prefabFilterList.Contains(rn.Substring(1, 16)))
 				return true;
-			container = container.GetAncestor();
 		}
 		return false;
 	}

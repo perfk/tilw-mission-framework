@@ -49,9 +49,12 @@ class PK_EntityDeleter : GenericEntity
 		if (!Replication.IsServer() && false) // temporarily allow re-deletion on clients. not a good approach but it won't work otherwise. https://feedback.bistudio.com/T197778#2922325
 			return;
 		
-		for (int i = 0; i < m_prefabFilterList.Count(); i++)
+		for (int i = m_prefabFilterList.Count()-1; i>=0 ; i--)
 		{
-			 m_prefabFilterList[i] =  m_prefabFilterList[i].Substring(1, 16);
+			if (!m_prefabFilterList[i].IsEmpty())
+				m_prefabFilterList[i] =  m_prefabFilterList[i].Substring(1, 16);
+			else
+				m_prefabFilterList.Remove(i);
 		}
 		
 		SCR_BaseGameMode gm = SCR_BaseGameMode.Cast(GetGame().GetGameMode());

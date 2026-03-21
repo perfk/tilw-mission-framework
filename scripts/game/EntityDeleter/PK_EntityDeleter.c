@@ -47,7 +47,17 @@ class PK_EntityDeleter : GenericEntity
 		super.EOnInit(owner);
 		if (!Replication.IsServer())
 			return;
-		GetGame().GetCallqueue().Call(PerformDeletion);
+		
+		for (int i = 0; i < m_prefabFilterList.Count(); i++)
+		{
+			 m_prefabFilterList[i] =  m_prefabFilterList[i].Substring(1, 16);
+		}
+		
+		SCR_BaseGameMode gm = SCR_BaseGameMode.Cast(GetGame().GetGameMode());
+		if (gm)
+			gm.GetOnWorldPostProcess().Insert(PerformDeletion);
+		else
+			GetGame().GetCallqueue().Call(PerformDeletion);
 	}
 	
 	protected void PerformDeletion()
@@ -58,7 +68,9 @@ class PK_EntityDeleter : GenericEntity
 		GetWorld().QueryEntitiesBySphere(GetOrigin(), m_fRadius, AddEntity, null, flags);
 		
 		foreach (IEntity e : m_aEntitiesToDelete)
+		{
 			SCR_EntityHelper.DeleteEntityAndChildren(e);
+		}
 		
 		SCR_EntityHelper.DeleteEntityAndChildren(this);
 	}
@@ -67,15 +79,14 @@ class PK_EntityDeleter : GenericEntity
 	{
 		if (e.GetParent() || e.FindComponent(PK_EntityProtectorComponent) || e.IsInherited(PK_EntityDeleter) || e.IsInherited(SCR_PrefabDeleterEntity))
 			return true;
-		
-		if (!m_prefabFilterList.IsEmpty() && IsInPrefabList(e) == m_excludePrefabsInList)
+		if (!m_prefabFilterList.IsEmpty() && IsEntityOnList(e) == m_excludePrefabsInList)
 			return true;
 		
 		m_aEntitiesToDelete.Insert(e);
 		return true;
 	}
 	
-	protected bool IsInPrefabList(IEntity e)
+	protected bool IsEntityOnList(IEntity e)
 	{
 		EntityPrefabData prefabData = e.GetPrefabData();
 		if (!prefabData)
@@ -83,7 +94,10 @@ class PK_EntityDeleter : GenericEntity
 		BaseContainer container = prefabData.GetPrefab();
 		while (container)
 		{
-			if (m_prefabFilterList.Contains(container.GetResourceName()))
+			ResourceName rn = container.GetResourceName();
+			if (rn.IsEmpty()) // fix for empty resource name
+				continue;
+			if (m_prefabFilterList.Contains(rn.Substring(1, 16)))
 				return true;
 			container = container.GetAncestor();
 		}

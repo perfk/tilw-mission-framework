@@ -28,6 +28,9 @@ class PK_EntityDeleter : GenericEntity
 	[Attribute("0", UIWidgets.Auto, desc: "If enabled, only entities with VObjects (e. g. mesh or particle) are deleted, not purely logical entities.", category: "Entity Deleter")]
 	protected bool m_bVObjectsOnly;
 	
+	[Attribute("1", UIWidgets.Auto, desc: "If enabled, child entities are only deleted together with their parent entity. Avoids accidental partial deletion of composite entities.\nIf you want to delete something but keep its hierarchy parent, uncheck this.", category: "Entity Deleter")]
+	protected bool m_bParentsOnly;
+	
 	[Attribute("1", UIWidgets.Auto, desc: "Whether to show a preview of the deletion radius in the World Editor.", category: "Entity Deleter")]
 	protected bool m_bPreviewShape;
 	
@@ -84,7 +87,7 @@ class PK_EntityDeleter : GenericEntity
 	
 	private bool AddEntity(IEntity e)
 	{
-		if (e.GetParent() || e.FindComponent(PK_EntityProtectorComponent) || e.IsInherited(PK_EntityDeleter) || e.IsInherited(SCR_PrefabDeleterEntity))
+		if ((e.GetParent() && m_bParentsOnly) || e.FindComponent(PK_EntityProtectorComponent) || e.IsInherited(PK_EntityDeleter) || e.IsInherited(SCR_PrefabDeleterEntity))
 			return true;
 		if (!m_prefabFilterList.IsEmpty() && IsEntityOnList(e) == m_excludePrefabsInList)
 			return true;

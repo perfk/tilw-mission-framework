@@ -21,7 +21,7 @@ Vehicle M1025_armed_M2HB1 : "{3EA6F47D95867114}Prefabs/Vehicles/Wheeled/M998/M10
 }
 Vehicle hmm : "{4A71F755A4513227}Prefabs/Vehicles/Wheeled/M998/M1025.et" {
  coords 95.076 1 119.969
- angleY -153.412
+ angles 0 -153.412 0
 }
 Vehicle uh : "{70BAEEFC2D3FEE64}Prefabs/Vehicles/Helicopters/UH1H/UH1H.et" {
  components {
@@ -35,17 +35,17 @@ SCR_AIWaypoint wpm : "{750A8D1695BD6998}Prefabs/AI/Waypoints/AIWaypoint_Move.et"
 }
 TILW_PrefabSpawnerEntity : "{7F10372CF1CA1175}Prefabs/Utils/TILW_PrefabSpawner.et" {
  coords 55.473 1 179.344
- angleY 16.518
+ angles 0 16.518 0
  m_prefab "{C012BB3488BEA0C2}Prefabs/Vehicles/Wheeled/BTR70/BTR70.et"
  m_spawnTimings {
-  0 10
+  0
+  10
  }
  m_pregameSpawn 1
 }
 TILW_PresenceTriggerEntity : "{826E6F2246328952}Prefabs/Logic/Triggers/TILW_PresenceTrigger.et" {
- Flags 2097155
+ Flags 0x200003 0
  coords 89.542 1 79.121
- m_captureIterations 2
  m_sendStatusMessages 1
  m_flagName "hmm"
  m_entityNames {
@@ -137,4 +137,30 @@ TILW_MissionFrameworkEntity fw : "{8F846D0FD5D6EA51}Prefabs/MP/TILW_MissionFrame
 }
 GenericEntity sd : "{C3F1FA1E2EC2B345}Prefabs/Items/Medicine/FieldDressing_01/FieldDressing_USSR_01.et" {
  coords 105.02 1 109.647
+}
+PolylineShapeEntity : "{CAAEFE4F33007CA6}Prefabs/Utils/TILW_AreaPrefabSpawner.et" {
+ components {
+  TILW_AreaSpawningComponent "{68FF32617B5D1B1F}" {
+   m_prefabs {
+    "{6BAF8D4249D7BDCA}Prefabs/Rocks/Granite/Granite_BeachStone_02.et"
+   }
+   m_iCount 5
+   m_bContactCheck 1
+  }
+ }
+ coords 146.646 1 179.26
+ Points {
+  ShapePoint "{68FF3263C8635FCD}" {
+   Position 9.818 0 -11.106
+  }
+  ShapePoint "{68FF3263C8B91478}" {
+   Position -12.374 0 15.517
+  }
+  ShapePoint "{68FF3263C88811D9}" {
+   Position -33.579 0 -6.194
+  }
+  ShapePoint "{68FF3263C8CACECD}" {
+   Position -13.108 0 -28.766
+  }
+ }
 }

@@ -1,0 +1,10 @@
+PolylineShapeEntity {
+ ID "68FF3263C720CFED"
+ components {
+  TILW_AreaSpawningComponent "{68FF32617B5D1B1F}" {
+  }
+ }
+ coords 0 0 0
+ IsClosed 1
+ LineColor 1 0 0 1
+}

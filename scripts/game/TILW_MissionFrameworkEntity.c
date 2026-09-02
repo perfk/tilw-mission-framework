@@ -567,7 +567,7 @@ class TILW_RandomFlag: TILW_BaseRandomFlag
 		TILW_MissionFrameworkEntity mfe = TILW_MissionFrameworkEntity.GetInstance();
 		float f = Math.RandomFloat01();
 		if (mfe && m_chance >= f)
-			mfe.AdjustMissionFlag(m_flagName, true);
+			mfe.AdjustMissionFlag(m_flagName, true, false);
 		// Fun fact: A chance of 0 can technically still set the flag, because RandomFloat01 is inclusive. I don't know an elegant way to fix this.
 		// Anyway, this will never happen! Okay, maybe once in about 4 billion times...
 		// I'm gonna print a cool message just in case!
@@ -601,7 +601,7 @@ class TILW_FlagSampling: TILW_BaseRandomFlag
 			string flag = m_flagNames.GetRandomElement();
 			if (!m_withReplacement)
 				m_flagNames.RemoveItem(flag);
-			mfe.AdjustMissionFlag(flag, true);
+			mfe.AdjustMissionFlag(flag, true, false);
 		}
 	}
 }

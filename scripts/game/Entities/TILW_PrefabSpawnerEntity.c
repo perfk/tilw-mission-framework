@@ -36,9 +36,8 @@ class TILW_PrefabSpawnerEntity : GenericEntity
 	override void EOnInit(IEntity owner)
 	{
 		super.EOnInit(owner);
-		if (!GetGame().InPlayMode() && !Replication.IsServer())
-			return;
-		GetGame().GetCallqueue().CallLater(Init, 1000, false);
+		if (GetGame().InPlayMode() && Replication.IsServer() && !m_prefab.IsEmpty())
+			GetGame().GetCallqueue().CallLater(Init, 1000, false);
 	}
 	
 	protected void Init()
@@ -125,14 +124,8 @@ class TILW_PrefabSpawnerEntity : GenericEntity
 	
 	protected void SpawnPrefab()
 	{
-		if (m_prefab == "")
-			return;
-		
-		// Spawn
 		EntitySpawnParams spawnParams = new EntitySpawnParams();
-		vector mat[4];
-		GetWorldTransform(mat);
-		spawnParams.Transform = mat;
+		GetWorldTransform(spawnParams.Transform);
 		IEntity spawnedEntity = GetGame().SpawnEntityPrefab(Resource.Load(m_prefab), GetGame().GetWorld(), spawnParams);
 		
 		if (!spawnedEntity)

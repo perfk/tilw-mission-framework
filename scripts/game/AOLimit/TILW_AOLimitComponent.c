@@ -16,6 +16,9 @@ class TILW_AOLimitComponent : ScriptComponent
 	[Attribute("", UIWidgets.Auto, desc: "Passengers of these vehicle prefabs (or inheriting) are NOT affected by the AO limit", params: "et", category: "Logic")]
 	protected ref array<ResourceName> m_ignoredVehicles;
 	
+	[Attribute("", uiwidget: UIWidgets.Auto, desc: "If defined, the AO limit is only active while this flag is set.", category: "Logic")]
+	protected string m_conditionFlag;
+	
 	//[Attribute("", UIWidgets.Auto, desc: "Members of these groups (referenced by name) are not affected by the AO limit", category: "Logic")]
 	protected ref array<string> m_ignoredGroups;
 
@@ -108,7 +111,7 @@ class TILW_AOLimitComponent : ScriptComponent
 		if (!m_wasEverInsideAO && !outsideAO)
 			m_wasEverInsideAO = true;
 		
-		if (m_wasOutsideAO == outsideAO || !m_wasEverInsideAO && outsideAO) // nothing changes, or nothing should happen
+		if (m_wasOutsideAO == outsideAO || (!m_wasEverInsideAO && outsideAO)) // nothing changes, or nothing should happen
 			return;
 		
 		if (outsideAO)
@@ -176,6 +179,9 @@ class TILW_AOLimitComponent : ScriptComponent
 			return false;
 
 		if (!m_factionKeys.IsEmpty() && !m_factionKeys.Contains(faction.GetFactionKey()))
+			return false;
+		
+		if (!m_conditionFlag.IsEmpty() && !TILW_MissionFrameworkEntity.GetInstance().IsMissionFlag(m_conditionFlag))
 			return false;
 
 		return true;

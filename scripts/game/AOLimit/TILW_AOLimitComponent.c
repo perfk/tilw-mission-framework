@@ -132,7 +132,10 @@ class TILW_AOLimitComponent : ScriptComponent
 			return false;
 
 		if (!IsPlayerAffected())
+		{
+			m_wasEverInsideAO = false;
 			return false;
+		}
 
 		IEntity ce = GetGame().GetPlayerController().GetControlledEntity();
 		if (ce != m_controlledEntity)
